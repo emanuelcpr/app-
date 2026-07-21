@@ -331,6 +331,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
       Proyectos / Servicios
     </div>
+    <div class="nav-item" onclick="show('investigacion');renderInvestigacion()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+      Investigación I+D
+    </div>
     <div class="nav-item" id="nav-servicios" onclick="show('servicios');renderServicios()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/><line x1="19" y1="8" x2="23" y2="8"/><line x1="21" y1="6" x2="21" y2="10"/></svg>
       Servicios
@@ -2727,6 +2731,377 @@
       </div>
     </div>
 
+    <!-- ═══════════ INVESTIGACIÓN I+D ═══════════ -->
+    <div class="section" id="sec-investigacion">
+
+      <!-- Vista lista o detalle -->
+      <div id="inv-list-view">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div>
+            <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px">Proyectos de investigación y desarrollo</div>
+            <div style="font-size:13px;color:var(--muted)">Tesis · PIDs · PICTs · Becas · Proyectos internos</div>
+          </div>
+          <button class="btn btn-primary" onclick="openNewProject()">+ Nuevo proyecto</button>
+        </div>
+
+        <!-- KPIs -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px">
+          <div class="kpi-card blue"><div class="kpi-label">Activos</div><div class="kpi-value blue" id="inv-k-active">0</div><div class="kpi-sub">proyectos en curso</div></div>
+          <div class="kpi-card green"><div class="kpi-label">Referencias</div><div class="kpi-value green" id="inv-k-refs">0</div><div class="kpi-sub">papers cargados</div></div>
+          <div class="kpi-card purple"><div class="kpi-label">Publicaciones</div><div class="kpi-value purple" id="inv-k-pubs">0</div><div class="kpi-sub">producción total</div></div>
+          <div class="kpi-card amber"><div class="kpi-label">Investigadores</div><div class="kpi-value amber" id="inv-k-people">0</div><div class="kpi-sub">involucrados</div></div>
+        </div>
+
+        <!-- Filtros -->
+        <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap" id="inv-filters">
+          <button class="cat-btn active" onclick="setInvFilter('all',this)">Todos</button>
+          <button class="cat-btn" onclick="setInvFilter('formulacion',this)">Formulación</button>
+          <button class="cat-btn" onclick="setInvFilter('activo',this)">Activo</button>
+          <button class="cat-btn" onclick="setInvFilter('finalizado',this)">Finalizado</button>
+          <button class="cat-btn" onclick="setInvFilter('suspendido',this)">Suspendido</button>
+        </div>
+
+        <!-- Tarjetas de proyectos -->
+        <div id="inv-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px"></div>
+      </div>
+
+      <!-- Vista detalle de un proyecto -->
+      <div id="inv-detail-view" style="display:none">
+        <!-- Header del proyecto -->
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;gap:12px">
+          <div>
+            <button onclick="closeProjectDetail()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:0;margin-bottom:8px;display:flex;align-items:center;gap:4px">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+              Volver a proyectos
+            </button>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:4px" id="det-id">—</div>
+            <div style="font-size:18px;font-weight:600;color:var(--text);margin-bottom:6px" id="det-title">—</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <span class="badge" id="det-type-badge">—</span>
+              <span class="badge" id="det-status-badge">—</span>
+              <span style="font-size:12px;color:var(--muted)" id="det-dates">—</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-shrink:0">
+            <button class="btn" onclick="editCurrentProject()">Editar</button>
+            <button class="btn btn-primary" onclick="openAddRef()">+ Referencia</button>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div style="display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:18px">
+          <button class="inv-tab active" id="inv-tab-info"   onclick="setInvTab('info')"   style="padding:9px 18px;background:transparent;border:none;border-bottom:2px solid var(--accent);color:var(--accent);font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;margin-bottom:-1px">Información</button>
+          <button class="inv-tab"        id="inv-tab-hitos"  onclick="setInvTab('hitos')"  style="padding:9px 18px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:var(--font);font-size:13px;cursor:pointer;margin-bottom:-1px">Hitos</button>
+          <button class="inv-tab"        id="inv-tab-refs"   onclick="setInvTab('refs')"   style="padding:9px 18px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:var(--font);font-size:13px;cursor:pointer;margin-bottom:-1px">Referencias</button>
+          <button class="inv-tab"        id="inv-tab-pubs"   onclick="setInvTab('pubs')"   style="padding:9px 18px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:var(--font);font-size:13px;cursor:pointer;margin-bottom:-1px">Publicaciones</button>
+          <button class="inv-tab"        id="inv-tab-notas"  onclick="setInvTab('notas')"  style="padding:9px 18px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:var(--font);font-size:13px;cursor:pointer;margin-bottom:-1px">Notas</button>
+        </div>
+
+        <!-- Tab: Información -->
+        <div id="inv-panel-info">
+          <div class="grid-2" style="gap:16px">
+            <div class="card">
+              <div class="card-header"><span class="card-title">Datos del proyecto</span></div>
+              <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;gap:8px"><span style="font-size:12px;color:var(--muted);min-width:120px">Director / PI</span><span style="font-size:13px;font-weight:500" id="det-pi">—</span></div>
+                <div style="display:flex;gap:8px"><span style="font-size:12px;color:var(--muted);min-width:120px">Codirector</span><span style="font-size:13px" id="det-copi">—</span></div>
+                <div style="display:flex;gap:8px"><span style="font-size:12px;color:var(--muted);min-width:120px">Financiamiento</span><span style="font-size:13px" id="det-funding">—</span></div>
+                <div style="display:flex;gap:8px"><span style="font-size:12px;color:var(--muted);min-width:120px">N° expediente</span><span style="font-family:var(--mono);font-size:12px;color:var(--muted)" id="det-expte">—</span></div>
+                <div style="display:flex;gap:8px"><span style="font-size:12px;color:var(--muted);min-width:120px">Disciplina</span><span style="font-size:13px" id="det-field">—</span></div>
+                <div style="display:flex;gap:8px;align-items:flex-start"><span style="font-size:12px;color:var(--muted);min-width:120px">Palabras clave</span><div id="det-keywords" style="display:flex;gap:4px;flex-wrap:wrap"></div></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><span class="card-title">Equipo</span></div>
+              <div class="card-body" style="padding:0" id="det-team"></div>
+            </div>
+          </div>
+          <div class="card" style="margin-top:16px">
+            <div class="card-header"><span class="card-title">Resumen / Descripción</span></div>
+            <div class="card-body" style="font-size:13px;line-height:1.7;color:var(--text)" id="det-abstract">—</div>
+          </div>
+          <div class="grid-2" style="gap:16px;margin-top:16px">
+            <div class="card">
+              <div class="card-header"><span class="card-title">Objetivos</span></div>
+              <div class="card-body" style="font-size:13px;line-height:1.7" id="det-objectives">—</div>
+            </div>
+            <div class="card">
+              <div class="card-header"><span class="card-title">Hipótesis / Marco teórico</span></div>
+              <div class="card-body" style="font-size:13px;line-height:1.7" id="det-hypothesis">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Hitos -->
+        <div id="inv-panel-hitos" style="display:none">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+            <button class="btn btn-primary" style="font-size:12px" onclick="openAddHito()">+ Agregar hito</button>
+          </div>
+          <div class="card">
+            <div class="card-body" style="padding:0">
+              <table>
+                <thead><tr><th>Hito / Entregable</th><th>Tipo</th><th>Fecha estimada</th><th>Estado</th><th>Avance</th><th></th></tr></thead>
+                <tbody id="hitos-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;font-size:13px">No hay hitos definidos</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Referencias -->
+        <div id="inv-panel-refs" style="display:none">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+            <input id="ref-search" type="text" placeholder="Buscar por título, autor, revista..." oninput="renderRefs()" style="flex:1;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px">
+            <select id="ref-filter-year" onchange="renderRefs()" style="background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px">
+              <option value="">Todos los años</option>
+            </select>
+            <button class="btn btn-primary" style="font-size:12px;white-space:nowrap" onclick="openAddRef()">+ Agregar</button>
+          </div>
+          <div id="refs-list" style="display:flex;flex-direction:column;gap:10px"></div>
+        </div>
+
+        <!-- Tab: Publicaciones -->
+        <div id="inv-panel-pubs" style="display:none">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+            <button class="btn btn-primary" style="font-size:12px" onclick="openAddPub()">+ Agregar publicación</button>
+          </div>
+          <div id="pubs-list" style="display:flex;flex-direction:column;gap:10px"></div>
+        </div>
+
+        <!-- Tab: Notas -->
+        <div id="inv-panel-notas" style="display:none">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+            <button class="btn btn-primary" style="font-size:12px" onclick="openAddNota()">+ Nueva nota</button>
+          </div>
+          <div id="notas-list" style="display:flex;flex-direction:column;gap:10px"></div>
+        </div>
+
+      </div><!-- /inv-detail-view -->
+    </div><!-- /sec-investigacion -->
+
+    <!-- MODAL: Nuevo / Editar proyecto I+D -->
+    <div id="inv-proj-modal-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:300;align-items:center;justify-content:center">
+      <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:28px;width:560px;max-width:96vw;max-height:92vh;overflow-y:auto">
+        <div style="font-weight:500;font-size:15px;margin-bottom:20px" id="inv-proj-modal-title">Nuevo proyecto</div>
+        <div style="display:flex;flex-direction:column;gap:13px">
+
+          <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Título del proyecto</label>
+            <input id="proj-title" placeholder="Ej: Desarrollo de biosensores MEMS para detección de glucosa..." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px"></div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Tipo</label>
+              <select id="proj-type" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px">
+                <option value="PID">PID — Proyecto I+D</option>
+                <option value="PICT">PICT (ANPCyT)</option>
+                <option value="PIP">PIP (CONICET)</option>
+                <option value="Tesis doctoral">Tesis doctoral</option>
+                <option value="Tesis maestría">Tesis de maestría</option>
+                <option value="Tesis grado">Trabajo final de grado</option>
+                <option value="Beca">Beca doctoral / posdoctoral</option>
+                <option value="Convenio">Convenio / Contrato</option>
+                <option value="Interno">Proyecto interno AMF</option>
+              </select></div>
+            <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Estado</label>
+              <select id="proj-status" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px">
+                <option value="formulacion">Formulación</option>
+                <option value="activo" selected>Activo</option>
+                <option value="finalizado">Finalizado</option>
+                <option value="suspendido">Suspendido</option>
+              </select></div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Director / PI</label>
+              <input id="proj-pi" placeholder="Nombre del director" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px"></div>
+            <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Codirector (opcional)</label>
+              <input id="proj-copi" placeholder="Nombre del codirector" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px"></div>
+          </div>
+
+          <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Equipo (nombres separados por coma)</label>
+            <input id="proj-team" placeholder="Ej: Tomás Tesarik, Hernán Rodríguez, Emanuel Capra..." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px"></div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+            <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Financiamiento</label>
+              <select id="proj-funding" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px">
+                <option>CONICET</option><option>ANPCyT</option><option>UNER</option>
+                <option>MINCyT</option><option>UNL</option><option>Empresa privada</option>
+                <option>Sin financiamiento externo</option><option>Otro</option>
+              </select></div>
+            <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Inicio</label>
+              <input type="date" id="proj-start" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--mono);font-size:13px"></div>
+            <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Fin estimado</label>
+              <input type="date" id="proj-end" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--mono);font-size:13px"></div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Disciplina / Área</label>
+              <input id="proj-field" placeholder="Ej: Ingeniería biomédica · MEMS · Microfluídica" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px"></div>
+            <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">N° expediente / código</label>
+              <input id="proj-expte" placeholder="Ej: PICT-2023-00142" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--mono);font-size:13px"></div>
+          </div>
+
+          <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Palabras clave (separadas por coma)</label>
+            <input id="proj-keywords" placeholder="Ej: MEMS, biosensor, microfluídica, SU-8, litografía" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px"></div>
+
+          <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Resumen / Abstract</label>
+            <textarea id="proj-abstract" rows="3" placeholder="Descripción breve del proyecto..." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px;resize:vertical"></textarea></div>
+
+          <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Objetivos</label>
+            <textarea id="proj-objectives" rows="3" placeholder="Objetivo general y específicos..." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px;resize:vertical"></textarea></div>
+
+          <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Hipótesis / Marco teórico</label>
+            <textarea id="proj-hypothesis" rows="2" placeholder="Hipótesis de trabajo..." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px;resize:vertical"></textarea></div>
+
+        </div>
+        <div style="display:flex;gap:8px;margin-top:20px">
+          <button class="btn btn-primary" style="flex:1" onclick="saveProject()">Guardar proyecto</button>
+          <button class="btn" onclick="closeProjModal()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: Agregar referencia bibliográfica -->
+    <div id="inv-ref-modal-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:300;align-items:center;justify-content:center">
+      <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:28px;width:500px;max-width:96vw;max-height:90vh;overflow-y:auto">
+        <div style="font-weight:500;font-size:15px;margin-bottom:20px">Agregar referencia</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Autores</label>
+            <input id="ref-authors" placeholder="Apellido, N.; Apellido, N. (orden Vancouver)" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px"></div>
+          <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Título del artículo / capítulo</label>
+            <input id="ref-title" placeholder="Título completo..." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px"></div>
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px">
+            <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Revista / Editorial / Congreso</label>
+              <input id="ref-journal" placeholder="Ej: Lab on a Chip · Springer · IEEE MEMS 2024" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px"></div>
+            <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Año</label>
+              <input type="number" id="ref-year" placeholder="2024" min="1900" max="2099" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--mono);font-size:13px"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">DOI / URL</label>
+              <input id="ref-doi" placeholder="10.xxxx/xxxx o https://..." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--mono);font-size:12px"></div>
+            <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Tipo</label>
+              <select id="ref-type" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px">
+                <option value="articulo">Artículo</option>
+                <option value="libro">Libro / Capítulo</option>
+                <option value="congreso">Congreso / Conferencia</option>
+                <option value="tesis">Tesis</option>
+                <option value="norma">Norma / Standard</option>
+                <option value="otro">Otro</option>
+              </select></div>
+          </div>
+          <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Notas / Relevancia para el proyecto</label>
+            <input id="ref-notes" placeholder="Por qué es relevante, qué metodología usa, etc." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:18px">
+          <button class="btn btn-primary" style="flex:1" onclick="saveRef()">Agregar referencia</button>
+          <button class="btn" onclick="closeRefModal()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: Agregar publicación -->
+    <div id="inv-pub-modal-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:300;align-items:center;justify-content:center">
+      <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:28px;width:480px;max-width:96vw">
+        <div style="font-weight:500;font-size:15px;margin-bottom:20px">Agregar producción científica</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Tipo de producción</label>
+            <select id="pub-type" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px">
+              <option value="paper">Artículo en revista</option>
+              <option value="congreso">Trabajo en congreso</option>
+              <option value="poster">Póster</option>
+              <option value="tesis">Tesis</option>
+              <option value="informe">Informe técnico</option>
+              <option value="patente">Patente</option>
+              <option value="libro">Capítulo de libro</option>
+            </select></div>
+          <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Título</label>
+            <input id="pub-title" placeholder="Título completo..." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px"></div>
+          <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Autores del equipo</label>
+            <input id="pub-authors" placeholder="Apellido N., Apellido N...." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px"></div>
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px">
+            <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Revista / Evento / Editorial</label>
+              <input id="pub-venue" placeholder="Ej: Sensors and Actuators B · CNMEM 2024" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px"></div>
+            <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Año</label>
+              <input type="number" id="pub-year" placeholder="2025" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--mono);font-size:13px"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">DOI / URL</label>
+              <input id="pub-doi" placeholder="10.xxxx/xxxx" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--mono);font-size:12px"></div>
+            <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Estado</label>
+              <select id="pub-status" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px">
+                <option value="publicado">Publicado</option>
+                <option value="aceptado">Aceptado</option>
+                <option value="enviado">Enviado / En revisión</option>
+                <option value="en_prep">En preparación</option>
+              </select></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:18px">
+          <button class="btn btn-primary" style="flex:1" onclick="savePub()">Agregar</button>
+          <button class="btn" onclick="closePubModal()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: Agregar hito -->
+    <div id="inv-hito-modal-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:300;align-items:center;justify-content:center">
+      <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:28px;width:440px;max-width:96vw">
+        <div style="font-weight:500;font-size:15px;margin-bottom:20px">Agregar hito / entregable</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Descripción del hito</label>
+            <input id="hito-desc" placeholder="Ej: Primer prototipo funcional del sensor..." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Tipo</label>
+              <select id="hito-type" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px">
+                <option value="hito">Hito</option>
+                <option value="entregable">Entregable</option>
+                <option value="publicacion">Publicación</option>
+                <option value="informe">Informe</option>
+                <option value="presentacion">Presentación</option>
+              </select></div>
+            <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Fecha estimada</label>
+              <input type="date" id="hito-date" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--mono);font-size:13px"></div>
+          </div>
+          <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Estado</label>
+            <select id="hito-status" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px">
+              <option value="pendiente">Pendiente</option>
+              <option value="en_curso">En curso</option>
+              <option value="completado">Completado</option>
+              <option value="demorado">Demorado</option>
+            </select></div>
+          <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">% de avance</label>
+            <input type="range" id="hito-progress" min="0" max="100" value="0" oninput="document.getElementById('hito-pct').textContent=this.value+'%'" style="width:100%">
+            <span id="hito-pct" style="font-family:var(--mono);font-size:12px;color:var(--muted)">0%</span></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:18px">
+          <button class="btn btn-primary" style="flex:1" onclick="saveHito()">Agregar hito</button>
+          <button class="btn" onclick="closeHitoModal()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: Nota de campo -->
+    <div id="inv-nota-modal-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:300;align-items:center;justify-content:center">
+      <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:28px;width:440px;max-width:96vw">
+        <div style="font-weight:500;font-size:15px;margin-bottom:20px">Nueva nota del proyecto</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Categoría</label>
+            <select id="nota-cat" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px">
+              <option value="metodologia">Metodología experimental</option>
+              <option value="resultado">Resultado / Observación</option>
+              <option value="problema">Problema / Inconveniente</option>
+              <option value="idea">Idea / Hipótesis nueva</option>
+              <option value="reunion">Reunión de equipo</option>
+              <option value="general">General</option>
+            </select></div>
+          <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Nota</label>
+            <textarea id="nota-text" rows="5" placeholder="Describí el resultado, la idea, el problema..." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px;resize:vertical"></textarea></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:18px">
+          <button class="btn btn-primary" style="flex:1" onclick="saveNota()">Guardar nota</button>
+          <button class="btn" onclick="closeNotaModal()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ═══════════ SERVICIOS ═══════════ -->
     <div class="section" id="sec-servicios">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
@@ -2925,8 +3300,8 @@
 </div>
 
 <script>
-const sections = { inicio:'Inicio', dashboard:'Dashboard', sala:'Sala Limpia', equipos:'Equipos y Turnos', procesos:'Procesos', proyectos:'Proyectos / Servicios', servicios:'Servicios', bitacora:'Bitácora', muestras:'Muestras', mantenimiento:'Mantenimiento', stock:'Stock', residuos:'Residuos Químicos', habilitaciones:'Habilitaciones', personal:'Personal', docs:'Documentación', logs:'Logs' };
-const subs = { inicio:'— Vista general del laboratorio', dashboard:'— Estadísticas · Uso de equipos · Reportes', sala:'— Control y sesiones', equipos:'— Reservas y calendario', procesos:'— Flujos de fabricación', proyectos:'— Académicos y servicios activos', servicios:'— Solicitudes · Presupuestos · Facturación', bitacora:'— REG-AMF-09 · Uso de equipos y consumo de insumos', muestras:'— Trazabilidad de wafers y muestras en proceso', mantenimiento:'— Alertas y servicio preventivo', stock:'— Químicos e insumos', residuos:'— Descarte y tratamiento de residuos peligrosos', habilitaciones:'— REG-AMF-24 · Certificaciones de personal', personal:'— Registro de acceso y horas', docs:'— SOPs · Manuales · Hojas de seguridad', logs:'— Registro de actividad' };
+const sections = { inicio:'Inicio', dashboard:'Dashboard', sala:'Sala Limpia', equipos:'Equipos y Turnos', procesos:'Procesos', proyectos:'Proyectos / Servicios', investigacion:'Investigación I+D', servicios:'Servicios', bitacora:'Bitácora', muestras:'Muestras', mantenimiento:'Mantenimiento', stock:'Stock', residuos:'Residuos Químicos', habilitaciones:'Habilitaciones', personal:'Personal', docs:'Documentación', logs:'Logs' };
+const subs = { inicio:'— Vista general del laboratorio', dashboard:'— Estadísticas · Uso de equipos · Reportes', sala:'— Control y sesiones', equipos:'— Reservas y calendario', procesos:'— Flujos de fabricación', proyectos:'— Académicos y servicios activos', investigacion:'— Proyectos I+D · Referencias · Publicaciones · Hitos', servicios:'— Solicitudes · Presupuestos · Facturación', bitacora:'— REG-AMF-09 · Uso de equipos y consumo de insumos', muestras:'— Trazabilidad de wafers y muestras en proceso', mantenimiento:'— Alertas y servicio preventivo', stock:'— Químicos e insumos', residuos:'— Descarte y tratamiento de residuos peligrosos', habilitaciones:'— REG-AMF-24 · Certificaciones de personal', personal:'— Registro de acceso y horas', docs:'— SOPs · Manuales · Hojas de seguridad', logs:'— Registro de actividad' };
 
 // ═══ PERSISTENCIA localStorage ═══
 const LS_KEY = 'amf_fiuner_v1';
@@ -2942,7 +3317,9 @@ function saveAll() {
       certMatrix: certMatrix,
       serviceRecords: serviceRecords,
       serviceCounter: serviceCounter,
-      sampleCounter: sampleCounter
+      sampleCounter: sampleCounter,
+      projects: projects,
+      projectCounter: projectCounter
     };
     localStorage.setItem(LS_KEY, JSON.stringify(snap));
   } catch(e) { console.warn('localStorage save failed', e); }
@@ -2962,6 +3339,8 @@ function loadAll() {
     if (snap.serviceRecords) serviceRecords = snap.serviceRecords;
     if (snap.serviceCounter) serviceCounter = snap.serviceCounter;
     if (snap.sampleCounter) sampleCounter = snap.sampleCounter;
+    if (snap.projects) projects = snap.projects;
+    if (snap.projectCounter) projectCounter = snap.projectCounter;
     return true;
   } catch(e) { console.warn('localStorage load failed', e); return false; }
 }
@@ -3816,6 +4195,485 @@ function renderServicios() {
       </td>
     </tr>`;
   }).join('');
+}
+
+// ═══════════ INVESTIGACIÓN I+D ═══════════
+let projects = [];
+let projectCounter = 1;
+let currentProjectId = null;
+let invFilter = 'all';
+
+const projTypeLabel = {
+  PID:'PID', PICT:'PICT (ANPCyT)', PIP:'PIP (CONICET)',
+  tesis_doc:'Tesis doctoral', tesis_mae:'Tesis maestría', tesis_gra:'Tesis grado',
+  beca:'Beca', convenio:'Convenio', interno:'Interno'
+};
+const projStatusLabel = { activo:'Activo', finalizado:'Finalizado', suspendido:'Suspendido', formulacion:'En formulación' };
+const projStatusColor = { activo:'green', finalizado:'muted', suspendido:'amber', formulacion:'blue' };
+const hitoTypeLabel   = { hito:'Hito', entregable:'Entregable', publicacion:'Publicación', informe:'Informe', presentacion:'Presentación' };
+const pubStatusLabel  = { publicado:'Publicado', aceptado:'Aceptado', enviado:'Enviado', en_prep:'En preparación' };
+const pubStatusColor  = { publicado:'green', aceptado:'blue', enviado:'amber', en_prep:'muted' };
+
+// ── Lista ──────────────────────────────
+function renderInvestigacion() {
+  const lv = document.getElementById('inv-list-view');
+  const dv = document.getElementById('inv-detail-view');
+  if (lv) lv.style.display = '';
+  if (dv) dv.style.display = 'none';
+  currentProjectId = null;
+
+  const filtered = invFilter === 'all' ? projects : projects.filter(p => p.status === invFilter);
+  const allRefs  = projects.reduce((a,p) => a + (p.refs||[]).length, 0);
+  const allPubs  = projects.reduce((a,p) => a + (p.pubs||[]).length, 0);
+  const people   = new Set(projects.flatMap(p => p.team || []));
+
+  const ge = id => document.getElementById(id);
+  if (ge('inv-k-active'))  ge('inv-k-active').textContent  = projects.filter(p => p.status === 'activo').length;
+  if (ge('inv-k-refs'))    ge('inv-k-refs').textContent    = allRefs;
+  if (ge('inv-k-pubs'))    ge('inv-k-pubs').textContent    = allPubs;
+  if (ge('inv-k-people'))  ge('inv-k-people').textContent  = people.size;
+
+  const cards = document.getElementById('inv-cards');
+  if (!cards) return;
+  if (!filtered.length) {
+    cards.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:48px 0;font-size:13px">Sin proyectos. <a href="#" onclick="openNewProject();return false" style="color:var(--accent)">Agregar el primero →</a></div>`;
+    return;
+  }
+  cards.innerHTML = filtered.map(p => {
+    const sc = projStatusColor[p.status] || 'muted';
+    const progress = calcProgress(p);
+    const nextHito = (p.hitos||[]).filter(h => !h.done && h.date).sort((a,b) => a.date.localeCompare(b.date))[0];
+    return `<div class="card" style="cursor:pointer;padding:18px 20px" onclick="openProjectDetail('${p.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <span class="badge ${sc}">${projStatusLabel[p.status]||p.status}</span>
+        <span style="font-size:11px;color:var(--muted);font-family:var(--mono)">${p.id}</span>
+      </div>
+      <div style="font-weight:600;font-size:14px;margin-bottom:4px">${p.title}</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">${projTypeLabel[p.type]||p.type} · ${p.director||'—'}</div>
+      ${p.abstract ? `<div style="font-size:12px;color:#4b5563;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${p.abstract}</div>` : ''}
+      <div style="display:flex;gap:16px;font-size:11px;color:var(--muted);margin-bottom:12px">
+        <span>📚 ${(p.refs||[]).length} refs</span>
+        <span>📄 ${(p.pubs||[]).length} pubs</span>
+        <span>🏁 ${(p.hitos||[]).filter(h=>h.done).length}/${(p.hitos||[]).length} hitos</span>
+      </div>
+      ${progress !== null ? `<div style="background:var(--border);border-radius:4px;height:4px;margin-bottom:10px"><div style="background:var(--accent);height:4px;border-radius:4px;width:${progress}%"></div></div>` : ''}
+      ${nextHito ? `<div style="font-size:11px;color:var(--amber)">⏰ Próximo: ${nextHito.title} — ${nextHito.date}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function calcProgress(p) {
+  const total = (p.hitos||[]).length;
+  if (!total) return null;
+  return Math.round((p.hitos.filter(h=>h.done).length / total) * 100);
+}
+
+function setInvFilter(f, btn) {
+  invFilter = f;
+  document.querySelectorAll('#inv-filters .cat-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderInvestigacion();
+}
+
+// ── Detalle de proyecto ────────────────
+function openProjectDetail(id) {
+  const p = projects.find(x => x.id === id);
+  if (!p) return;
+  currentProjectId = id;
+  document.getElementById('inv-list-view').style.display = 'none';
+  document.getElementById('inv-detail-view').style.display = '';
+
+  document.getElementById('inv-det-title').textContent  = p.title;
+  document.getElementById('inv-det-type').textContent   = projTypeLabel[p.type]||p.type;
+  const sc = projStatusColor[p.status] || 'muted';
+  document.getElementById('inv-det-status').className   = 'badge ' + sc;
+  document.getElementById('inv-det-status').textContent = projStatusLabel[p.status]||p.status;
+  document.getElementById('inv-det-id').textContent     = p.id;
+
+  setInvTab('info');
+}
+
+function closeProjectDetail() {
+  currentProjectId = null;
+  renderInvestigacion();
+}
+
+function setInvTab(tab) {
+  ['info','hitos','refs','pubs','notas'].forEach(t => {
+    const btn   = document.getElementById('inv-tab-' + t);
+    const panel = document.getElementById('inv-panel-' + t);
+    const active = t === tab;
+    if (btn) {
+      btn.style.borderBottomColor = active ? 'var(--accent)' : 'transparent';
+      btn.style.color = active ? 'var(--accent)' : 'var(--muted)';
+      btn.style.fontWeight = active ? '500' : '400';
+    }
+    if (panel) panel.style.display = active ? '' : 'none';
+  });
+  const p = projects.find(x => x.id === currentProjectId);
+  if (!p) return;
+  if (tab === 'info')   renderInfoPanel(p);
+  if (tab === 'hitos')  renderHitosPanel(p);
+  if (tab === 'refs')   renderRefsPanel(p);
+  if (tab === 'pubs')   renderPubsPanel(p);
+  if (tab === 'notas')  renderNotasPanel(p);
+}
+
+// ── Panel info ─────────────────────────
+function renderInfoPanel(p) {
+  const el = document.getElementById('inv-panel-info');
+  if (!el) return;
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px">Director/a</div><div style="font-size:13px">${p.director||'—'}</div></div>
+      <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px">Institución</div><div style="font-size:13px">${p.institution||'—'}</div></div>
+      <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px">Inicio</div><div style="font-size:13px;font-family:var(--mono)">${p.startDate||'—'}</div></div>
+      <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px">Fin previsto</div><div style="font-size:13px;font-family:var(--mono)">${p.endDate||'—'}</div></div>
+      <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px">Financiamiento</div><div style="font-size:13px">${p.funding||'—'}</div></div>
+      <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px">Código externo</div><div style="font-size:13px;font-family:var(--mono)">${p.extCode||'—'}</div></div>
+    </div>
+    ${p.abstract ? `<div style="margin-bottom:16px"><div style="font-size:11px;color:var(--muted);margin-bottom:6px">Resumen</div><div style="font-size:13px;line-height:1.6;background:var(--surface2);padding:14px;border-radius:8px">${p.abstract}</div></div>` : ''}
+    ${p.keywords ? `<div style="margin-bottom:16px"><div style="font-size:11px;color:var(--muted);margin-bottom:6px">Palabras clave</div><div style="display:flex;gap:6px;flex-wrap:wrap">${p.keywords.split(',').map(k=>`<span class="badge blue">${k.trim()}</span>`).join('')}</div></div>` : ''}
+    <div><div style="font-size:11px;color:var(--muted);margin-bottom:6px">Equipo</div><div style="font-size:13px">${(p.team||[]).join(', ')||'—'}</div></div>
+    <div style="margin-top:14px">
+      <button class="btn btn-primary" onclick="editCurrentProject()">Editar proyecto</button>
+    </div>
+  `;
+}
+
+// ── Panel hitos ────────────────────────
+function renderHitosPanel(p) {
+  const el = document.getElementById('inv-panel-hitos');
+  if (!el) return;
+  const hitos = p.hitos || [];
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-size:13px;color:var(--muted)">${hitos.filter(h=>h.done).length} de ${hitos.length} completados</div>
+      <button class="btn btn-primary" onclick="openAddHito()">+ Agregar hito</button>
+    </div>
+    ${!hitos.length ? `<div style="text-align:center;color:var(--muted);padding:32px;font-size:13px">Sin hitos cargados aún.</div>` : `
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${hitos.map((h,i) => `
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:${h.done?'var(--green-dim)':'var(--surface2)'};border-radius:8px;border-left:3px solid ${h.done?'var(--green)':'var(--border2)'}">
+          <input type="checkbox" ${h.done?'checked':''} onchange="toggleHito('${p.id}',${i})" style="margin-top:2px;cursor:pointer">
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:500;${h.done?'text-decoration:line-through;color:var(--muted)':''}">${h.title}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">${hitoTypeLabel[h.type]||h.type}${h.date?' · '+h.date:''}</div>
+            ${h.notes?`<div style="font-size:12px;color:#4b5563;margin-top:4px">${h.notes}</div>`:''}
+          </div>
+          <button onclick="deleteHito('${p.id}',${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0" title="Eliminar">×</button>
+        </div>`).join('')}
+    </div>`}
+  `;
+}
+
+function toggleHito(projId, idx) {
+  const p = projects.find(x => x.id === projId);
+  if (!p || !p.hitos[idx]) return;
+  p.hitos[idx].done = !p.hitos[idx].done;
+  saveAll();
+  renderHitosPanel(p);
+}
+function deleteHito(projId, idx) {
+  const p = projects.find(x => x.id === projId);
+  if (!p) return;
+  p.hitos.splice(idx, 1);
+  saveAll();
+  renderHitosPanel(p);
+}
+
+// ── Panel referencias ──────────────────
+function renderRefsPanel(p) {
+  const el = document.getElementById('inv-panel-refs');
+  if (!el) return;
+  const refs = p.refs || [];
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-size:13px;color:var(--muted)">${refs.length} referencia(s)</div>
+      <button class="btn btn-primary" onclick="openAddRef()">+ Agregar referencia</button>
+    </div>
+    ${!refs.length ? `<div style="text-align:center;color:var(--muted);padding:32px;font-size:13px">Sin referencias cargadas.</div>` : `
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${refs.map((r,i) => `
+        <div style="padding:12px 14px;background:var(--surface2);border-radius:8px;position:relative">
+          <div style="font-size:13px;font-weight:500;margin-bottom:3px;padding-right:24px">${r.title}</div>
+          <div style="font-size:12px;color:var(--muted)">${r.authors||''}${r.year?' ('+r.year+')':''}</div>
+          ${r.journal?`<div style="font-size:11px;color:var(--accent);margin-top:2px;font-style:italic">${r.journal}</div>`:''}
+          ${r.doi?`<div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:2px">DOI: ${r.doi}</div>`:''}
+          ${r.notes?`<div style="font-size:12px;color:#4b5563;margin-top:6px;border-top:1px solid var(--border);padding-top:6px">${r.notes}</div>`:''}
+          <button onclick="deleteRef('${p.id}',${i})" style="position:absolute;top:10px;right:10px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px" title="Eliminar">×</button>
+        </div>`).join('')}
+    </div>`}
+  `;
+}
+
+function deleteRef(projId, idx) {
+  const p = projects.find(x => x.id === projId);
+  if (!p) return;
+  p.refs.splice(idx, 1);
+  saveAll();
+  renderRefsPanel(p);
+}
+
+// ── Panel publicaciones ────────────────
+function renderPubsPanel(p) {
+  const el = document.getElementById('inv-panel-pubs');
+  if (!el) return;
+  const pubs = p.pubs || [];
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-size:13px;color:var(--muted)">${pubs.length} publicación(es)</div>
+      <button class="btn btn-primary" onclick="openAddPub()">+ Agregar publicación</button>
+    </div>
+    ${!pubs.length ? `<div style="text-align:center;color:var(--muted);padding:32px;font-size:13px">Sin publicaciones cargadas.</div>` : `
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${pubs.map((pub,i) => {
+        const sc = pubStatusColor[pub.status]||'muted';
+        return `<div style="padding:12px 14px;background:var(--surface2);border-radius:8px;position:relative">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span class="badge ${sc}">${pubStatusLabel[pub.status]||pub.status}</span>
+            ${pub.year?`<span style="font-size:11px;color:var(--muted);font-family:var(--mono)">${pub.year}</span>`:''}
+          </div>
+          <div style="font-size:13px;font-weight:500;padding-right:24px">${pub.title}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">${pub.authors||''}</div>
+          ${pub.venue?`<div style="font-size:11px;color:var(--accent);margin-top:2px;font-style:italic">${pub.venue}</div>`:''}
+          ${pub.doi?`<div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:2px">DOI: ${pub.doi}</div>`:''}
+          <button onclick="deletePub('${p.id}',${i})" style="position:absolute;top:10px;right:10px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px" title="Eliminar">×</button>
+        </div>`;
+      }).join('')}
+    </div>`}
+  `;
+}
+
+function deletePub(projId, idx) {
+  const p = projects.find(x => x.id === projId);
+  if (!p) return;
+  p.pubs.splice(idx, 1);
+  saveAll();
+  renderPubsPanel(p);
+}
+
+// ── Panel notas ────────────────────────
+function renderNotasPanel(p) {
+  const el = document.getElementById('inv-panel-notas');
+  if (!el) return;
+  const notas = p.notas || [];
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-size:13px;color:var(--muted)">${notas.length} nota(s) de campo</div>
+      <button class="btn btn-primary" onclick="openAddNota()">+ Nueva nota</button>
+    </div>
+    ${!notas.length ? `<div style="text-align:center;color:var(--muted);padding:32px;font-size:13px">Sin notas registradas.</div>` : `
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${[...notas].reverse().map((n,ri) => {
+        const i = notas.length - 1 - ri;
+        return `<div style="padding:14px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-size:11px;color:var(--muted);font-family:var(--mono)">${n.date||''} ${n.author?'· '+n.author:''}</span>
+            <button onclick="deleteNota('${p.id}',${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px" title="Eliminar">×</button>
+          </div>
+          ${n.title?`<div style="font-size:13px;font-weight:500;margin-bottom:4px">${n.title}</div>`:''}
+          <div style="font-size:13px;white-space:pre-wrap;line-height:1.6">${n.content}</div>
+          ${n.tags?`<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">${n.tags.split(',').map(t=>`<span class="badge muted" style="font-size:10px">${t.trim()}</span>`).join('')}</div>`:''}
+        </div>`;
+      }).join('')}
+    </div>`}
+  `;
+}
+
+function deleteNota(projId, idx) {
+  const p = projects.find(x => x.id === projId);
+  if (!p) return;
+  p.notas.splice(idx, 1);
+  saveAll();
+  renderNotasPanel(p);
+}
+
+// ── Modal: Proyecto ────────────────────
+function openNewProject() {
+  const bg = document.getElementById('inv-proj-modal-bg');
+  document.getElementById('inv-proj-modal-title').textContent = 'Nuevo proyecto';
+  document.getElementById('inv-proj-id').value       = '';
+  document.getElementById('inv-proj-title').value    = '';
+  document.getElementById('inv-proj-type').value     = 'PID';
+  document.getElementById('inv-proj-status').value   = 'formulacion';
+  document.getElementById('inv-proj-director').value = '';
+  document.getElementById('inv-proj-institution').value = 'FIUNER';
+  document.getElementById('inv-proj-start').value    = '';
+  document.getElementById('inv-proj-end').value      = '';
+  document.getElementById('inv-proj-funding').value  = '';
+  document.getElementById('inv-proj-extcode').value  = '';
+  document.getElementById('inv-proj-team').value     = '';
+  document.getElementById('inv-proj-abstract').value = '';
+  document.getElementById('inv-proj-keywords').value = '';
+  bg.style.display = 'flex';
+}
+
+function editCurrentProject() {
+  const p = projects.find(x => x.id === currentProjectId);
+  if (!p) return;
+  document.getElementById('inv-proj-modal-title').textContent = 'Editar proyecto';
+  document.getElementById('inv-proj-id').value       = p.id;
+  document.getElementById('inv-proj-title').value    = p.title;
+  document.getElementById('inv-proj-type').value     = p.type;
+  document.getElementById('inv-proj-status').value   = p.status;
+  document.getElementById('inv-proj-director').value = p.director||'';
+  document.getElementById('inv-proj-institution').value = p.institution||'';
+  document.getElementById('inv-proj-start').value    = p.startDate||'';
+  document.getElementById('inv-proj-end').value      = p.endDate||'';
+  document.getElementById('inv-proj-funding').value  = p.funding||'';
+  document.getElementById('inv-proj-extcode').value  = p.extCode||'';
+  document.getElementById('inv-proj-team').value     = (p.team||[]).join(', ');
+  document.getElementById('inv-proj-abstract').value = p.abstract||'';
+  document.getElementById('inv-proj-keywords').value = p.keywords||'';
+  document.getElementById('inv-proj-modal-bg').style.display = 'flex';
+}
+
+function closeProjModal() {
+  document.getElementById('inv-proj-modal-bg').style.display = 'none';
+}
+
+function saveProject() {
+  const title = document.getElementById('inv-proj-title').value.trim();
+  if (!title) { alert('El título es obligatorio.'); return; }
+  const existingId = document.getElementById('inv-proj-id').value;
+  const teamRaw    = document.getElementById('inv-proj-team').value;
+  const team       = teamRaw ? teamRaw.split(',').map(s=>s.trim()).filter(Boolean) : [];
+  const data = {
+    title,
+    type:        document.getElementById('inv-proj-type').value,
+    status:      document.getElementById('inv-proj-status').value,
+    director:    document.getElementById('inv-proj-director').value.trim(),
+    institution: document.getElementById('inv-proj-institution').value.trim(),
+    startDate:   document.getElementById('inv-proj-start').value,
+    endDate:     document.getElementById('inv-proj-end').value,
+    funding:     document.getElementById('inv-proj-funding').value.trim(),
+    extCode:     document.getElementById('inv-proj-extcode').value.trim(),
+    team,
+    abstract:    document.getElementById('inv-proj-abstract').value.trim(),
+    keywords:    document.getElementById('inv-proj-keywords').value.trim()
+  };
+  if (existingId) {
+    const p = projects.find(x => x.id === existingId);
+    if (p) Object.assign(p, data);
+  } else {
+    const newId = 'PRY-' + String(projectCounter++).padStart(4,'0');
+    projects.unshift({ id: newId, hitos:[], refs:[], pubs:[], notas:[], createdAt: new Date().toISOString().slice(0,10), ...data });
+  }
+  saveAll();
+  closeProjModal();
+  renderInvestigacion();
+}
+
+// ── Modal: Referencia ──────────────────
+function openAddRef() {
+  ['inv-ref-title','inv-ref-authors','inv-ref-journal','inv-ref-year','inv-ref-doi','inv-ref-notes'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('inv-ref-modal-bg').style.display = 'flex';
+}
+function closeRefModal() { document.getElementById('inv-ref-modal-bg').style.display = 'none'; }
+function saveRef() {
+  const title = document.getElementById('inv-ref-title').value.trim();
+  if (!title) { alert('El título es obligatorio.'); return; }
+  const p = projects.find(x => x.id === currentProjectId);
+  if (!p) return;
+  if (!p.refs) p.refs = [];
+  p.refs.push({
+    title,
+    authors: document.getElementById('inv-ref-authors').value.trim(),
+    journal: document.getElementById('inv-ref-journal').value.trim(),
+    year:    document.getElementById('inv-ref-year').value.trim(),
+    doi:     document.getElementById('inv-ref-doi').value.trim(),
+    notes:   document.getElementById('inv-ref-notes').value.trim()
+  });
+  saveAll();
+  closeRefModal();
+  renderRefsPanel(p);
+}
+
+// ── Modal: Publicación ─────────────────
+function openAddPub() {
+  ['inv-pub-title','inv-pub-authors','inv-pub-venue','inv-pub-year','inv-pub-doi'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('inv-pub-status').value = 'en_prep';
+  document.getElementById('inv-pub-modal-bg').style.display = 'flex';
+}
+function closePubModal() { document.getElementById('inv-pub-modal-bg').style.display = 'none'; }
+function savePub() {
+  const title = document.getElementById('inv-pub-title').value.trim();
+  if (!title) { alert('El título es obligatorio.'); return; }
+  const p = projects.find(x => x.id === currentProjectId);
+  if (!p) return;
+  if (!p.pubs) p.pubs = [];
+  p.pubs.push({
+    title,
+    authors: document.getElementById('inv-pub-authors').value.trim(),
+    venue:   document.getElementById('inv-pub-venue').value.trim(),
+    year:    document.getElementById('inv-pub-year').value.trim(),
+    doi:     document.getElementById('inv-pub-doi').value.trim(),
+    status:  document.getElementById('inv-pub-status').value
+  });
+  saveAll();
+  closePubModal();
+  renderPubsPanel(p);
+}
+
+// ── Modal: Hito ────────────────────────
+function openAddHito() {
+  ['inv-hito-title','inv-hito-date','inv-hito-notes'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('inv-hito-type').value = 'hito';
+  document.getElementById('inv-hito-modal-bg').style.display = 'flex';
+}
+function closeHitoModal() { document.getElementById('inv-hito-modal-bg').style.display = 'none'; }
+function saveHito() {
+  const title = document.getElementById('inv-hito-title').value.trim();
+  if (!title) { alert('El título es obligatorio.'); return; }
+  const p = projects.find(x => x.id === currentProjectId);
+  if (!p) return;
+  if (!p.hitos) p.hitos = [];
+  p.hitos.push({
+    title,
+    type:  document.getElementById('inv-hito-type').value,
+    date:  document.getElementById('inv-hito-date').value,
+    notes: document.getElementById('inv-hito-notes').value.trim(),
+    done:  false
+  });
+  saveAll();
+  closeHitoModal();
+  renderHitosPanel(p);
+}
+
+// ── Modal: Nota ────────────────────────
+function openAddNota() {
+  ['inv-nota-title','inv-nota-content','inv-nota-tags'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('inv-nota-author').value = 'Emanuel Capra';
+  const today2 = new Date().toISOString().slice(0,10);
+  document.getElementById('inv-nota-date').value = today2;
+  document.getElementById('inv-nota-modal-bg').style.display = 'flex';
+}
+function closeNotaModal() { document.getElementById('inv-nota-modal-bg').style.display = 'none'; }
+function saveNota() {
+  const content = document.getElementById('inv-nota-content').value.trim();
+  if (!content) { alert('El contenido es obligatorio.'); return; }
+  const p = projects.find(x => x.id === currentProjectId);
+  if (!p) return;
+  if (!p.notas) p.notas = [];
+  p.notas.push({
+    title:   document.getElementById('inv-nota-title').value.trim(),
+    content,
+    author:  document.getElementById('inv-nota-author').value.trim(),
+    date:    document.getElementById('inv-nota-date').value,
+    tags:    document.getElementById('inv-nota-tags').value.trim()
+  });
+  saveAll();
+  closeNotaModal();
+  renderNotasPanel(p);
 }
 
 // ═══ INICIALIZACIÓN ═══
