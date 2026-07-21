@@ -416,6 +416,7 @@
     <div class="topbar-right">
       <div class="status-dot"></div>
       <span class="clock" id="clock">--:--:--</span>
+      <button class="btn" onclick="openGeminiSettings()" title="Configurar IA" style="padding:6px 10px;font-size:13px" id="gemini-cfg-btn">⚙ IA</button>
       <button class="btn btn-primary" onclick="openModal()">+ Registrar</button>
     </div>
   </div>
@@ -2881,7 +2882,8 @@
     <!-- MODAL: Nuevo / Editar proyecto I+D -->
     <div id="inv-proj-modal-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:300;align-items:center;justify-content:center">
       <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:28px;width:560px;max-width:96vw;max-height:92vh;overflow-y:auto">
-        <div style="font-weight:500;font-size:15px;margin-bottom:20px" id="inv-proj-modal-title">Nuevo proyecto</div>
+        <input type="hidden" id="proj-editing-id">
+      <div style="font-weight:500;font-size:15px;margin-bottom:20px" id="inv-proj-modal-title">Nuevo proyecto</div>
         <div style="display:flex;flex-direction:column;gap:13px">
 
           <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Título del proyecto</label>
@@ -2939,11 +2941,21 @@
               <input id="proj-expte" placeholder="Ej: PICT-2023-00142" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--mono);font-size:13px"></div>
           </div>
 
-          <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Palabras clave (separadas por coma)</label>
-            <input id="proj-keywords" placeholder="Ej: MEMS, biosensor, microfluídica, SU-8, litografía" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px"></div>
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px">Palabras clave (separadas por coma)</label>
+              <button type="button" class="btn" style="padding:3px 9px;font-size:11px;color:var(--purple);border-color:var(--purple-dim);background:var(--purple-dim)" onclick="aiSuggestKeywords()">✨ Sugerir</button>
+            </div>
+            <input id="proj-keywords" placeholder="Ej: MEMS, biosensor, microfluídica, SU-8, litografía" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px">
+          </div>
 
-          <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Resumen / Abstract</label>
-            <textarea id="proj-abstract" rows="3" placeholder="Descripción breve del proyecto..." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px;resize:vertical"></textarea></div>
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px">Resumen / Abstract</label>
+              <button type="button" class="btn" style="padding:3px 9px;font-size:11px;color:var(--purple);border-color:var(--purple-dim);background:var(--purple-dim)" onclick="aiImproveAbstract()">✨ Mejorar</button>
+            </div>
+            <textarea id="proj-abstract" rows="3" placeholder="Descripción breve del proyecto..." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px;resize:vertical"></textarea>
+          </div>
 
           <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Objetivos</label>
             <textarea id="proj-objectives" rows="3" placeholder="Objetivo general y específicos..." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px;resize:vertical"></textarea></div>
@@ -2962,7 +2974,15 @@
     <!-- MODAL: Agregar referencia bibliográfica -->
     <div id="inv-ref-modal-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:300;align-items:center;justify-content:center">
       <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:28px;width:500px;max-width:96vw;max-height:90vh;overflow-y:auto">
-        <div style="font-weight:500;font-size:15px;margin-bottom:20px">Agregar referencia</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+          <div style="font-weight:500;font-size:15px">Agregar referencia</div>
+          <button type="button" class="btn" style="padding:4px 11px;font-size:12px;color:var(--purple);border-color:var(--purple-dim);background:var(--purple-dim)" onclick="aiParseCitation()">✨ Parsear cita</button>
+        </div>
+        <div id="ref-paste-area" style="display:none;margin-bottom:12px">
+          <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Pegá la cita en cualquier formato</label>
+          <textarea id="ref-raw-text" rows="3" placeholder="Ej: Nguyen NT, Wereley ST. Fundamentals and Applications of Microfluidics. Artech House, 2006." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--mono);font-size:12px;resize:vertical"></textarea>
+          <button type="button" class="btn btn-primary" style="margin-top:6px;padding:5px 12px;font-size:12px" onclick="aiDoParseOneCitation()">Extraer campos ✨</button>
+        </div>
         <div style="display:flex;flex-direction:column;gap:12px">
           <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Autores</label>
             <input id="ref-authors" placeholder="Apellido, N.; Apellido, N. (orden Vancouver)" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px"></div>
@@ -3092,12 +3112,76 @@
               <option value="reunion">Reunión de equipo</option>
               <option value="general">General</option>
             </select></div>
-          <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Nota</label>
-            <textarea id="nota-text" rows="5" placeholder="Describí el resultado, la idea, el problema..." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px;resize:vertical"></textarea></div>
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px">Nota</label>
+              <button type="button" class="btn" style="padding:3px 9px;font-size:11px;color:var(--purple);border-color:var(--purple-dim);background:var(--purple-dim)" onclick="aiStructureNote()">✨ Estructurar</button>
+            </div>
+            <textarea id="nota-text" rows="5" placeholder="Describí el resultado, la idea, el problema..." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-family:var(--font);font-size:13px;resize:vertical"></textarea>
+          </div>
         </div>
         <div style="display:flex;gap:8px;margin-top:18px">
           <button class="btn btn-primary" style="flex:1" onclick="saveNota()">Guardar nota</button>
           <button class="btn" onclick="closeNotaModal()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: Configuración Gemini API -->
+    <div id="gemini-settings-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:400;align-items:center;justify-content:center">
+      <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:28px;width:480px;max-width:96vw">
+        <div style="font-weight:600;font-size:15px;margin-bottom:6px">Integración con Gemini AI</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:20px">La API key se guarda solo en tu navegador (localStorage). Nunca sale de tu dispositivo salvo hacia Google.</div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div>
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:6px">Google AI Studio API Key</label>
+            <input id="gemini-key-input" type="password" placeholder="AIzaSy..." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:10px 12px;border-radius:7px;font-family:var(--mono);font-size:13px">
+            <div style="font-size:11px;color:var(--muted);margin-top:5px">Obtenés tu key gratis en <strong>aistudio.google.com</strong> → Get API key</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:8px;padding:14px;font-size:12px;color:var(--muted);line-height:1.7">
+            <strong style="color:var(--text);display:block;margin-bottom:6px">Funciones disponibles en I+D:</strong>
+            ✨ Sugerir palabras clave desde título y abstract<br>
+            ✨ Parsear una cita bibliográfica en texto libre<br>
+            ✨ Importar lote de referencias desde texto copiado<br>
+            ✨ Generar informe de avance del proyecto<br>
+            ✨ Estructurar una nota de campo libre
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:20px">
+          <button class="btn btn-primary" style="flex:1" onclick="saveGeminiSettings()">Guardar y activar</button>
+          <button class="btn" onclick="closeGeminiSettings()">Cancelar</button>
+        </div>
+        <div id="gemini-test-result" style="margin-top:10px;font-size:12px;display:none"></div>
+      </div>
+    </div>
+
+    <!-- MODAL: Importar referencias con IA -->
+    <div id="ai-import-refs-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:400;align-items:center;justify-content:center">
+      <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:28px;width:600px;max-width:96vw;max-height:90vh;overflow-y:auto">
+        <div style="font-weight:600;font-size:15px;margin-bottom:6px">Importar referencias con IA</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Pegá un bloque de referencias (cualquier formato: APA, Vancouver, BibTeX, lista de papers...) y Gemini las parseará automáticamente.</div>
+        <textarea id="ai-refs-raw" rows="10" placeholder="Pega aquí tu lista de referencias..." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:10px 12px;border-radius:7px;font-family:var(--mono);font-size:12px;resize:vertical"></textarea>
+        <div id="ai-refs-preview" style="margin-top:14px;display:none">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px" id="ai-refs-count"></div>
+          <div id="ai-refs-list" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <button class="btn btn-primary" id="ai-parse-btn" onclick="aiParseRefs()">✨ Parsear con Gemini</button>
+          <button class="btn" id="ai-import-confirm-btn" style="display:none" onclick="aiConfirmImportRefs()">Importar todas</button>
+          <button class="btn" onclick="closeAiImportRefs()">Cancelar</button>
+        </div>
+        <div id="ai-refs-status" style="margin-top:8px;font-size:12px;color:var(--muted)"></div>
+      </div>
+    </div>
+
+    <!-- MODAL: Informe de avance IA -->
+    <div id="ai-report-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:400;align-items:center;justify-content:center">
+      <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:28px;width:640px;max-width:96vw;max-height:90vh;overflow-y:auto">
+        <div style="font-weight:600;font-size:15px;margin-bottom:16px">Informe de avance — generado con IA</div>
+        <div id="ai-report-content" style="font-size:13px;line-height:1.8;white-space:pre-wrap;background:var(--surface2);border-radius:8px;padding:16px;min-height:80px"></div>
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <button class="btn btn-primary" onclick="copyAiReport()">Copiar texto</button>
+          <button class="btn" onclick="document.getElementById('ai-report-bg').style.display='none'">Cerrar</button>
         </div>
       </div>
     </div>
@@ -4197,6 +4281,244 @@ function renderServicios() {
   }).join('');
 }
 
+// ═══════════ GEMINI AI ═══════════
+let geminiKey = localStorage.getItem('amf_gemini_key') || '';
+
+function openGeminiSettings() {
+  document.getElementById('gemini-key-input').value = geminiKey;
+  document.getElementById('gemini-test-result').style.display = 'none';
+  document.getElementById('gemini-settings-bg').style.display = 'flex';
+}
+function closeGeminiSettings() { document.getElementById('gemini-settings-bg').style.display = 'none'; }
+function saveGeminiSettings() {
+  const k = document.getElementById('gemini-key-input').value.trim();
+  geminiKey = k;
+  localStorage.setItem('amf_gemini_key', k);
+  const cfgBtn = document.getElementById('gemini-cfg-btn');
+  if (cfgBtn) { cfgBtn.style.color = k ? 'var(--green)' : ''; cfgBtn.textContent = k ? '✨ IA' : '⚙ IA'; }
+  const res = document.getElementById('gemini-test-result');
+  res.style.display = '';
+  res.style.color = 'var(--green)';
+  res.textContent = k ? '✓ API key guardada. Podés usar las funciones de IA en el módulo I+D.' : 'API key borrada.';
+}
+
+async function callGemini(prompt) {
+  if (!geminiKey) {
+    alert('Configurá tu API key de Gemini primero (botón ⚙ IA en la barra superior).');
+    return null;
+  }
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(()=>({}));
+      throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+  } catch(e) {
+    alert('Error Gemini: ' + e.message);
+    return null;
+  }
+}
+
+function setAiLoading(btnEl, loading) {
+  if (loading) { btnEl._orig = btnEl.textContent; btnEl.textContent = '⏳ Pensando...'; btnEl.disabled = true; }
+  else { btnEl.textContent = btnEl._orig || '✨'; btnEl.disabled = false; }
+}
+
+// Sugerir palabras clave para un proyecto
+async function aiSuggestKeywords() {
+  const title    = document.getElementById('proj-title').value.trim();
+  const abstract = document.getElementById('proj-abstract').value.trim();
+  if (!title && !abstract) { alert('Completá al menos el título o el abstract primero.'); return; }
+  const btn = event.target;
+  setAiLoading(btn, true);
+  const prompt = `Eres asistente de investigación académica en ciencia e ingeniería.
+Dado el siguiente proyecto, generá exactamente 6-8 palabras clave en español separadas por coma, sin numeración, solo la lista.
+Título: ${title}
+Abstract: ${abstract || '(sin abstract)'}`;
+  const result = await callGemini(prompt);
+  setAiLoading(btn, false);
+  if (result) {
+    const kw = result.replace(/[\n\r]/g,' ').replace(/^\s*[-•]\s*/,'').trim();
+    document.getElementById('proj-keywords').value = kw;
+  }
+}
+
+// Mejorar abstract de un proyecto
+async function aiImproveAbstract() {
+  const title    = document.getElementById('proj-title').value.trim();
+  const abstract = document.getElementById('proj-abstract').value.trim();
+  if (!abstract) { alert('Escribí un borrador del abstract primero.'); return; }
+  const btn = event.target;
+  setAiLoading(btn, true);
+  const prompt = `Eres asistente de escritura académica para un área de microfabricación universitaria argentina (FIUNER).
+Mejorá el siguiente abstract de proyecto de investigación: hacelo más claro, conciso y académico, en español, 120-200 palabras.
+Título: ${title || '(sin título)'}
+Abstract actual: ${abstract}
+Devolvé solo el abstract mejorado, sin comentarios adicionales.`;
+  const result = await callGemini(prompt);
+  setAiLoading(btn, false);
+  if (result) document.getElementById('proj-abstract').value = result;
+}
+
+// Mostrar/ocultar área de parseo de cita individual
+function aiParseCitation() {
+  const area = document.getElementById('ref-paste-area');
+  area.style.display = area.style.display === 'none' ? '' : 'none';
+}
+
+// Parsear una cita individual y llenar los campos del formulario
+async function aiDoParseOneCitation() {
+  const raw = document.getElementById('ref-raw-text').value.trim();
+  if (!raw) { alert('Pegá una cita primero.'); return; }
+  const btn = event.target;
+  setAiLoading(btn, true);
+  const prompt = `Extraé los campos bibliográficos de la siguiente cita y respondé SOLO con un JSON con exactamente estas claves: title, authors, journal, year, doi, type (uno de: articulo, libro, congreso, tesis, norma, otro).
+Si algún campo no está presente, poné "".
+Cita: ${raw}
+Respondé SOLO el JSON, sin markdown, sin explicaciones.`;
+  const result = await callGemini(prompt);
+  setAiLoading(btn, false);
+  if (!result) return;
+  try {
+    const clean = result.replace(/```json?/g,'').replace(/```/g,'').trim();
+    const obj = JSON.parse(clean);
+    if (obj.title)   document.getElementById('ref-title').value   = obj.title;
+    if (obj.authors) document.getElementById('ref-authors').value = obj.authors;
+    if (obj.journal) document.getElementById('ref-journal').value = obj.journal;
+    if (obj.year)    document.getElementById('ref-year').value    = obj.year;
+    if (obj.doi)     document.getElementById('ref-doi').value     = obj.doi;
+    if (obj.type)    document.getElementById('ref-type').value    = obj.type;
+    document.getElementById('ref-paste-area').style.display = 'none';
+  } catch(e) {
+    alert('No se pudo parsear la respuesta. Intentá copiar la cita de otra forma.');
+  }
+}
+
+// Abrir modal de importación masiva de referencias
+function openAiImportRefs() {
+  document.getElementById('ai-refs-raw').value = '';
+  document.getElementById('ai-refs-preview').style.display = 'none';
+  document.getElementById('ai-import-confirm-btn').style.display = 'none';
+  document.getElementById('ai-refs-status').textContent = '';
+  document.getElementById('ai-import-refs-bg').style.display = 'flex';
+}
+function closeAiImportRefs() { document.getElementById('ai-import-refs-bg').style.display = 'none'; }
+
+let _parsedRefs = [];
+async function aiParseRefs() {
+  const raw = document.getElementById('ai-refs-raw').value.trim();
+  if (!raw) { alert('Pegá referencias primero.'); return; }
+  const btn = document.getElementById('ai-parse-btn');
+  setAiLoading(btn, true);
+  document.getElementById('ai-refs-status').textContent = 'Enviando a Gemini...';
+  const prompt = `Sos un asistente para gestión bibliográfica académica.
+Extraé TODAS las referencias del siguiente texto y devolvé SOLO un array JSON (sin markdown) donde cada elemento tiene: title, authors, journal, year, doi, type (articulo/libro/congreso/tesis/norma/otro).
+Si un campo no está disponible, usá "".
+Texto con referencias:
+${raw}`;
+  const result = await callGemini(prompt);
+  setAiLoading(btn, false);
+  if (!result) { document.getElementById('ai-refs-status').textContent = ''; return; }
+  try {
+    const clean = result.replace(/```json?/g,'').replace(/```/g,'').trim();
+    _parsedRefs = JSON.parse(clean);
+    if (!Array.isArray(_parsedRefs)) throw new Error('no array');
+    document.getElementById('ai-refs-count').textContent = `${_parsedRefs.length} referencia(s) detectada(s). Revisá y confirmá la importación.`;
+    document.getElementById('ai-refs-list').innerHTML = _parsedRefs.map((r,i) =>
+      `<div style="padding:8px 10px;background:var(--surface);border-radius:6px;border:1px solid var(--border)">
+        <div style="font-size:12px;font-weight:500">${r.title||'(sin título)'}</div>
+        <div style="font-size:11px;color:var(--muted)">${r.authors||''}${r.year?' · '+r.year:''} · ${r.journal||''}</div>
+      </div>`).join('');
+    document.getElementById('ai-refs-preview').style.display = '';
+    document.getElementById('ai-import-confirm-btn').style.display = '';
+    document.getElementById('ai-refs-status').textContent = '';
+  } catch(e) {
+    document.getElementById('ai-refs-status').textContent = 'Error al interpretar la respuesta. Intentá con un texto más limpio.';
+  }
+}
+
+function aiConfirmImportRefs() {
+  const p = projects.find(x => x.id === currentProjectId);
+  if (!p) return;
+  if (!p.refs) p.refs = [];
+  p.refs.push(..._parsedRefs);
+  saveAll();
+  closeAiImportRefs();
+  renderRefsPanel(p);
+  _parsedRefs = [];
+}
+
+// Estructurar nota libre
+async function aiStructureNote() {
+  const text = document.getElementById('nota-text').value.trim();
+  if (!text) { alert('Escribí algo en la nota primero.'); return; }
+  const btn = event.target;
+  setAiLoading(btn, true);
+  const prompt = `Sos asistente de investigación de laboratorio. El usuario escribió la siguiente nota de campo libre.
+Reformateala de forma clara y concisa para una bitácora científica, en español. Mantenés toda la información, solo mejorás la redacción y la estructura. Máximo 200 palabras.
+Nota original: ${text}
+Devolvé solo la nota mejorada, sin comentarios.`;
+  const result = await callGemini(prompt);
+  setAiLoading(btn, false);
+  if (result) document.getElementById('nota-text').value = result;
+}
+
+// Generar informe de avance
+async function aiGenerateReport() {
+  const p = projects.find(x => x.id === currentProjectId);
+  if (!p) return;
+  const btn = event.target;
+  setAiLoading(btn, true);
+  const hitosText = (p.hitos||[]).map(h => `- [${h.done?'✓':'○'}] ${h.title} (${h.type}, ${h.date||'sin fecha'})`).join('\n') || 'Sin hitos cargados.';
+  const pubsText  = (p.pubs||[]).map(pub => `- ${pub.title} [${pubStatusLabel[pub.status]||pub.status}]`).join('\n') || 'Sin publicaciones.';
+  const refsCount = (p.refs||[]).length;
+  const notasText = (p.notas||[]).slice(-3).map(n => `- ${n.date||''}: ${(n.content||'').slice(0,80)}...`).join('\n') || 'Sin notas.';
+  const prompt = `Generá un informe de avance breve y profesional (en español, estilo académico) para el siguiente proyecto de investigación:
+
+Título: ${p.title}
+Tipo: ${projTypeLabel[p.type]||p.type}
+Estado: ${projStatusLabel[p.status]||p.status}
+Director: ${p.director||'—'}
+Período: ${p.startDate||'—'} → ${p.endDate||'—'}
+Referencias bibliográficas cargadas: ${refsCount}
+
+Hitos:
+${hitosText}
+
+Producción científica:
+${pubsText}
+
+Últimas notas:
+${notasText}
+
+El informe debe tener: resumen ejecutivo (2-3 oraciones), estado de avance, logros recientes, próximos pasos, y producción científica. Máximo 350 palabras.`;
+  const result = await callGemini(prompt);
+  setAiLoading(btn, false);
+  if (!result) return;
+  document.getElementById('ai-report-content').textContent = result;
+  document.getElementById('ai-report-bg').style.display = 'flex';
+}
+
+function copyAiReport() {
+  const text = document.getElementById('ai-report-content').textContent;
+  navigator.clipboard.writeText(text).then(() => alert('Informe copiado al portapapeles.'));
+}
+
+// Init Gemini indicator
+(function() {
+  if (geminiKey) {
+    const cfgBtn = document.getElementById('gemini-cfg-btn');
+    if (cfgBtn) { cfgBtn.style.color = 'var(--green)'; cfgBtn.textContent = '✨ IA'; }
+  }
+})();
+
 // ═══════════ INVESTIGACIÓN I+D ═══════════
 let projects = [];
 let projectCounter = 1;
@@ -4335,8 +4657,9 @@ function renderInfoPanel(p) {
     ${p.abstract ? `<div style="margin-bottom:16px"><div style="font-size:11px;color:var(--muted);margin-bottom:6px">Resumen</div><div style="font-size:13px;line-height:1.6;background:var(--surface2);padding:14px;border-radius:8px">${p.abstract}</div></div>` : ''}
     ${p.keywords ? `<div style="margin-bottom:16px"><div style="font-size:11px;color:var(--muted);margin-bottom:6px">Palabras clave</div><div style="display:flex;gap:6px;flex-wrap:wrap">${p.keywords.split(',').map(k=>`<span class="badge blue">${k.trim()}</span>`).join('')}</div></div>` : ''}
     <div><div style="font-size:11px;color:var(--muted);margin-bottom:6px">Equipo</div><div style="font-size:13px">${(p.team||[]).join(', ')||'—'}</div></div>
-    <div style="margin-top:14px">
+    <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn btn-primary" onclick="editCurrentProject()">Editar proyecto</button>
+      <button class="btn" style="color:var(--purple);border-color:var(--purple-dim);background:var(--purple-dim)" onclick="aiGenerateReport()">✨ Generar informe</button>
     </div>
   `;
 }
@@ -4390,7 +4713,10 @@ function renderRefsPanel(p) {
   el.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
       <div style="font-size:13px;color:var(--muted)">${refs.length} referencia(s)</div>
-      <button class="btn btn-primary" onclick="openAddRef()">+ Agregar referencia</button>
+      <div style="display:flex;gap:6px">
+        <button class="btn" style="color:var(--purple);border-color:var(--purple-dim);background:var(--purple-dim);font-size:12px" onclick="openAiImportRefs()">✨ Importar con IA</button>
+        <button class="btn btn-primary" onclick="openAddRef()">+ Agregar</button>
+      </div>
     </div>
     ${!refs.length ? `<div style="text-align:center;color:var(--muted);padding:32px;font-size:13px">Sin referencias cargadas.</div>` : `
     <div style="display:flex;flex-direction:column;gap:8px">
@@ -4491,41 +4817,46 @@ function deleteNota(projId, idx) {
 
 // ── Modal: Proyecto ────────────────────
 function openNewProject() {
-  const bg = document.getElementById('inv-proj-modal-bg');
   document.getElementById('inv-proj-modal-title').textContent = 'Nuevo proyecto';
-  document.getElementById('inv-proj-id').value       = '';
-  document.getElementById('inv-proj-title').value    = '';
-  document.getElementById('inv-proj-type').value     = 'PID';
-  document.getElementById('inv-proj-status').value   = 'formulacion';
-  document.getElementById('inv-proj-director').value = '';
-  document.getElementById('inv-proj-institution').value = 'FIUNER';
-  document.getElementById('inv-proj-start').value    = '';
-  document.getElementById('inv-proj-end').value      = '';
-  document.getElementById('inv-proj-funding').value  = '';
-  document.getElementById('inv-proj-extcode').value  = '';
-  document.getElementById('inv-proj-team').value     = '';
-  document.getElementById('inv-proj-abstract').value = '';
-  document.getElementById('inv-proj-keywords').value = '';
-  bg.style.display = 'flex';
+  document.getElementById('proj-editing-id').value  = '';
+  document.getElementById('proj-title').value       = '';
+  document.getElementById('proj-type').value        = 'PID';
+  document.getElementById('proj-status').value      = 'activo';
+  document.getElementById('proj-pi').value          = '';
+  document.getElementById('proj-copi').value        = '';
+  document.getElementById('proj-team').value        = '';
+  document.getElementById('proj-funding').value     = 'UNER';
+  document.getElementById('proj-start').value       = '';
+  document.getElementById('proj-end').value         = '';
+  document.getElementById('proj-field').value       = '';
+  document.getElementById('proj-expte').value       = '';
+  document.getElementById('proj-keywords').value    = '';
+  document.getElementById('proj-abstract').value    = '';
+  document.getElementById('proj-objectives').value  = '';
+  document.getElementById('proj-hypothesis').value  = '';
+  document.getElementById('inv-proj-modal-bg').style.display = 'flex';
 }
 
 function editCurrentProject() {
   const p = projects.find(x => x.id === currentProjectId);
   if (!p) return;
   document.getElementById('inv-proj-modal-title').textContent = 'Editar proyecto';
-  document.getElementById('inv-proj-id').value       = p.id;
-  document.getElementById('inv-proj-title').value    = p.title;
-  document.getElementById('inv-proj-type').value     = p.type;
-  document.getElementById('inv-proj-status').value   = p.status;
-  document.getElementById('inv-proj-director').value = p.director||'';
-  document.getElementById('inv-proj-institution').value = p.institution||'';
-  document.getElementById('inv-proj-start').value    = p.startDate||'';
-  document.getElementById('inv-proj-end').value      = p.endDate||'';
-  document.getElementById('inv-proj-funding').value  = p.funding||'';
-  document.getElementById('inv-proj-extcode').value  = p.extCode||'';
-  document.getElementById('inv-proj-team').value     = (p.team||[]).join(', ');
-  document.getElementById('inv-proj-abstract').value = p.abstract||'';
-  document.getElementById('inv-proj-keywords').value = p.keywords||'';
+  document.getElementById('proj-editing-id').value  = p.id;
+  document.getElementById('proj-title').value       = p.title||'';
+  document.getElementById('proj-type').value        = p.type||'PID';
+  document.getElementById('proj-status').value      = p.status||'activo';
+  document.getElementById('proj-pi').value          = p.director||'';
+  document.getElementById('proj-copi').value        = p.codirector||'';
+  document.getElementById('proj-team').value        = (p.team||[]).join(', ');
+  document.getElementById('proj-funding').value     = p.funding||'UNER';
+  document.getElementById('proj-start').value       = p.startDate||'';
+  document.getElementById('proj-end').value         = p.endDate||'';
+  document.getElementById('proj-field').value       = p.field||'';
+  document.getElementById('proj-expte').value       = p.extCode||'';
+  document.getElementById('proj-keywords').value    = p.keywords||'';
+  document.getElementById('proj-abstract').value    = p.abstract||'';
+  document.getElementById('proj-objectives').value  = p.objectives||'';
+  document.getElementById('proj-hypothesis').value  = p.hypothesis||'';
   document.getElementById('inv-proj-modal-bg').style.display = 'flex';
 }
 
@@ -4534,27 +4865,30 @@ function closeProjModal() {
 }
 
 function saveProject() {
-  const title = document.getElementById('inv-proj-title').value.trim();
+  const title = document.getElementById('proj-title').value.trim();
   if (!title) { alert('El título es obligatorio.'); return; }
-  const existingId = document.getElementById('inv-proj-id').value;
-  const teamRaw    = document.getElementById('inv-proj-team').value;
-  const team       = teamRaw ? teamRaw.split(',').map(s=>s.trim()).filter(Boolean) : [];
+  const editingId = document.getElementById('proj-editing-id').value;
+  const teamRaw   = document.getElementById('proj-team').value;
+  const team      = teamRaw ? teamRaw.split(',').map(s=>s.trim()).filter(Boolean) : [];
   const data = {
     title,
-    type:        document.getElementById('inv-proj-type').value,
-    status:      document.getElementById('inv-proj-status').value,
-    director:    document.getElementById('inv-proj-director').value.trim(),
-    institution: document.getElementById('inv-proj-institution').value.trim(),
-    startDate:   document.getElementById('inv-proj-start').value,
-    endDate:     document.getElementById('inv-proj-end').value,
-    funding:     document.getElementById('inv-proj-funding').value.trim(),
-    extCode:     document.getElementById('inv-proj-extcode').value.trim(),
+    type:       document.getElementById('proj-type').value,
+    status:     document.getElementById('proj-status').value,
+    director:   document.getElementById('proj-pi').value.trim(),
+    codirector: document.getElementById('proj-copi').value.trim(),
     team,
-    abstract:    document.getElementById('inv-proj-abstract').value.trim(),
-    keywords:    document.getElementById('inv-proj-keywords').value.trim()
+    funding:    document.getElementById('proj-funding').value,
+    startDate:  document.getElementById('proj-start').value,
+    endDate:    document.getElementById('proj-end').value,
+    field:      document.getElementById('proj-field').value.trim(),
+    extCode:    document.getElementById('proj-expte').value.trim(),
+    keywords:   document.getElementById('proj-keywords').value.trim(),
+    abstract:   document.getElementById('proj-abstract').value.trim(),
+    objectives: document.getElementById('proj-objectives').value.trim(),
+    hypothesis: document.getElementById('proj-hypothesis').value.trim()
   };
-  if (existingId) {
-    const p = projects.find(x => x.id === existingId);
+  if (editingId) {
+    const p = projects.find(x => x.id === editingId);
     if (p) Object.assign(p, data);
   } else {
     const newId = 'PRY-' + String(projectCounter++).padStart(4,'0');
@@ -4562,30 +4896,35 @@ function saveProject() {
   }
   saveAll();
   closeProjModal();
-  renderInvestigacion();
+  if (editingId) { renderInfoPanel(projects.find(x=>x.id===editingId)); }
+  else { renderInvestigacion(); }
 }
 
 // ── Modal: Referencia ──────────────────
 function openAddRef() {
-  ['inv-ref-title','inv-ref-authors','inv-ref-journal','inv-ref-year','inv-ref-doi','inv-ref-notes'].forEach(id => {
-    document.getElementById(id).value = '';
+  ['ref-title','ref-authors','ref-journal','ref-year','ref-doi','ref-notes'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = '';
   });
+  const rt = document.getElementById('ref-type'); if(rt) rt.value = 'articulo';
+  document.getElementById('ref-paste-area').style.display = 'none';
+  const rrt = document.getElementById('ref-raw-text'); if(rrt) rrt.value = '';
   document.getElementById('inv-ref-modal-bg').style.display = 'flex';
 }
 function closeRefModal() { document.getElementById('inv-ref-modal-bg').style.display = 'none'; }
 function saveRef() {
-  const title = document.getElementById('inv-ref-title').value.trim();
+  const title = document.getElementById('ref-title').value.trim();
   if (!title) { alert('El título es obligatorio.'); return; }
   const p = projects.find(x => x.id === currentProjectId);
   if (!p) return;
   if (!p.refs) p.refs = [];
   p.refs.push({
     title,
-    authors: document.getElementById('inv-ref-authors').value.trim(),
-    journal: document.getElementById('inv-ref-journal').value.trim(),
-    year:    document.getElementById('inv-ref-year').value.trim(),
-    doi:     document.getElementById('inv-ref-doi').value.trim(),
-    notes:   document.getElementById('inv-ref-notes').value.trim()
+    authors: document.getElementById('ref-authors').value.trim(),
+    journal: document.getElementById('ref-journal').value.trim(),
+    year:    document.getElementById('ref-year').value.trim(),
+    doi:     document.getElementById('ref-doi').value.trim(),
+    type:    document.getElementById('ref-type').value,
+    notes:   document.getElementById('ref-notes').value.trim()
   });
   saveAll();
   closeRefModal();
@@ -4594,26 +4933,28 @@ function saveRef() {
 
 // ── Modal: Publicación ─────────────────
 function openAddPub() {
-  ['inv-pub-title','inv-pub-authors','inv-pub-venue','inv-pub-year','inv-pub-doi'].forEach(id => {
-    document.getElementById(id).value = '';
+  ['pub-title','pub-authors','pub-venue','pub-year','pub-doi'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = '';
   });
-  document.getElementById('inv-pub-status').value = 'en_prep';
+  const ps = document.getElementById('pub-status'); if(ps) ps.value = 'en_prep';
+  const pt = document.getElementById('pub-type'); if(pt) pt.value = 'paper';
   document.getElementById('inv-pub-modal-bg').style.display = 'flex';
 }
 function closePubModal() { document.getElementById('inv-pub-modal-bg').style.display = 'none'; }
 function savePub() {
-  const title = document.getElementById('inv-pub-title').value.trim();
+  const title = document.getElementById('pub-title').value.trim();
   if (!title) { alert('El título es obligatorio.'); return; }
   const p = projects.find(x => x.id === currentProjectId);
   if (!p) return;
   if (!p.pubs) p.pubs = [];
   p.pubs.push({
     title,
-    authors: document.getElementById('inv-pub-authors').value.trim(),
-    venue:   document.getElementById('inv-pub-venue').value.trim(),
-    year:    document.getElementById('inv-pub-year').value.trim(),
-    doi:     document.getElementById('inv-pub-doi').value.trim(),
-    status:  document.getElementById('inv-pub-status').value
+    type:    document.getElementById('pub-type').value,
+    authors: document.getElementById('pub-authors').value.trim(),
+    venue:   document.getElementById('pub-venue').value.trim(),
+    year:    document.getElementById('pub-year').value.trim(),
+    doi:     document.getElementById('pub-doi').value.trim(),
+    status:  document.getElementById('pub-status').value
   });
   saveAll();
   closePubModal();
@@ -4622,25 +4963,28 @@ function savePub() {
 
 // ── Modal: Hito ────────────────────────
 function openAddHito() {
-  ['inv-hito-title','inv-hito-date','inv-hito-notes'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
-  document.getElementById('inv-hito-type').value = 'hito';
+  const hd = document.getElementById('hito-desc'); if(hd) hd.value = '';
+  const hdate = document.getElementById('hito-date'); if(hdate) hdate.value = '';
+  const ht = document.getElementById('hito-type'); if(ht) ht.value = 'hito';
+  const hs = document.getElementById('hito-status'); if(hs) hs.value = 'pendiente';
+  const hp = document.getElementById('hito-progress'); if(hp) { hp.value = 0; document.getElementById('hito-pct').textContent = '0%'; }
   document.getElementById('inv-hito-modal-bg').style.display = 'flex';
 }
 function closeHitoModal() { document.getElementById('inv-hito-modal-bg').style.display = 'none'; }
 function saveHito() {
-  const title = document.getElementById('inv-hito-title').value.trim();
-  if (!title) { alert('El título es obligatorio.'); return; }
+  const desc = document.getElementById('hito-desc').value.trim();
+  if (!desc) { alert('La descripción es obligatoria.'); return; }
   const p = projects.find(x => x.id === currentProjectId);
   if (!p) return;
   if (!p.hitos) p.hitos = [];
+  const status = document.getElementById('hito-status').value;
   p.hitos.push({
-    title,
-    type:  document.getElementById('inv-hito-type').value,
-    date:  document.getElementById('inv-hito-date').value,
-    notes: document.getElementById('inv-hito-notes').value.trim(),
-    done:  false
+    title:    desc,
+    type:     document.getElementById('hito-type').value,
+    date:     document.getElementById('hito-date').value,
+    status,
+    progress: parseInt(document.getElementById('hito-progress').value)||0,
+    done:     status === 'completado'
   });
   saveAll();
   closeHitoModal();
@@ -4649,27 +4993,22 @@ function saveHito() {
 
 // ── Modal: Nota ────────────────────────
 function openAddNota() {
-  ['inv-nota-title','inv-nota-content','inv-nota-tags'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
-  document.getElementById('inv-nota-author').value = 'Emanuel Capra';
-  const today2 = new Date().toISOString().slice(0,10);
-  document.getElementById('inv-nota-date').value = today2;
+  const nt = document.getElementById('nota-text'); if(nt) nt.value = '';
+  const nc = document.getElementById('nota-cat'); if(nc) nc.value = 'resultado';
   document.getElementById('inv-nota-modal-bg').style.display = 'flex';
 }
 function closeNotaModal() { document.getElementById('inv-nota-modal-bg').style.display = 'none'; }
 function saveNota() {
-  const content = document.getElementById('inv-nota-content').value.trim();
+  const content = document.getElementById('nota-text').value.trim();
   if (!content) { alert('El contenido es obligatorio.'); return; }
   const p = projects.find(x => x.id === currentProjectId);
   if (!p) return;
   if (!p.notas) p.notas = [];
   p.notas.push({
-    title:   document.getElementById('inv-nota-title').value.trim(),
     content,
-    author:  document.getElementById('inv-nota-author').value.trim(),
-    date:    document.getElementById('inv-nota-date').value,
-    tags:    document.getElementById('inv-nota-tags').value.trim()
+    cat:    document.getElementById('nota-cat').value,
+    date:   new Date().toISOString().slice(0,10),
+    author: 'Emanuel Capra'
   });
   saveAll();
   closeNotaModal();
