@@ -417,6 +417,7 @@
       <div class="status-dot"></div>
       <span class="clock" id="clock">--:--:--</span>
       <button class="btn" onclick="openGeminiSettings()" title="Configurar IA" style="padding:6px 10px;font-size:13px" id="gemini-cfg-btn">⚙ IA</button>
+      <button class="btn" onclick="openQuickRegister()" style="background:var(--purple-dim);border-color:var(--purple-dim);color:var(--purple);font-weight:600" title="Registrar con IA">✨ Registrar con IA</button>
       <button class="btn btn-primary" onclick="openModal()">+ Registrar</button>
     </div>
   </div>
@@ -3127,6 +3128,57 @@
       </div>
     </div>
 
+    <!-- MODAL: Quick Register con IA -->
+    <div id="qr-modal-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;align-items:flex-start;justify-content:center;padding-top:48px;overflow-y:auto">
+      <div style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:28px;width:640px;max-width:96vw;margin-bottom:48px">
+
+        <!-- Encabezado -->
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <span style="font-size:20px">✨</span>
+          <div>
+            <div style="font-weight:600;font-size:15px">Registrar con IA</div>
+            <div style="font-size:12px;color:var(--muted)">Describí lo que hiciste en lenguaje libre. La IA interpreta y completa los registros.</div>
+          </div>
+          <button onclick="closeQuickRegister()" style="margin-left:auto;background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer">×</button>
+        </div>
+
+        <!-- Selector de autor -->
+        <div style="margin-top:16px;margin-bottom:12px">
+          <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:6px">¿Quién registra?</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap" id="qr-author-btns">
+            <button class="cat-btn active" onclick="setQrAuthor('Emanuel Capra',this)">Emanuel Capra</button>
+            <button class="cat-btn" onclick="setQrAuthor('Hernán Rodríguez',this)">Hernán Rodríguez</button>
+            <button class="cat-btn" onclick="setQrAuthor('Tomás Tesarik',this)">Tomás Tesarik</button>
+            <button class="cat-btn" onclick="setQrAuthor('Dr. Gastón Miño',this)">Dr. Gastón Miño</button>
+          </div>
+        </div>
+
+        <!-- Área de texto libre -->
+        <div style="margin-bottom:14px">
+          <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:6px">¿Qué hiciste hoy?</label>
+          <textarea id="qr-input" rows="5" placeholder="Ej: Hoy hice sputtering de oro con Tomás en el Quorum. Tardamos unas 2 horas, procesamos 3 sustratos de silicio. Todo salió bien, los espesores se ven buenos. Después limpié con acetona e IPA en la estación 687." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:12px;border-radius:8px;font-family:var(--font);font-size:13px;resize:vertical;line-height:1.6"></textarea>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">Podés mencionar equipos, procesos, personas, materiales, duración, resultados, problemas — cuanto más detalle, mejor.</div>
+        </div>
+
+        <button class="btn btn-primary" style="width:100%;padding:10px;font-size:13px" onclick="aiQuickRegister()" id="qr-interpret-btn">✨ Interpretar y sugerir registros</button>
+
+        <!-- Preview de registros interpretados -->
+        <div id="qr-preview" style="display:none;margin-top:20px">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:4px" id="qr-interpretation-text"></div>
+          <div style="border-top:1px solid var(--border);margin:10px 0"></div>
+          <div style="font-size:12px;font-weight:600;margin-bottom:10px;color:var(--text)">Registros a crear — marcá los que querés confirmar:</div>
+          <div id="qr-records-list" style="display:flex;flex-direction:column;gap:8px"></div>
+
+          <div style="display:flex;gap:8px;margin-top:18px">
+            <button class="btn btn-primary" style="flex:1;padding:10px" onclick="confirmQuickRegister()">✓ Confirmar seleccionados</button>
+            <button class="btn" onclick="resetQuickRegister()">← Volver a editar</button>
+          </div>
+          <div id="qr-confirm-msg" style="margin-top:10px;font-size:12px;display:none"></div>
+        </div>
+
+      </div>
+    </div>
+
     <!-- MODAL: Configuración Gemini API -->
     <div id="gemini-settings-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:400;align-items:center;justify-content:center">
       <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:28px;width:480px;max-width:96vw">
@@ -4279,6 +4331,244 @@ function renderServicios() {
       </td>
     </tr>`;
   }).join('');
+}
+
+// ═══════════ QUICK REGISTER CON IA ═══════════
+let qrAuthor = 'Emanuel Capra';
+let qrParsedRecords = [];
+
+const AMF_EQUIPOS_CTX = `Equipos disponibles en AMF FIUNER:
+- EQP-AMF-001: Sputter Coater (Quorum Tech Q300TT). Insumos: Argón, Target metálico (Au/Cr/Ti/Ag), vacío propio.
+- EQP-AMF-002: Plasma Etching (Plasma Etch PE-25). Insumos: gases de proceso, vacío.
+- EQP-AMF-003: Wire Bonder (TPT HB16). Insumos: hilo de oro 25µm.
+- EQP-AMF-004: Alineador de Máscara (OAI 204). Insumos: vacío, CDA, N₂.
+- EQP-AMF-005: Purificador de Agua (Thermo Fisher Smart2Pure).
+- EQP-AMF-006: Estación de Trabajo N°687 (Thorbrell wet bench). Insumos: acetona, IPA, protector de metales.
+- EQP-AMF-007: Estación de Trabajo N°686 (Thorbrell wet bench). Insumos: acetona, IPA.
+- EQP-AMF-008: Bomba de Vacío (Edwards nXDS6i).
+- EQP-AMF-009: Spin Processor (Laurell WS-650MZ). Insumos: N₂/CDA, vacío.
+- EQP-AMF-014: Sistema de Gases (Ar, N₂).`;
+
+const AMF_PERSONAL_CTX = `Personal del AMF:
+- Emanuel Capra (Responsable Técnico)
+- Hernán Rodríguez (Asistente Técnico)
+- Tomás Tesarik (Personal de Apoyo CONICET)
+- Dr. Gastón Miño (Responsable de Gestión)`;
+
+const AMF_STOCK_CTX = `Insumos y químicos frecuentes:
+Fotorresinas: SU-8 2025, SU-8 2150, maN 1405, maN 1440, MA-P 1275, AZ1512, PMMA 950 A8.
+Solventes/reveladores: Acetona, IPA, PGMEA, MF-26A, mr-Dev 600, Clorobenceno.
+Ácidos/bases: H₂SO₄, H₂O₂, HF, BOE, KOH, H₃PO₄, HCl, HNO₃.
+Targets de sputtering: Au (oro), Cr (cromo), Ti (titanio), Ag (plata).
+Gases: Argón (Ar), Nitrógeno (N₂).
+Consumibles: swipes, papel aluminio, guantes nitrilo, pinzas, sustratos de silicio, vidrio borosilicato.`;
+
+function setQrAuthor(name, btn) {
+  qrAuthor = name;
+  document.querySelectorAll('#qr-author-btns .cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function openQuickRegister() {
+  document.getElementById('qr-input').value = '';
+  document.getElementById('qr-preview').style.display = 'none';
+  document.getElementById('qr-confirm-msg').style.display = 'none';
+  document.getElementById('qr-modal-bg').style.display = 'flex';
+}
+
+function closeQuickRegister() {
+  document.getElementById('qr-modal-bg').style.display = 'none';
+}
+
+function resetQuickRegister() {
+  document.getElementById('qr-preview').style.display = 'none';
+  document.getElementById('qr-confirm-msg').style.display = 'none';
+}
+
+async function aiQuickRegister() {
+  const text = document.getElementById('qr-input').value.trim();
+  if (!text) { alert('Describí al menos brevemente lo que hiciste.'); return; }
+  const btn = document.getElementById('qr-interpret-btn');
+  setAiLoading(btn, true);
+
+  const hoy = new Date().toISOString().slice(0,10);
+  const prompt = `Sos el asistente de registro del Área de Microfabricación (AMF) de FIUNER, Argentina. Tu tarea es interpretar una descripción libre de actividades de laboratorio y extraer registros estructurados.
+
+${AMF_EQUIPOS_CTX}
+
+${AMF_PERSONAL_CTX}
+
+${AMF_STOCK_CTX}
+
+Fecha de hoy: ${hoy}
+Autor principal: ${qrAuthor}
+
+Descripción de actividades:
+"${text}"
+
+Analizá la descripción y devolvé SOLO un JSON (sin markdown) con esta estructura exacta:
+{
+  "interpretacion": "resumen en 1 oración de lo que entendiste",
+  "registros": [
+    {
+      "tipo": "sesion_equipo",
+      "activo": true,
+      "equipo_id": "EQP-AMF-001",
+      "equipo_nombre": "Sputter Coater",
+      "proceso": "Sputtering de Au",
+      "usuario": "${qrAuthor}",
+      "otros_usuarios": ["Tomás Tesarik"],
+      "duracion_horas": 2,
+      "resultado": "exitoso",
+      "observaciones": "3 sustratos de silicio procesados, espesores correctos",
+      "fecha": "${hoy}"
+    },
+    {
+      "tipo": "stock_consumo",
+      "activo": true,
+      "insumo": "Acetona",
+      "cantidad": 50,
+      "unidad": "mL",
+      "equipo": "EQP-AMF-006"
+    },
+    {
+      "tipo": "residuo",
+      "activo": true,
+      "quimico": "Acetona",
+      "cantidad": "50 mL",
+      "metodo": "Evaporación controlada",
+      "responsable": "${qrAuthor}",
+      "fecha": "${hoy}"
+    }
+  ]
+}
+
+Reglas:
+- Solo incluí registros que estén claramente mencionados o fuertemente implícitos en la descripción.
+- Para sesion_equipo: si mencionan sputtering → EQP-AMF-001; litografía/alineador/UV → EQP-AMF-004; spin coating/spinner → EQP-AMF-009; plasma/etching → EQP-AMF-002; wire bonding → EQP-AMF-003; wet bench/química húmeda/estación → EQP-AMF-006 o 007.
+- Para stock_consumo: solo si se menciona un insumo específico y se puede estimar cantidad.
+- Para residuo: si se usaron químicos que generan residuo peligroso (ácidos, acetona, reveladores).
+- El campo "activo" siempre es true (es editable por el usuario).
+- Si no hay suficiente información para un campo, omitilo del objeto.
+- Devolvé SOLO el JSON, sin ningún texto adicional.`;
+
+  const result = await callGemini(prompt);
+  setAiLoading(btn, false);
+  if (!result) return;
+
+  try {
+    const clean = result.replace(/```json?/g,'').replace(/```/g,'').trim();
+    const parsed = JSON.parse(clean);
+    qrParsedRecords = parsed.registros || [];
+
+    document.getElementById('qr-interpretation-text').textContent = '💬 ' + (parsed.interpretacion || '');
+    renderQrRecords();
+    document.getElementById('qr-preview').style.display = '';
+    document.getElementById('qr-confirm-msg').style.display = 'none';
+  } catch(e) {
+    alert('No se pudo interpretar la respuesta. Intentá con una descripción más detallada.');
+  }
+}
+
+const qrTipoLabel = {
+  sesion_equipo: '📋 Sesión de equipo',
+  stock_consumo: '📦 Consumo de stock',
+  residuo: '⚠️ Residuo químico'
+};
+const qrTipoColor = { sesion_equipo:'blue', stock_consumo:'green', residuo:'amber' };
+
+function renderQrRecords() {
+  const list = document.getElementById('qr-records-list');
+  list.innerHTML = qrParsedRecords.map((r, i) => {
+    const sc = qrTipoColor[r.tipo] || 'muted';
+    let detail = '';
+    if (r.tipo === 'sesion_equipo') {
+      detail = `<div style="font-size:12px;color:var(--muted);margin-top:4px">
+        <strong>${r.equipo_nombre||''}</strong> · ${r.proceso||''}<br>
+        Usuario: ${r.usuario||''}${r.otros_usuarios?.length?' + '+r.otros_todos?.join(', '):''}
+        ${r.duracion_horas?` · ${r.duracion_horas}h`:''}
+        ${r.resultado?' · '+r.resultado:''}<br>
+        ${r.observaciones?`<span style="color:var(--text)">${r.observaciones}</span>`:''}
+      </div>`;
+    } else if (r.tipo === 'stock_consumo') {
+      detail = `<div style="font-size:12px;color:var(--muted);margin-top:4px">${r.insumo||''} — ${r.cantidad||'?'} ${r.unidad||''}</div>`;
+    } else if (r.tipo === 'residuo') {
+      detail = `<div style="font-size:12px;color:var(--muted);margin-top:4px">${r.quimico||''} — ${r.cantidad||'?'}<br>Método: ${r.metodo||'—'}</div>`;
+    }
+    return `<label style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:var(--surface2);border-radius:8px;cursor:pointer;border:1px solid var(--border)">
+      <input type="checkbox" checked data-idx="${i}" style="margin-top:2px;cursor:pointer;flex-shrink:0">
+      <div style="flex:1">
+        <span class="badge ${sc}">${qrTipoLabel[r.tipo]||r.tipo}</span>
+        ${detail}
+      </div>
+    </label>`;
+  }).join('');
+}
+
+function confirmQuickRegister() {
+  const checkboxes = document.querySelectorAll('#qr-records-list input[type=checkbox]');
+  const hoy = new Date().toISOString().slice(0,10);
+  const hora = new Date().toLocaleTimeString('es-AR', {hour:'2-digit',minute:'2-digit'});
+  let created = 0;
+
+  checkboxes.forEach(cb => {
+    if (!cb.checked) return;
+    const r = qrParsedRecords[parseInt(cb.dataset.idx)];
+    if (!r) return;
+
+    if (r.tipo === 'sesion_equipo') {
+      // Crear en sessionHistory
+      const sid = 'SES-' + String(++sessionCounter).padStart(4,'0');
+      sessionHistory.unshift({
+        id: sid,
+        eqId: r.equipo_id || 'EQP-AMF-???',
+        eqName: r.equipo_nombre || 'Equipo',
+        proceso: r.proceso || '',
+        user: r.usuario || qrAuthor,
+        start: hoy + ' ' + hora,
+        end: hora,
+        duration: r.duracion_horas ? (r.duracion_horas * 60) : null,
+        resultado: r.resultado || 'exitoso',
+        obs: r.observaciones || '',
+        fecha: hoy,
+        via: 'quick-register-ia'
+      });
+      created++;
+    } else if (r.tipo === 'stock_consumo') {
+      // Descontar del stock si existe el item
+      const key = Object.keys(stockLevels).find(k => k.toLowerCase().includes((r.insumo||'').toLowerCase().split(' ')[0]));
+      if (key && r.cantidad) {
+        stockLevels[key] = Math.max(0, (stockLevels[key]||0) - Number(r.cantidad));
+      }
+      created++;
+    } else if (r.tipo === 'residuo') {
+      wasteRecords.unshift({
+        id: 'RES-' + Date.now(),
+        quimico: r.quimico || '',
+        cantidad: r.cantidad || '',
+        metodo: r.metodo || '',
+        responsable: r.responsable || qrAuthor,
+        fecha: r.fecha || hoy,
+        obs: '',
+        via: 'quick-register-ia'
+      });
+      created++;
+    }
+  });
+
+  saveAll();
+  renderHistory();
+  renderWaste();
+
+  const msg = document.getElementById('qr-confirm-msg');
+  msg.style.display = '';
+  msg.style.color = 'var(--green)';
+  msg.textContent = `✓ ${created} registro(s) creado(s) correctamente.`;
+
+  setTimeout(() => {
+    closeQuickRegister();
+    show('inicio');
+  }, 1800);
 }
 
 // ═══════════ GEMINI AI ═══════════
