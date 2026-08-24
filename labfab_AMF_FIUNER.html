@@ -1530,127 +1530,56 @@
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
         <div>
           <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px">Biblioteca de procesos</div>
-          <div style="font-size:13px;color:var(--muted)">Flujos de fabricación definidos y usados en el área</div>
+          <div style="font-size:13px;color:var(--muted)">Flujos de fabricación del AMF — seleccioná uno para ver el detalle</div>
         </div>
-        <button class="btn btn-primary">+ Nuevo proceso</button>
+        <div style="display:flex;gap:8px">
+          <select id="proc-filter-cat" onchange="renderProcesos()" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:6px 10px;border-radius:7px;font-size:12px">
+            <option value="">Todas las categorías</option>
+            <option value="Litografía">Litografía</option>
+            <option value="Deposición">Deposición</option>
+            <option value="Grabado">Grabado</option>
+            <option value="Molde/PDMS">Molde/PDMS</option>
+            <option value="Limpieza">Limpieza</option>
+            <option value="Bonding">Bonding</option>
+            <option value="Electrodeposición">Electrodeposición</option>
+            <option value="Otro">Otro</option>
+          </select>
+          <button class="btn btn-primary" onclick="openProcModal()">+ Nuevo proceso</button>
+        </div>
       </div>
+      <!-- Tabla dinámica -->
       <div class="card" style="margin-bottom:16px">
-        <div class="card-header"><span class="card-title">Procesos activos</span></div>
         <div class="card-body" style="padding:0">
-          <table>
-            <thead><tr><th>Proceso</th><th>Tipo</th><th>Pasos</th><th>Equipos involucrados</th><th>Última ejecución</th><th>Estado</th><th>SOP</th><th>HDS</th></tr></thead>
-            <tbody>
-              <tr>
-                <td><strong>Fotolitografía UV — AZ1512</strong></td>
-                <td><span class="badge blue">Litografía</span></td>
-                <td style="font-family:var(--mono)">8 pasos</td>
-                <td style="color:var(--muted);font-size:12px">Spinner · Mask Aligner · Wet Bench</td>
-                <td style="color:var(--muted)">Hoy 08:30</td>
-                <td><span class="badge green">Activo</span></td>
-                <td>
-                  <a href="https://drive.google.com/file/d/1gdjDQpXlEqagTnO0kjhudwAUEeew2y3V/view" target="_blank"
-                     style="font-family:var(--mono);font-size:10px;color:var(--accent);text-decoration:none;font-weight:600;white-space:nowrap"
-                     title="POE-AMF-11 — Fotolitografía">POE-11 ↗</a>
-                  <a href="https://drive.google.com/file/d/1MphRNcY1Ru8_NsuwB15K4Eg2NvSMs9DR/view" target="_blank"
-                     style="font-family:var(--mono);font-size:10px;color:var(--accent);text-decoration:none;font-weight:600;white-space:nowrap;display:block;margin-top:2px"
-                     title="POE-AMF-07 — Alineador de Máscara">POE-07 ↗</a>
-                </td>
-                <td style="font-size:11px;line-height:1.8">
-                  <span title="Fotorresist AZ1512" style="color:var(--amber)">⚠ AZ1512</span><br>
-                  <span title="Revelador MF319 — TMAH" style="color:var(--amber)">⚠ MF319</span><br>
-                  <span title="Acetona — inflamable" style="color:var(--muted)">◉ Acetona</span>
-                </td>
-              </tr>
-              <tr>
-                <td><strong>Deposición Au — Sputter DC</strong></td>
-                <td><span class="badge purple">Deposición</span></td>
-                <td style="font-family:var(--mono)">6 pasos</td>
-                <td style="color:var(--muted);font-size:12px">Sputtering Q300T</td>
-                <td style="color:var(--muted)">22/04</td>
-                <td><span class="badge green">Activo</span></td>
-                <td>
-                  <a href="https://drive.google.com/file/d/1574R-Hyxv7dLIj4n3ytWGnLXEeFicM-4/view" target="_blank"
-                     style="font-family:var(--mono);font-size:10px;color:var(--accent);text-decoration:none;font-weight:600;white-space:nowrap"
-                     title="POE-AMF-06 — Sputter Q300TT">POE-06 ↗</a>
-                </td>
-                <td style="font-size:11px;line-height:1.8">
-                  <span title="Acetona — inflamable" style="color:var(--muted)">◉ Acetona</span><br>
-                  <span title="IPA — inflamable" style="color:var(--muted)">◉ IPA</span>
-                </td>
-              </tr>
-              <tr>
-                <td><strong>Grabado RIE — SiO₂</strong></td>
-                <td><span class="badge amber">Grabado</span></td>
-                <td style="font-family:var(--mono)">5 pasos</td>
-                <td style="color:var(--muted);font-size:12px">Plasma Etching PE-25</td>
-                <td style="color:var(--muted)">18/04</td>
-                <td><span class="badge muted">Pausado</span></td>
-                <td>
-                  <a href="https://drive.google.com/file/d/1FAYouEXZrWrRAymK10sf9eidRI_NqJ3t/view" target="_blank"
-                     style="font-family:var(--mono);font-size:10px;color:var(--accent);text-decoration:none;font-weight:600;white-space:nowrap"
-                     title="POE-AMF-09 — PE-25 Plasma System">POE-09 ↗</a>
-                  <a href="https://drive.google.com/file/d/1QlfjfBfxL_en9QmYy2iBbPdqqcrb1_bl/view" target="_blank"
-                     style="font-family:var(--mono);font-size:10px;color:var(--purple);text-decoration:none;font-weight:600;white-space:nowrap;display:block;margin-top:2px"
-                     title="IT-AMF-05 — PE-25 Plasma">IT-05 ↗</a>
-                </td>
-                <td style="font-size:11px;line-height:1.8">
-                  <span title="Gases de proceso — verificar SDS" style="color:var(--red)">⚠ Gases proc.</span><br>
-                  <span title="NH₄F — BHF para limpieza post-etch" style="color:var(--red)">⚠ BHF/HF</span>
-                </td>
-              </tr>
-              <tr>
-                <td><strong>SU-8 — Microcanaletas PDMS</strong></td>
-                <td><span class="badge teal" style="background:var(--teal-dim);color:var(--teal)">Molde</span></td>
-                <td style="font-family:var(--mono)">11 pasos</td>
-                <td style="color:var(--muted);font-size:12px">Spinner · Mask Aligner · Hot Plate</td>
-                <td style="color:var(--muted)">15/04</td>
-                <td><span class="badge green">Activo</span></td>
-                <td>
-                  <a href="https://drive.google.com/file/d/1I-my-bAgeoT2408pnHXYBoC3z3GH-uvt/view" target="_blank"
-                     style="font-family:var(--mono);font-size:10px;color:var(--accent);text-decoration:none;font-weight:600;white-space:nowrap"
-                     title="POE-AMF-04 — Litografía SU-8">POE-04 ↗</a>
-                  <a href="https://drive.google.com/file/d/1C5Zi-sC4H6mIN6GiPwsLPAv1y2apNECn/view" target="_blank"
-                     style="font-family:var(--mono);font-size:10px;color:var(--purple);text-decoration:none;font-weight:600;white-space:nowrap;display:block;margin-top:2px"
-                     title="IT-AMF-07 — Fotolitografía">IT-07 ↗</a>
-                </td>
-                <td style="font-size:11px;line-height:1.8">
-                  <span title="SU-8 2025/2150 — irritante" style="color:var(--amber)">⚠ SU-8</span><br>
-                  <span title="SU-8 Developer — PGMEA" style="color:var(--amber)">⚠ SU-8 Dev.</span><br>
-                  <span title="Acetona — inflamable" style="color:var(--muted)">◉ Acetona</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Detalle — Fotolitografía UV · AZ1512</span>
-          <div class="card-actions" style="display:flex;gap:8px;align-items:center">
-            <a href="https://drive.google.com/file/d/1gdjDQpXlEqagTnO0kjhudwAUEeew2y3V/view" target="_blank"
-               class="btn" style="font-size:11px;color:var(--accent);font-weight:600;text-decoration:none"
-               title="POE-AMF-11 — Fotolitografía">📄 POE-AMF-11 ↗</a>
-            <a href="https://drive.google.com/file/d/1MphRNcY1Ru8_NsuwB15K4Eg2NvSMs9DR/view" target="_blank"
-               class="btn" style="font-size:11px;color:var(--accent);font-weight:600;text-decoration:none"
-               title="POE-AMF-07 — Alineador de Máscara">📄 POE-AMF-07 ↗</a>
-            <span style="font-size:11px;color:var(--muted)">HDS:</span>
-            <span style="font-size:11px;color:var(--amber);font-weight:500" title="Ver hojas de seguridad en sección Documentación">⚠ AZ1512 · MF319 · Acetona</span>
+          <div id="proc-table-wrap" style="overflow-x:auto">
+            <table id="proc-table">
+              <thead><tr><th>Proceso</th><th>Categoría</th><th>Pasos</th><th>Equipos</th><th>Químicos/HDS</th><th>POE/SOP</th><th>Estado</th><th>Acciones</th></tr></thead>
+              <tbody id="proc-tbody"></tbody>
+            </table>
           </div>
         </div>
-        <div class="card-body" style="padding:0">
-          <table>
-            <thead><tr><th>#</th><th>Paso</th><th>Parámetros</th><th>Equipo</th><th>Tiempo</th></tr></thead>
-            <tbody>
-              <tr><td style="font-family:var(--mono);color:var(--muted)">01</td><td>Limpieza de sustrato</td><td style="color:var(--muted);font-size:12px">Acetona → IPA → N₂</td><td>—</td><td style="font-family:var(--mono)">5 min</td></tr>
-              <tr><td style="font-family:var(--mono);color:var(--muted)">02</td><td>Deshidratación</td><td style="color:var(--muted);font-size:12px">110°C, 5 min</td><td>Horno</td><td style="font-family:var(--mono)">5 min</td></tr>
-              <tr><td style="font-family:var(--mono);color:var(--muted)">03</td><td>Spin coating AZ1512</td><td style="color:var(--muted);font-size:12px">500rpm 5s → 4000rpm 30s</td><td>Spinner Laurell</td><td style="font-family:var(--mono)">1 min</td></tr>
-              <tr><td style="font-family:var(--mono);color:var(--muted)">04</td><td>Soft bake</td><td style="color:var(--muted);font-size:12px">95°C, 60s</td><td>Hot Plate</td><td style="font-family:var(--mono)">2 min</td></tr>
-              <tr><td style="font-family:var(--mono);color:var(--muted)">05</td><td>Exposición UV</td><td style="color:var(--muted);font-size:12px">365nm, 75 mJ/cm²</td><td>Mask Aligner OAI</td><td style="font-family:var(--mono)">~40s</td></tr>
-              <tr><td style="font-family:var(--mono);color:var(--muted)">06</td><td>Revelado</td><td style="color:var(--muted);font-size:12px">MF319, 60s agitación suave</td><td>—</td><td style="font-family:var(--mono)">2 min</td></tr>
-              <tr><td style="font-family:var(--mono);color:var(--muted)">07</td><td>Enjuague y secado</td><td style="color:var(--muted);font-size:12px">DI water → N₂</td><td>—</td><td style="font-family:var(--mono)">2 min</td></tr>
-              <tr><td style="font-family:var(--mono);color:var(--muted)">08</td><td>Inspección óptica</td><td style="color:var(--muted);font-size:12px">50× — verificar resolución</td><td>SEM / Microscopio</td><td style="font-family:var(--mono)">10 min</td></tr>
-            </tbody>
-          </table>
+      </div>
+
+      <!-- Panel de detalle del proceso seleccionado -->
+      <div id="proc-detail-panel" style="display:none">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title" id="proc-detail-title"></span>
+            <div class="card-actions">
+              <span id="proc-detail-poe" style="font-size:12px;color:var(--muted)"></span>
+              <button class="btn" onclick="closeProcDetail()" style="font-size:11px">✕ Cerrar</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="proc-detail-meta" style="display:flex;gap:24px;margin-bottom:14px;flex-wrap:wrap;font-size:13px;color:var(--muted)"></div>
+            <div style="font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;color:var(--muted)">Pasos del proceso</div>
+            <div style="overflow-x:auto">
+              <table>
+                <thead><tr><th>#</th><th>Paso</th><th>Parámetros</th><th>Equipo</th><th>Tiempo</th></tr></thead>
+                <tbody id="proc-detail-steps"></tbody>
+              </table>
+            </div>
+            <div id="proc-detail-notes" style="margin-top:12px;font-size:12px;color:var(--muted);line-height:1.6;background:var(--surface2);padding:10px 14px;border-radius:8px;display:none"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -3128,6 +3057,80 @@
       </div>
     </div>
 
+    <!-- MODAL: Nuevo / Editar Proceso -->
+    <div id="proc-modal-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;align-items:flex-start;justify-content:center;padding-top:40px;overflow-y:auto">
+      <div style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:28px;width:680px;max-width:96vw;margin-bottom:48px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+          <div style="font-weight:700;font-size:16px" id="proc-modal-title">Nuevo proceso</div>
+          <button onclick="closeProcModal()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+        </div>
+        <input type="hidden" id="proc-edit-id">
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <div style="grid-column:1/-1">
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Nombre del proceso *</label>
+            <input id="proc-name" type="text" placeholder="Ej: Fotolitografía UV — AZ1512" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Categoría *</label>
+            <select id="proc-cat" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px">
+              <option value="Litografía">Litografía</option>
+              <option value="Deposición">Deposición</option>
+              <option value="Grabado">Grabado</option>
+              <option value="Molde/PDMS">Molde/PDMS</option>
+              <option value="Limpieza">Limpieza</option>
+              <option value="Bonding">Bonding</option>
+              <option value="Electrodeposición">Electrodeposición</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Estado</label>
+            <select id="proc-status" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px">
+              <option value="activo">Activo</option>
+              <option value="desarrollo">En desarrollo</option>
+              <option value="pausado">Pausado</option>
+              <option value="obsoleto">Obsoleto</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Equipos involucrados</label>
+            <input id="proc-equips" type="text" placeholder="Ej: Spinner, Mask Aligner, Wet Bench" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Químicos / HDS</label>
+            <input id="proc-chemicals" type="text" placeholder="Ej: AZ1512, Acetona, IPA" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">POE / SOP (código)</label>
+            <input id="proc-poe" type="text" placeholder="Ej: POE-AMF-11" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Link SOP (Drive)</label>
+            <input id="proc-poe-url" type="text" placeholder="https://drive.google.com/..." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px">
+          </div>
+          <div style="grid-column:1/-1">
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Notas / descripción</label>
+            <textarea id="proc-notes" rows="3" placeholder="Descripción general, condiciones, advertencias..." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px;resize:vertical"></textarea>
+          </div>
+        </div>
+
+        <!-- Pasos del proceso -->
+        <div style="margin-bottom:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px">Pasos del proceso</label>
+            <button class="btn" onclick="addProcStep()" style="font-size:11px;padding:4px 10px">+ Paso</button>
+          </div>
+          <div id="proc-steps-list" style="display:flex;flex-direction:column;gap:6px"></div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:20px">
+          <button class="btn btn-primary" style="flex:1" onclick="saveProceso()">Guardar proceso</button>
+          <button class="btn" onclick="closeProcModal()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
     <!-- MODAL: Quick Register con IA -->
     <div id="qria-modal-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;align-items:flex-start;justify-content:center;padding-top:48px;overflow-y:auto">
       <div style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:28px;width:640px;max-width:96vw;margin-bottom:48px">
@@ -3455,7 +3458,9 @@ function saveAll() {
       serviceCounter: serviceCounter,
       sampleCounter: sampleCounter,
       projects: projects,
-      projectCounter: projectCounter
+      projectCounter: projectCounter,
+      procesos: procesos,
+      procesoCounter: procesoCounter
     };
     localStorage.setItem(LS_KEY, JSON.stringify(snap));
   } catch(e) { console.warn('localStorage save failed', e); }
@@ -3477,6 +3482,8 @@ function loadAll() {
     if (snap.sampleCounter) sampleCounter = snap.sampleCounter;
     if (snap.projects) projects = snap.projects;
     if (snap.projectCounter) projectCounter = snap.projectCounter;
+    if (snap.procesos) procesos = snap.procesos;
+    if (snap.procesoCounter) procesoCounter = snap.procesoCounter;
     return true;
   } catch(e) { console.warn('localStorage load failed', e); return false; }
 }
@@ -3593,6 +3600,7 @@ function show(id) {
   document.querySelectorAll('.nav-item').forEach(n => { if(n.getAttribute('onclick')===`show('${id}')`) n.classList.add('active'); });
   document.getElementById('topbar-title').textContent = sections[id];
   document.getElementById('topbar-sub').textContent = subs[id];
+  if (id === 'procesos') renderProcesos();
 }
 
 function openModal() { document.getElementById('modal-bg').style.display='flex'; }
@@ -4332,6 +4340,349 @@ function renderServicios() {
     </tr>`;
   }).join('');
 }
+
+// ═══════════ MÓDULO PROCESOS ═══════════
+let procesoCounter = 0;
+let procesos = [];
+let currentProcId = null;
+let procStepCount = 0;
+
+const PROCESOS_DEFAULT = [
+  {
+    id:'PROC-001', nombre:'Fotolitografía UV — AZ1512 (positiva)', cat:'Litografía', status:'activo',
+    equipos:'Spinner Laurell WS-650, Mask Aligner OAI 204, Wet Bench, Hot Plate',
+    chemicals:'AZ1512, Revelador MF319 (TMAH), Acetona, IPA, Agua DI',
+    poe:'POE-AMF-11 / POE-AMF-07', poeUrl:'https://drive.google.com/file/d/1gdjDQpXlEqagTnO0kjhudwAUEeew2y3V/view',
+    notes:'Proceso estándar de fotolitografía positiva. La AZ1512 es sensible a la luz UV (365 nm). Edge bead frecuente con sustratos flexibles. Verificar resolución con microscopio antes de continuar.',
+    pasos:[
+      {desc:'Limpieza de sustrato', params:'Acetona → IPA → DI water → N₂', equipo:'Wet Bench', tiempo:'5 min'},
+      {desc:'Deshidratación', params:'110 °C, 5 min', equipo:'Hot Plate', tiempo:'5 min'},
+      {desc:'Spin coating AZ1512', params:'500 rpm 5 s → 4000 rpm 30 s (ACL 015)', equipo:'Spinner Laurell', tiempo:'1 min'},
+      {desc:'Soft bake', params:'95 °C, 60 s', equipo:'Hot Plate', tiempo:'2 min'},
+      {desc:'Exposición UV', params:'365 nm, 75 mJ/cm²', equipo:'Mask Aligner OAI 204', tiempo:'~40 s'},
+      {desc:'Revelado MF319', params:'60 s, agitación suave', equipo:'Wet Bench', tiempo:'2 min'},
+      {desc:'Enjuague y secado', params:'DI water → N₂', equipo:'—', tiempo:'2 min'},
+      {desc:'Inspección óptica', params:'50× — verificar resolución y perfil', equipo:'Microscopio', tiempo:'10 min'},
+    ]
+  },
+  {
+    id:'PROC-002', nombre:'Litografía SU-8 — Molde para PDMS', cat:'Litografía', status:'activo',
+    equipos:'Spinner Laurell WS-650, Mask Aligner OAI 204, Hot Plate',
+    chemicals:'SU-8 2025/2150, SU-8 Developer (PGMEA), Acetona, IPA',
+    poe:'POE-AMF-04 / IT-AMF-07', poeUrl:'https://drive.google.com/file/d/1I-my-bAgeoT2408pnHXYBoC3z3GH-uvt/view',
+    notes:'Resina negativa de alta viscosidad. Precalentar 1 h fuera del refrigerador antes de usar. Proceso en 11 pasos. Crítico: PEB (post-exposure bake) entre 65–95 °C. El SU-8 Developer (PGMEA) es corrosivo — usar en campana.',
+    pasos:[
+      {desc:'Limpieza de sustrato', params:'Acetona → IPA → N₂', equipo:'Wet Bench', tiempo:'5 min'},
+      {desc:'Deshidratación', params:'200 °C, 5 min', equipo:'Hot Plate', tiempo:'5 min'},
+      {desc:'Deposición SU-8', params:'Verter directamente desde botella de trabajo', equipo:'—', tiempo:'1 min'},
+      {desc:'Spin coating SU-8', params:'500 rpm 10 s → 2000 rpm 30 s → 1000 rpm 5 s', equipo:'Spinner Laurell', tiempo:'1 min'},
+      {desc:'Pre-bake (soft bake)', params:'65 °C 1 min → 95 °C 5 min (rampa)', equipo:'Hot Plate', tiempo:'8 min'},
+      {desc:'Exposición UV', params:'365 nm, 200 mJ/cm² (SU-8 2025)', equipo:'Mask Aligner OAI 204', tiempo:'~2 min'},
+      {desc:'PEB (post-exposure bake)', params:'65 °C 1 min → 95 °C 5 min', equipo:'Hot Plate', tiempo:'8 min'},
+      {desc:'Revelado SU-8', params:'SU-8 Developer, 4–6 min agitación suave', equipo:'Wet Bench', tiempo:'6 min'},
+      {desc:'Enjuague IPA + N₂', params:'Si aparece precipitado blanquecino → sobre-revelar', equipo:'Wet Bench', tiempo:'2 min'},
+      {desc:'Hard bake (opcional)', params:'150 °C, 30 min', equipo:'Hot Plate/Horno', tiempo:'30 min'},
+      {desc:'Inspección óptica', params:'Verificar paredes verticales y adhesión', equipo:'Microscopio', tiempo:'10 min'},
+    ]
+  },
+  {
+    id:'PROC-003', nombre:'Sputtering Au/Cr/Ti — Deposición PVD DC', cat:'Deposición', status:'activo',
+    equipos:'Sputter Coater Quorum Q300TT (EQP-AMF-001), Bomba Edwards',
+    chemicals:'Acetona, IPA (limpieza previa); Target Au/Cr/Ti; Argón (gas proceso)',
+    poe:'POE-AMF-06', poeUrl:'https://drive.google.com/file/d/1574R-Hyxv7dLIj4n3ytWGnLXEeFicM-4/view',
+    notes:'Deposición PVD a temperatura ambiente. Para Au: usar shutter de acero inox para limpieza de cámara (plasma previo). Verificar vacío < 1×10⁻² mbar antes de abrir Argón. Target de Cu requiere mayor tiempo de presputtering.',
+    pasos:[
+      {desc:'Limpieza de sustrato', params:'Acetona → IPA → N₂', equipo:'Wet Bench', tiempo:'5 min'},
+      {desc:'Cargar muestra y target', params:'Verificar target correcto. Para Kapton: dos arandelas con cobre adhesivo', equipo:'Sputter Coater', tiempo:'5 min'},
+      {desc:'Encender bomba mecánica', params:'Esperar 2 min → cerrar gas balast', equipo:'Sputter Coater Q300TT', tiempo:'2 min'},
+      {desc:'Encender bomba difusora', params:'Esperar 20 min → registrar presión base', equipo:'Sputter Coater Q300TT', tiempo:'20 min'},
+      {desc:'Plasma de limpieza (presputtering)', params:'Shutter cerrado, Ar ~1×10⁻² mbar, 30–60 s', equipo:'Sputter Coater Q300TT', tiempo:'5 min'},
+      {desc:'Deposición', params:'Au: 20 mA, Ar 1×10⁻² mbar. Tiempo según espesor objetivo', equipo:'Sputter Coater Q300TT', tiempo:'variable'},
+      {desc:'Apagado y venteo', params:'Apagar fuente → cerrar Ar → apagar bomba difusora → apagar mecánica → ventilar', equipo:'Sputter Coater Q300TT', tiempo:'5 min'},
+    ]
+  },
+  {
+    id:'PROC-004', nombre:'Plasma Etching / RIE — Grabado seco y activación', cat:'Grabado', status:'activo',
+    equipos:'Plasma Etch PE-25 (EQP-AMF-002)',
+    chemicals:'Gases de proceso (O₂, CF₄, Ar); verificar SDS específico por gas',
+    poe:'POE-AMF-09 / IT-AMF-05', poeUrl:'https://drive.google.com/file/d/1FAYouEXZrWrRAymK10sf9eidRI_NqJ3t/view',
+    notes:'Usos principales: (1) Grabado seco de SiO₂, polímeros; (2) Activación de PDMS para bonding — O₂ 30 s para hidrofilizar. Target de acero inox para plasma de O₂. Verificar gases disponibles y presión antes de cada corrida.',
+    pasos:[
+      {desc:'Verificar gases y presiones', params:'Controlar válvulas y manómetros', equipo:'—', tiempo:'2 min'},
+      {desc:'Cargar muestra', params:'Colocar en porta-muestra. Verificar que la cámara esté limpia', equipo:'PE-25', tiempo:'3 min'},
+      {desc:'Purgar cámara', params:'Ciclo de vacío-N₂ × 2 para eliminar residuos', equipo:'PE-25', tiempo:'5 min'},
+      {desc:'Establecer vacío de proceso', params:'< 100 mTorr', equipo:'PE-25', tiempo:'5 min'},
+      {desc:'Abrir gas de proceso', params:'O₂ para activación PDMS: 1×10⁻² – 3×10⁻² mbar', equipo:'PE-25', tiempo:'1 min'},
+      {desc:'Proceso de plasma', params:'Activación PDMS: 30 s O₂. Grabado: ajustar según material y tasa', equipo:'PE-25', tiempo:'variable'},
+      {desc:'Ventilar y retirar muestra', params:'Cerrar gas → apagar RF → ventilar → extraer', equipo:'PE-25', tiempo:'3 min'},
+    ]
+  },
+  {
+    id:'PROC-005', nombre:'Soft Lithography — Réplica PDMS de molde SU-8', cat:'Molde/PDMS', status:'activo',
+    equipos:'Hot Plate / Horno, Plasma Etch PE-25 (para bonding), Balanza',
+    chemicals:'PDMS Sylgard 184 (base + curador 10:1), Acetona, IPA',
+    poe:'—', poeUrl:'',
+    notes:'Proceso de réplica estándar para microfluídica en PDMS. Relación base:curador 10:1 en peso. El desgasificado es crítico para evitar burbujas. Para bonding irreversible: activar PDMS y sustrato con O₂ plasma 30 s y unir inmediatamente.',
+    pasos:[
+      {desc:'Mezcla PDMS base:curador 10:1', params:'Pesar en balanza. Mezclar vigorosamente 5 min', equipo:'Balanza', tiempo:'10 min'},
+      {desc:'Desgasificado', params:'Vacío ≥ 30 min hasta desaparición de burbujas', equipo:'Desecador + vacío', tiempo:'30 min'},
+      {desc:'Verter sobre molde SU-8', params:'Altura ~5 mm. Evitar burbujas al verter', equipo:'—', tiempo:'5 min'},
+      {desc:'Curado térmico', params:'65 °C, 4 h mínimo (o 80 °C, 2 h para curado rápido)', equipo:'Horno / Hot Plate', tiempo:'4 h'},
+      {desc:'Desmolde', params:'Cortar con bisturí y despegar con pinzas. Verificar que los canales no colapsen', equipo:'—', tiempo:'10 min'},
+      {desc:'Punching de puertos', params:'Usar biopsy punch del diámetro adecuado', equipo:'—', tiempo:'5 min'},
+      {desc:'Activación y bonding (opcional)', params:'O₂ plasma 30 s → unir sobre vidrio/PDMS inmediatamente', equipo:'PE-25', tiempo:'5 min'},
+    ]
+  },
+  {
+    id:'PROC-006', nombre:'Wire Bonding — Conexión con hilo de Au 25 µm', cat:'Bonding', status:'activo',
+    equipos:'Wire Bonder TPT HB10 (EQP-AMF-003)',
+    chemicals:'Hilo de Au 25 µm (consumible); limpieza previa con IPA',
+    poe:'—', poeUrl:'',
+    notes:'Wedge & ball bonding con hilo de Au 25 µm. Verificar que los pads estén limpios (sin fotorresina ni contaminante). Temperatura del sustrato: 80–150 °C para Au sobre Au. Fuerza de bonding y tiempo ultrasónico críticos — requiere calibración previa.',
+    pasos:[
+      {desc:'Limpieza de pads', params:'IPA, verificar ausencia de residuos', equipo:'—', tiempo:'3 min'},
+      {desc:'Montar muestra en porta-sustrato', params:'Fijar con vacío o cinta de kapton según geometría', equipo:'Wire Bonder TPT HB10', tiempo:'3 min'},
+      {desc:'Verificar hilo y carrete', params:'Controlar que no haya bucles ni kinks en el hilo', equipo:'Wire Bonder TPT HB10', tiempo:'2 min'},
+      {desc:'Calibrar parámetros', params:'Fuerza, tiempo US, temperatura. Ver receta guardada para Au/Al pads', equipo:'Wire Bonder TPT HB10', tiempo:'5 min'},
+      {desc:'Ball bond (primer bond)', params:'Formar ball con EFO → posicionar en pad 1 → aplicar fuerza+US', equipo:'Wire Bonder TPT HB10', tiempo:'variable'},
+      {desc:'Loop y wedge bond (segundo bond)', params:'Arco de hilo → posicionar en pad 2 → romper hilo', equipo:'Wire Bonder TPT HB10', tiempo:'variable'},
+      {desc:'Inspección pull test (aleatorio)', params:'Verificar resistencia del bond con pull tester', equipo:'—', tiempo:'5 min'},
+    ]
+  },
+  {
+    id:'PROC-007', nombre:'Limpieza orgánica IPA-Acetona', cat:'Limpieza', status:'activo',
+    equipos:'Wet Bench Thorbrell (EQP-AMF-006/007), Baño ultrasónico',
+    chemicals:'Acetona, IPA (isopropanol), Agua DI, N₂',
+    poe:'sop_LIMPIEZA (Drive)', poeUrl:'https://docs.google.com/document/d/1Nud4FksqjPTAHmfwhpIyq5wRDj9diyDrIQyM3AGz_c0/edit',
+    notes:'Limpieza estándar para eliminar residuos orgánicos (aceites, resinas solubles, contaminación de sala gris). Los solventes dejan residuos propios → siempre en dos solventes. Descartar en contenedores etiquetados.',
+    pasos:[
+      {desc:'Preparar baño ultrasónico', params:'5 min, 100% potencia, T < 30 °C', equipo:'Baño ultrasónico', tiempo:'1 min'},
+      {desc:'Baño en acetona', params:'Sumergir muestra, 5 min con US', equipo:'Wet Bench + US', tiempo:'5 min'},
+      {desc:'Transferir a IPA', params:'Sin dejar secar entre solventes', equipo:'Wet Bench', tiempo:'5 min'},
+      {desc:'Enjuague DI water', params:'Enjuague generoso con agua ultrapura', equipo:'Wet Bench', tiempo:'2 min'},
+      {desc:'Secado N₂', params:'Pistola de N₂, flujo suave a moderado', equipo:'—', tiempo:'1 min'},
+      {desc:'Disposición de residuos', params:'Acetona e IPA en contenedores etiquetados "DESECHO SOLVENTES"', equipo:'—', tiempo:'1 min'},
+    ]
+  },
+  {
+    id:'PROC-008', nombre:'Ataque químico húmedo — Metales (Au/Cr)', cat:'Grabado', status:'activo',
+    equipos:'Wet Bench Thorbrell (EQP-AMF-007)',
+    chemicals:'Gold Etchant TFA (o KI/I₂), Chromium Etchant 1020AC, DI water, Acetona, IPA',
+    poe:'—', poeUrl:'',
+    notes:'Proceso para remover metales de zonas no protegidas por fotorresina. Gold Etchant (TFA): etch rate ~1 µm/min a 25 °C. Chromium Etchant 1020AC: etch rate variable. Siempre verificar el tiempo de ataque con una muestra de prueba.',
+    pasos:[
+      {desc:'Fotolitografía de máscara', params:'Proceso PROC-001 o similar', equipo:'—', tiempo:'(ver PROC-001)'},
+      {desc:'Preparar solución de ataque', params:'Gold Etchant TFA a temperatura de trabajo (25 °C)', equipo:'Wet Bench', tiempo:'5 min'},
+      {desc:'Ataque de Cr (si aplica)', params:'Chromium Etchant 1020AC, inmersión ~30–60 s', equipo:'Wet Bench', tiempo:'1 min'},
+      {desc:'Ataque de Au', params:'Gold Etchant TFA, monitorear color de la solución', equipo:'Wet Bench', tiempo:'variable'},
+      {desc:'Enjuague DI water', params:'Mínimo 3 ciclos de enjuague', equipo:'Wet Bench', tiempo:'3 min'},
+      {desc:'Strip de fotorresina', params:'Acetona (5 min) → IPA → DI water → N₂', equipo:'Wet Bench', tiempo:'10 min'},
+      {desc:'Inspección', params:'Verificar apertura del patrón bajo microscopio', equipo:'Microscopio', tiempo:'10 min'},
+    ]
+  },
+  {
+    id:'PROC-009', nombre:'PDMS Spin Coating — Membranas delgadas', cat:'Molde/PDMS', status:'activo',
+    equipos:'Spinner Laurell WS-650 (EQP-AMF-009), Horno / Hot Plate',
+    chemicals:'PDMS Sylgard 184 (10:1), Solvente de dilución opcional (hexano)',
+    poe:'—', poeUrl:'',
+    notes:'Para membranas de 5–50 µm: diluir PDMS en hexano o ciclohexano. A mayor velocidad → menor espesor. Curar a 80–100 °C. El spin coating de PDMS puede contaminar el bowl del spinner → usar cubierta de aluminio y oblea falsa.',
+    pasos:[
+      {desc:'Preparar PDMS', params:'Mezclar 10:1, desgasificar 30 min', equipo:'—', tiempo:'35 min'},
+      {desc:'Diluir si es necesario', params:'PDMS:hexano para < 20 µm objetivo', equipo:'—', tiempo:'5 min'},
+      {desc:'Spin coating PDMS', params:'500 rpm 5 s → [velocidad según espesor] 30–60 s', equipo:'Spinner Laurell', tiempo:'1 min'},
+      {desc:'Curado parcial', params:'80 °C, 20 min (pre-cure para facilitar peel-off)', equipo:'Hot Plate', tiempo:'20 min'},
+      {desc:'Curado completo', params:'100 °C, 2 h o 65 °C 4 h', equipo:'Horno', tiempo:'2–4 h'},
+      {desc:'Limpiar spinner', params:'Acetona, oblea falsa, limpiar bowl cuidadosamente', equipo:'Spinner Laurell', tiempo:'10 min'},
+    ]
+  },
+  {
+    id:'PROC-010', nombre:'Electrodeposición — Polímeros activos (polipirrol)', cat:'Electrodeposición', status:'desarrollo',
+    equipos:'Potenciostato / Galvanostato (celda externa), Hot Plate, Wet Bench',
+    chemicals:'Pirrol, LiClO₄, Acetonitrilo, Solución electrolítica, DI water',
+    poe:'—', poeUrl:'',
+    notes:'Crecimiento electroquímico de polipirrol sobre electrodos de Au. Condiciones típicas: galvanostático 0.1 mA/cm², solución 0.1 M pirrol + 0.1 M LiClO₄ en acetonitrilo. El crecimiento es proporcional a la carga eléctrica aplicada.',
+    pasos:[
+      {desc:'Preparar electrolito', params:'0.1 M pirrol + 0.1 M LiClO₄ en acetonitrilo; desgasificar con N₂ 15 min', equipo:'—', tiempo:'20 min'},
+      {desc:'Montar celda electroquímica', params:'Electrodo trabajo (Au), referencia (Ag/AgCl), contraelectrodo (Pt)', equipo:'—', tiempo:'5 min'},
+      {desc:'Limpieza anódica del electrodo', params:'+1.2 V vs Ag/AgCl, 30 s en buffer PBS', equipo:'Potenciostato', tiempo:'1 min'},
+      {desc:'Electrodeposición', params:'Galvanostático: 0.1 mA/cm², t según espesor objetivo', equipo:'Potenciostato', tiempo:'variable'},
+      {desc:'Enjuague', params:'DI water × 3, secar con N₂', equipo:'—', tiempo:'3 min'},
+      {desc:'Caracterización', params:'CV en buffer PBS: verificar actividad redox del polipirrol', equipo:'Potenciostato', tiempo:'10 min'},
+    ]
+  },
+];
+
+function initProcesos() {
+  if (procesos.length === 0) {
+    procesos = JSON.parse(JSON.stringify(PROCESOS_DEFAULT));
+    procesoCounter = procesos.length;
+  }
+}
+
+const procCatColor = {
+  'Litografía':'blue', 'Deposición':'purple', 'Grabado':'amber',
+  'Molde/PDMS':'teal', 'Limpieza':'muted', 'Bonding':'green',
+  'Electrodeposición':'accent', 'Otro':'muted'
+};
+const procStatusLabel = { activo:'Activo', desarrollo:'En desarrollo', pausado:'Pausado', obsoleto:'Obsoleto' };
+const procStatusColor = { activo:'green', desarrollo:'blue', pausado:'muted', obsoleto:'muted' };
+
+function renderProcesos() {
+  initProcesos();
+  const filterCat = document.getElementById('proc-filter-cat')?.value || '';
+  const list = filterCat ? procesos.filter(p => p.cat === filterCat) : procesos;
+  const tbody = document.getElementById('proc-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = list.map(p => {
+    const catColor = procCatColor[p.cat] || 'muted';
+    const stColor = procStatusColor[p.status] || 'muted';
+    const poeLink = p.poeUrl
+      ? `<a href="${p.poeUrl}" target="_blank" style="font-family:var(--mono);font-size:10px;color:var(--accent);font-weight:600;white-space:nowrap">${p.poe||'Ver ↗'} ↗</a>`
+      : (p.poe ? `<span style="font-family:var(--mono);font-size:10px;color:var(--muted)">${p.poe}</span>` : '<span style="color:var(--muted);font-size:11px">—</span>');
+    const chemList = (p.chemicals||'').split(',').slice(0,3).map(c => `<span style="font-size:10px;color:var(--amber)">⚠ ${c.trim()}</span>`).join('<br>');
+    return `<tr style="cursor:pointer" onclick="openProcDetail('${p.id}')">
+      <td><strong>${p.nombre}</strong></td>
+      <td><span class="badge ${catColor}">${p.cat}</span></td>
+      <td style="font-family:var(--mono)">${(p.pasos||[]).length} pasos</td>
+      <td style="color:var(--muted);font-size:12px">${p.equipos||'—'}</td>
+      <td style="font-size:11px;line-height:1.8">${chemList||'—'}</td>
+      <td>${poeLink}</td>
+      <td><span class="badge ${stColor}">${procStatusLabel[p.status]||p.status}</span></td>
+      <td onclick="event.stopPropagation()" style="white-space:nowrap">
+        <button class="btn" style="font-size:10px;padding:3px 8px" onclick="openProcModal('${p.id}')">Editar</button>
+        <button class="btn" style="font-size:10px;padding:3px 8px;color:var(--red)" onclick="deleteProceso('${p.id}')">✕</button>
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">Sin procesos cargados.</td></tr>';
+}
+
+function openProcDetail(id) {
+  initProcesos();
+  const p = procesos.find(x => x.id === id);
+  if (!p) return;
+  currentProcId = id;
+  document.getElementById('proc-detail-title').textContent = p.nombre;
+  const catColor = procCatColor[p.cat] || 'muted';
+  document.getElementById('proc-detail-poe').innerHTML = p.poeUrl
+    ? `<a href="${p.poeUrl}" target="_blank" class="btn" style="font-size:11px;color:var(--accent);font-weight:600;text-decoration:none">📄 ${p.poe||'SOP'} ↗</a>` : '';
+  document.getElementById('proc-detail-meta').innerHTML = `
+    <span><span class="badge ${catColor}">${p.cat}</span></span>
+    <span style="color:var(--muted)">Equipos: <strong style="color:var(--text)">${p.equipos||'—'}</strong></span>
+    <span style="color:var(--amber)">HDS: <strong>${p.chemicals||'—'}</strong></span>
+    <span><span class="badge ${procStatusColor[p.status]||'muted'}">${procStatusLabel[p.status]||p.status}</span></span>`;
+  const stepsHtml = (p.pasos||[]).map((s,i) =>
+    `<tr>
+      <td style="font-family:var(--mono);color:var(--muted)">${String(i+1).padStart(2,'0')}</td>
+      <td><strong>${s.desc}</strong></td>
+      <td style="color:var(--muted);font-size:12px">${s.params||'—'}</td>
+      <td style="color:var(--muted)">${s.equipo||'—'}</td>
+      <td style="font-family:var(--mono)">${s.tiempo||'—'}</td>
+    </tr>`).join('');
+  document.getElementById('proc-detail-steps').innerHTML = stepsHtml || '<tr><td colspan="5" style="color:var(--muted)">Sin pasos cargados.</td></tr>';
+  const notesEl = document.getElementById('proc-detail-notes');
+  if (p.notes) { notesEl.textContent = '💡 ' + p.notes; notesEl.style.display = ''; }
+  else notesEl.style.display = 'none';
+  document.getElementById('proc-detail-panel').style.display = '';
+  document.getElementById('proc-detail-panel').scrollIntoView({behavior:'smooth', block:'start'});
+}
+function closeProcDetail() {
+  document.getElementById('proc-detail-panel').style.display = 'none';
+  currentProcId = null;
+}
+
+function openProcModal(id) {
+  initProcesos();
+  procStepCount = 0;
+  document.getElementById('proc-steps-list').innerHTML = '';
+  if (id) {
+    const p = procesos.find(x => x.id === id);
+    if (!p) return;
+    document.getElementById('proc-modal-title').textContent = 'Editar proceso';
+    document.getElementById('proc-edit-id').value = p.id;
+    document.getElementById('proc-name').value = p.nombre;
+    document.getElementById('proc-cat').value = p.cat;
+    document.getElementById('proc-status').value = p.status;
+    document.getElementById('proc-equips').value = p.equipos||'';
+    document.getElementById('proc-chemicals').value = p.chemicals||'';
+    document.getElementById('proc-poe').value = p.poe||'';
+    document.getElementById('proc-poe-url').value = p.poeUrl||'';
+    document.getElementById('proc-notes').value = p.notes||'';
+    (p.pasos||[]).forEach(s => addProcStep(s));
+  } else {
+    document.getElementById('proc-modal-title').textContent = 'Nuevo proceso';
+    document.getElementById('proc-edit-id').value = '';
+    ['proc-name','proc-equips','proc-chemicals','proc-poe','proc-poe-url','proc-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('proc-cat').value = 'Litografía';
+    document.getElementById('proc-status').value = 'activo';
+    addProcStep(); // empezar con un paso vacío
+  }
+  document.getElementById('proc-modal-bg').style.display = 'flex';
+}
+function closeProcModal() { document.getElementById('proc-modal-bg').style.display = 'none'; }
+document.addEventListener('DOMContentLoaded', function() {
+  const bg = document.getElementById('proc-modal-bg');
+  if (bg) bg.addEventListener('click', function(e){ if(e.target===this) closeProcModal(); });
+});
+
+function addProcStep(data) {
+  procStepCount++;
+  const idx = procStepCount;
+  const d = data || {};
+  document.getElementById('proc-steps-list').insertAdjacentHTML('beforeend', `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:6px;align-items:center;background:var(--surface2);padding:8px;border-radius:7px" id="proc-step-${idx}">
+      <input type="text" placeholder="Descripción del paso" value="${d.desc||''}" data-field="desc" data-step="${idx}" style="background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:6px 8px;border-radius:5px;font-size:12px">
+      <input type="text" placeholder="Parámetros" value="${d.params||''}" data-field="params" data-step="${idx}" style="background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:6px 8px;border-radius:5px;font-size:12px">
+      <input type="text" placeholder="Equipo" value="${d.equipo||''}" data-field="equipo" data-step="${idx}" style="background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:6px 8px;border-radius:5px;font-size:12px">
+      <input type="text" placeholder="Tiempo" value="${d.tiempo||''}" data-field="tiempo" data-step="${idx}" style="background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:6px 8px;border-radius:5px;font-size:12px">
+      <button onclick="document.getElementById('proc-step-${idx}').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px">✕</button>
+    </div>`);
+}
+
+function saveProceso() {
+  const nombre = document.getElementById('proc-name').value.trim();
+  if (!nombre) { alert('El nombre del proceso es obligatorio.'); return; }
+  const pasos = [];
+  document.querySelectorAll('#proc-steps-list > div').forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    pasos.push({
+      desc: inputs[0].value.trim(),
+      params: inputs[1].value.trim(),
+      equipo: inputs[2].value.trim(),
+      tiempo: inputs[3].value.trim(),
+    });
+  });
+  const editId = document.getElementById('proc-edit-id').value;
+  const proc = {
+    id: editId || 'PROC-' + String(++procesoCounter).padStart(3,'0'),
+    nombre, cat: document.getElementById('proc-cat').value,
+    status: document.getElementById('proc-status').value,
+    equipos: document.getElementById('proc-equips').value.trim(),
+    chemicals: document.getElementById('proc-chemicals').value.trim(),
+    poe: document.getElementById('proc-poe').value.trim(),
+    poeUrl: document.getElementById('proc-poe-url').value.trim(),
+    notes: document.getElementById('proc-notes').value.trim(),
+    pasos
+  };
+  if (editId) {
+    const idx = procesos.findIndex(p => p.id === editId);
+    if (idx >= 0) procesos[idx] = proc;
+  } else {
+    procesos.push(proc);
+  }
+  saveAll();
+  closeProcModal();
+  renderProcesos();
+  if (editId === currentProcId) openProcDetail(editId);
+}
+
+function deleteProceso(id) {
+  if (!confirm('¿Eliminar este proceso?')) return;
+  procesos = procesos.filter(p => p.id !== id);
+  saveAll();
+  renderProcesos();
+  if (currentProcId === id) closeProcDetail();
+}
+// ════════════════════════════════════
 
 // ═══════════ QUICK REGISTER CON IA ═══════════
 let qrAuthor = 'Emanuel Capra';
