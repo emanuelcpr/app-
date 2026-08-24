@@ -158,6 +158,76 @@
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: rgba(37,99,235,0.03); }
 
+  /* PROCESOS — panel UI */
+  .proc-layout { display: grid; grid-template-columns: 290px 1fr; gap: 16px; align-items: start; }
+  .proc-list-wrap { position: sticky; top: 0; }
+  .proc-search {
+    width: 100%; box-sizing: border-box;
+    background: var(--surface2); border: 1px solid var(--border2); color: var(--text);
+    padding: 8px 10px; border-radius: 7px; font-size: 12px; margin-bottom: 10px;
+    font-family: var(--font);
+  }
+  .proc-search::placeholder { color: var(--muted); }
+  .proc-search:focus { outline: none; border-color: var(--accent); }
+  .proc-cat-pills { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+  .proc-pill {
+    font-size: 10.5px; padding: 3px 9px; border-radius: 99px; cursor: pointer;
+    border: 1px solid var(--border2); color: var(--muted); background: var(--surface2);
+    transition: all 0.12s; user-select: none; white-space: nowrap;
+  }
+  .proc-pill:hover { border-color: var(--accent); color: var(--accent); }
+  .proc-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .proc-list { display: flex; flex-direction: column; gap: 3px; max-height: 520px; overflow-y: auto; }
+  .proc-list-item {
+    padding: 9px 10px; border-radius: 8px; cursor: pointer;
+    border: 1px solid transparent; transition: all 0.12s;
+  }
+  .proc-list-item:hover { background: var(--surface2); border-color: var(--border2); }
+  .proc-list-item.selected { background: var(--accent-dim); border-color: var(--accent); }
+  .proc-list-item .proc-item-name { font-size: 12px; font-weight: 600; line-height: 1.35; color: var(--text); }
+  .proc-list-item .proc-item-meta { display: flex; gap: 6px; align-items: center; margin-top: 4px; }
+  .proc-list-item .proc-item-cat { font-size: 10px; color: var(--muted); }
+  .proc-status-dot {
+    width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+  }
+  .proc-status-dot.activo { background: var(--green); }
+  .proc-status-dot.desarrollo { background: var(--amber); }
+  .proc-status-dot.pausado { background: var(--muted); }
+  .proc-status-dot.obsoleto { background: var(--red); }
+  /* Ficha técnica */
+  .proc-ficha-header {
+    padding: 18px 20px 14px; border-bottom: 1px solid var(--border);
+  }
+  .proc-ficha-nombre { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.3; margin-bottom: 8px; text-wrap: balance; }
+  .proc-ficha-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+  .proc-ficha-meta {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    padding: 14px 20px; border-bottom: 1px solid var(--border);
+  }
+  .proc-meta-item { font-size: 12px; }
+  .proc-meta-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); font-weight: 600; margin-bottom: 3px; }
+  .proc-meta-value { color: var(--text); line-height: 1.4; }
+  .proc-ficha-steps { padding: 14px 20px 0; }
+  .proc-step-row { display: grid; grid-template-columns: 28px 1fr 1.2fr auto auto; gap: 10px; align-items: start; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .proc-step-row:last-child { border-bottom: none; }
+  .proc-step-num { font-family: var(--mono); font-size: 11px; color: var(--muted); font-weight: 600; padding-top: 1px; }
+  .proc-step-desc { font-size: 12.5px; font-weight: 600; color: var(--text); }
+  .proc-step-params { font-size: 11.5px; color: var(--muted); font-family: var(--mono); line-height: 1.5; }
+  .proc-step-equip { font-size: 11px; color: var(--muted); text-align: right; white-space: nowrap; }
+  .proc-step-tiempo { font-size: 11px; color: var(--accent); font-family: var(--mono); text-align: right; white-space: nowrap; }
+  .proc-notes-box {
+    margin: 12px 20px 20px; padding: 10px 14px;
+    background: var(--surface2); border-radius: 8px; border-left: 3px solid var(--amber);
+    font-size: 12px; color: var(--muted); line-height: 1.6;
+  }
+  @media (max-width: 800px) {
+    .proc-layout { grid-template-columns: 1fr; }
+    .proc-list-wrap { position: static; }
+    .proc-ficha-meta { grid-template-columns: 1fr; }
+    .proc-step-row { grid-template-columns: 24px 1fr 1fr; }
+    .proc-step-equip, .proc-step-tiempo { display: none; }
+  }
+
   /* BADGES */
   .badge {
     display: inline-flex; align-items: center; gap: 4px;
@@ -1529,56 +1599,29 @@
     <div class="section" id="sec-procesos">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
         <div>
-          <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px">Biblioteca de procesos</div>
-          <div style="font-size:13px;color:var(--muted)">Flujos de fabricación del AMF — seleccioná uno para ver el detalle</div>
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px">Biblioteca de procesos</div>
+          <div style="font-size:13px;color:var(--muted)">Flujos de fabricación AMF — seleccioná un proceso para ver su ficha técnica</div>
         </div>
-        <div style="display:flex;gap:8px">
-          <select id="proc-filter-cat" onchange="renderProcesos()" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:6px 10px;border-radius:7px;font-size:12px">
-            <option value="">Todas las categorías</option>
-            <option value="Litografía">Litografía</option>
-            <option value="Deposición">Deposición</option>
-            <option value="Grabado">Grabado</option>
-            <option value="Molde/PDMS">Molde/PDMS</option>
-            <option value="Limpieza">Limpieza</option>
-            <option value="Bonding">Bonding</option>
-            <option value="Electrodeposición">Electrodeposición</option>
-            <option value="Otro">Otro</option>
-          </select>
-          <button class="btn btn-primary" onclick="openProcModal()">+ Nuevo proceso</button>
-        </div>
+        <button class="btn btn-primary" onclick="openProcModal()">+ Nuevo proceso</button>
       </div>
-      <!-- Tabla dinámica -->
-      <div class="card" style="margin-bottom:16px">
-        <div class="card-body" style="padding:0">
-          <div id="proc-table-wrap" style="overflow-x:auto">
-            <table id="proc-table">
-              <thead><tr><th>Proceso</th><th>Categoría</th><th>Pasos</th><th>Equipos</th><th>Químicos/HDS</th><th>POE/SOP</th><th>Estado</th><th>Acciones</th></tr></thead>
-              <tbody id="proc-tbody"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- Panel de detalle del proceso seleccionado -->
-      <div id="proc-detail-panel" style="display:none">
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title" id="proc-detail-title"></span>
-            <div class="card-actions">
-              <span id="proc-detail-poe" style="font-size:12px;color:var(--muted)"></span>
-              <button class="btn" onclick="closeProcDetail()" style="font-size:11px">✕ Cerrar</button>
+      <div class="proc-layout">
+        <!-- Panel izquierdo: lista navegable -->
+        <div class="proc-list-wrap">
+          <div class="card">
+            <div class="card-body" style="padding:12px">
+              <input id="proc-search" class="proc-search" type="text" placeholder="Buscar proceso..." oninput="renderProcesos()">
+              <div id="proc-cat-pills" class="proc-cat-pills"></div>
+              <div id="proc-list" class="proc-list"></div>
             </div>
           </div>
-          <div class="card-body">
-            <div id="proc-detail-meta" style="display:flex;gap:24px;margin-bottom:14px;flex-wrap:wrap;font-size:13px;color:var(--muted)"></div>
-            <div style="font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;color:var(--muted)">Pasos del proceso</div>
-            <div style="overflow-x:auto">
-              <table>
-                <thead><tr><th>#</th><th>Paso</th><th>Parámetros</th><th>Equipo</th><th>Tiempo</th></tr></thead>
-                <tbody id="proc-detail-steps"></tbody>
-              </table>
+        </div>
+        <!-- Panel derecho: ficha técnica -->
+        <div id="proc-detail-panel">
+          <div class="card">
+            <div class="card-body" style="text-align:center;padding:60px 20px;color:var(--muted)">
+              <div style="font-size:36px;margin-bottom:12px;opacity:0.4">⚗️</div>
+              <div style="font-size:13px">Seleccioná un proceso de la lista para ver su ficha técnica</div>
             </div>
-            <div id="proc-detail-notes" style="margin-top:12px;font-size:12px;color:var(--muted);line-height:1.6;background:var(--surface2);padding:10px 14px;border-radius:8px;display:none"></div>
           </div>
         </div>
       </div>
@@ -3081,6 +3124,7 @@
               <option value="Limpieza">Limpieza</option>
               <option value="Bonding">Bonding</option>
               <option value="Electrodeposición">Electrodeposición</option>
+              <option value="BioMEMS">BioMEMS</option>
               <option value="Otro">Otro</option>
             </select>
           </div>
@@ -4496,18 +4540,152 @@ const PROCESOS_DEFAULT = [
     ]
   },
   {
-    id:'PROC-010', nombre:'Electrodeposición — Polímeros activos (polipirrol)', cat:'Electrodeposición', status:'desarrollo',
-    equipos:'Potenciostato / Galvanostato (celda externa), Hot Plate, Wet Bench',
-    chemicals:'Pirrol, LiClO₄, Acetonitrilo, Solución electrolítica, DI water',
+    id:'PROC-010', nombre:'Electrodeposición — Polímeros conductores (polipirrol)', cat:'Electrodeposición', status:'desarrollo',
+    equipos:'Potenciostato/Galvanostato (celda externa), Hot Plate, Wet Bench',
+    chemicals:'Pirrol, LiClO₄, Acetonitrilo, PBS, DI water',
     poe:'—', poeUrl:'',
-    notes:'Crecimiento electroquímico de polipirrol sobre electrodos de Au. Condiciones típicas: galvanostático 0.1 mA/cm², solución 0.1 M pirrol + 0.1 M LiClO₄ en acetonitrilo. El crecimiento es proporcional a la carga eléctrica aplicada.',
+    notes:'Crecimiento electroquímico de polipirrol (PPy) sobre electrodos de Au. Condiciones típicas: galvanostático 0.1 mA/cm², solución 0.1 M pirrol + 0.1 M LiClO₄ en ACN. El espesor es proporcional a la carga eléctrica total aplicada (~1 µm por 5 mC/cm²).',
     pasos:[
       {desc:'Preparar electrolito', params:'0.1 M pirrol + 0.1 M LiClO₄ en acetonitrilo; desgasificar con N₂ 15 min', equipo:'—', tiempo:'20 min'},
-      {desc:'Montar celda electroquímica', params:'Electrodo trabajo (Au), referencia (Ag/AgCl), contraelectrodo (Pt)', equipo:'—', tiempo:'5 min'},
-      {desc:'Limpieza anódica del electrodo', params:'+1.2 V vs Ag/AgCl, 30 s en buffer PBS', equipo:'Potenciostato', tiempo:'1 min'},
-      {desc:'Electrodeposición', params:'Galvanostático: 0.1 mA/cm², t según espesor objetivo', equipo:'Potenciostato', tiempo:'variable'},
+      {desc:'Montar celda electroquímica', params:'WE: electrodo Au; RE: Ag/AgCl; CE: Pt wire o malla', equipo:'—', tiempo:'5 min'},
+      {desc:'Limpieza electroquímica del Au', params:'+1.2 V vs Ag/AgCl, 30 s en PBS pH 7.4', equipo:'Potenciostato', tiempo:'1 min'},
+      {desc:'Electrodeposición galvanostática', params:'j = 0.1 mA/cm², Q objetivo ≈ 5–50 mC/cm² según espesor', equipo:'Potenciostato', tiempo:'variable'},
       {desc:'Enjuague', params:'DI water × 3, secar con N₂', equipo:'—', tiempo:'3 min'},
-      {desc:'Caracterización', params:'CV en buffer PBS: verificar actividad redox del polipirrol', equipo:'Potenciostato', tiempo:'10 min'},
+      {desc:'Caracterización CV', params:'Ventana −0.6 a +0.8 V vs Ag/AgCl en PBS, 50 mV/s; verificar picos redox a −0.2 V', equipo:'Potenciostato', tiempo:'10 min'},
+    ]
+  },
+  // ─── BioMEMS ───────────────────────────────────────────────────────────────
+  {
+    id:'PROC-011', nombre:'Biosensor electroquímico — SAM + inmunosensor en Au', cat:'BioMEMS', status:'activo',
+    equipos:'Potenciostato, Wet Bench, Campana BSL-2, Agitador orbital, Refrigerador 4 °C',
+    chemicals:'11-MHA (ácido 11-mercaptoundecanoico) o MUA, EDC (0.4 M), NHS (0.1 M), PBS pH 7.4, etanol absoluto, BSA 1%, anticuerpo/aptámero objetivo',
+    poe:'—', poeUrl:'',
+    notes:'Construcción de inmunosensor de afinidad sobre Au. El éxito depende de la calidad del SAM: el Au debe estar recién depositado o limpiado con plasma. La incubación overnight a 4 °C es preferida. EDC/NHS tiene vida útil de 30 min una vez mezclados — preparar al momento.',
+    pasos:[
+      {desc:'Limpieza del electrodo de Au', params:'Plasma O₂ 60 s o limpieza electroquímica (+1.2 V, 30 s en H₂SO₄ 0.5 M)', equipo:'PE-25 / Potenciostato', tiempo:'5 min'},
+      {desc:'Formación de SAM (monocapa autoensamblada)', params:'Inmersión en 1 mM 11-MHA en etanol absoluto, overnight 4 °C, oscuridad', equipo:'—', tiempo:'16 h'},
+      {desc:'Enjuague post-SAM', params:'Etanol absoluto × 3 → PBS pH 7.4 × 3; secar N₂ suave', equipo:'—', tiempo:'5 min'},
+      {desc:'Activación EDC/NHS', params:'0.4 M EDC + 0.1 M NHS en PBS, 30 min RT — preparar fresh y cubrir electrodos', equipo:'—', tiempo:'30 min'},
+      {desc:'Incubación de bioreceptor', params:'Anticuerpo/aptámero 50–100 µg/mL en PBS, 2 h RT o 4 °C overnight', equipo:'Agitador orbital', tiempo:'2 h'},
+      {desc:'Bloqueo con BSA', params:'BSA 1% en PBS, 1 h RT para inactivar grupos NHS residuales', equipo:'—', tiempo:'60 min'},
+      {desc:'Enjuague final', params:'PBS × 5 por inmersión; conservar en PBS 4 °C hasta uso (max 7 días)', equipo:'—', tiempo:'5 min'},
+      {desc:'Caracterización EIS + CV', params:'CV: −0.2 a +0.6 V, 50 mV/s en [Fe(CN)₆]³⁻/⁴⁻ 5 mM + KCl 0.1 M; EIS: 100 kHz–0.1 Hz, 10 mVrms', equipo:'Potenciostato', tiempo:'20 min'},
+    ]
+  },
+  {
+    id:'PROC-012', nombre:'Microfluídica PDMS — Chip para cultivo celular', cat:'BioMEMS', status:'activo',
+    equipos:'Spinner Laurell, Mask Aligner OAI 204, PE-25, Horno, Bomba de jeringa, Microscopio, Campana BSL-2',
+    chemicals:'SU-8 2025/2050, PDMS Sylgard 184 (10:1), fibronectina 50 µg/mL, DMEM/F12 + 10% FBS, PBS, etanol 70%',
+    poe:'—', poeUrl:'',
+    notes:'Chip de microfluídica de una capa para cultivo en microcanales (200–500 µm ancho, 50–100 µm alto). El coating con fibronectina mejora la adhesión celular. Flujo recomendado para HeLa/HUVEC: 0.1–1 µL/min (~0.01–0.1 dyn/cm²). Esterilizar con UV 30 min antes de inocular.',
+    pasos:[
+      {desc:'Fabricar molde SU-8', params:'Proceso PROC-002 — altura 50–100 µm, revelado completo verificado', equipo:'(ver PROC-002)', tiempo:'(ver PROC-002)'},
+      {desc:'Silanizar molde (anti-sticking)', params:'TMCS o FOTS en campana; vapor 10 min sobre molde SU-8 a RT', equipo:'Campana', tiempo:'15 min'},
+      {desc:'Preparar PDMS 10:1', params:'Mezclar vigorosamente 5 min; desgasificar 45 min en vacío', equipo:'Desecador + vacío', tiempo:'50 min'},
+      {desc:'Verter y curar PDMS', params:'Altura ~5 mm sobre molde; 65 °C 4 h o 80 °C 2 h', equipo:'Horno', tiempo:'4 h'},
+      {desc:'Desmolde y punching de puertos', params:'Biopsy punch 1 mm (entradas) y 1.5 mm (salidas); verificar geometría bajo microscopio', equipo:'—', tiempo:'15 min'},
+      {desc:'Bonding PDMS-vidrio', params:'O₂ plasma 30–45 s a 50 W sobre PDMS y vidrio → unir inmediatamente, presión suave uniforme', equipo:'PE-25', tiempo:'5 min'},
+      {desc:'Post-bond bake', params:'80 °C 30 min para reforzar bonding covalente', equipo:'Horno', tiempo:'30 min'},
+      {desc:'Coating de fibronectina', params:'Fluir fibronectina 50 µg/mL en PBS; incubar 1 h RT; enjuagar con PBS x3', equipo:'Bomba de jeringa', tiempo:'90 min'},
+      {desc:'Esterilización pre-cultivo', params:'UV 30 min en campana; enjuagar con etanol 70% → PBS x3', equipo:'Campana BSL-2', tiempo:'45 min'},
+      {desc:'Sembrar células', params:'1×10⁵ cells/mL; flujo 0.5 µL/min; dejar asentar 4 h estático antes de flow', equipo:'Bomba de jeringa', tiempo:'4+ h'},
+    ]
+  },
+  {
+    id:'PROC-013', nombre:'Microagujas poliméricas — Molde SU-8 + replicado', cat:'BioMEMS', status:'desarrollo',
+    equipos:'Spinner Laurell, Mask Aligner OAI 204, Horno, Microscopio SEM/óptico',
+    chemicals:'SU-8 2100 (alta viscosidad), SU-8 Developer, PDMS Sylgard 184, polivinilalcohol (PVA) o PLGA',
+    poe:'—', poeUrl:'',
+    notes:'Fabricación de microagujas de aspecto alto (relación AR ≥ 10:1, típico 300 µm alto × 30 µm base) para administración transdérmica. El SU-8 2100 requiere una rampa de temperatura muy lenta para evitar cracking. La capa de sacrificio (dextrano o PVA) es necesaria para el desmolde si las agujas son poliméricas sólidas.',
+    pasos:[
+      {desc:'Dejar atemperar SU-8 2100', params:'Fuera del refrigerador 4 h antes de usar; proteger de luz UV', equipo:'—', tiempo:'4 h'},
+      {desc:'Limpieza y deshidratación del sustrato', params:'Acetona → IPA → 200 °C 5 min', equipo:'Hot Plate', tiempo:'10 min'},
+      {desc:'Spin coating SU-8 2100', params:'500 rpm 10 s → 1000–1500 rpm 30 s → rampa suave. Altura: 200–400 µm', equipo:'Spinner Laurell', tiempo:'2 min'},
+      {desc:'Soft bake en rampa', params:'65 °C 15 min → 95 °C 45–90 min (rampa 2 °C/min). No acelerar — riesgo de crack', equipo:'Hot Plate', tiempo:'90 min'},
+      {desc:'Exposición UV fraccional', params:'200–300 mJ/cm² en 3 dosis separadas 5 min para aliviar tensiones', equipo:'Mask Aligner OAI 204', tiempo:'20 min'},
+      {desc:'PEB (post-exposure bake)', params:'65 °C 5 min → 95 °C 20 min; enfriar a 65 °C antes de sacar de placa', equipo:'Hot Plate', tiempo:'30 min'},
+      {desc:'Revelado SU-8 Developer', params:'8–15 min con agitación suave; enjuagar IPA; verificar precipitado', equipo:'Wet Bench', tiempo:'15 min'},
+      {desc:'Hard bake', params:'150 °C 30 min; enfriar lentamente en placa caliente apagada', equipo:'Hot Plate/Horno', tiempo:'60 min'},
+      {desc:'Replicado en PDMS (si es molde)', params:'PDMS 10:1 desgasificado; curar 80 °C 2 h; desmolde con pinzas cuidadosamente', equipo:'Horno', tiempo:'3 h'},
+      {desc:'Caracterización dimensional', params:'SEM o microscopio óptico: medir altura, base, ángulo de flanco y verticalidad', equipo:'Microscopio / SEM', tiempo:'30 min'},
+    ]
+  },
+  {
+    id:'PROC-014', nombre:'Microgotas — Encapsulamiento en alginato de calcio', cat:'BioMEMS', status:'activo',
+    equipos:'Bomba de jeringa, chip microfluídico (flujo cruzado), Microscopio, Agitador, Campana BSL-2',
+    chemicals:'Alginato de sodio 1.5–2% (w/v) en PBS, CaCl₂ 100 mM, aceite mineral o fluorinert FC-40, Span 80 2% (surfactante), DMEM, células en suspensión',
+    poe:'—', poeUrl:'',
+    notes:'Encapsulamiento de células en microgotas de alginato por gelificación iónica. El diámetro de la gota se controla con el caudal Q_agua/Q_aceite (típico 1:5 a 1:20). Gelificación ocurre en el collector con CaCl₂. La viabilidad celular depende de la velocidad de gelificación — < 2 min es crítico.',
+    pasos:[
+      {desc:'Preparar solución de alginato', params:'1.5% (w/v) en PBS; esterilizar filtro 0.22 µm; mantener 37 °C para disminuir viscosidad', equipo:'Campana BSL-2', tiempo:'30 min'},
+      {desc:'Preparar fase oleosa', params:'Aceite mineral + Span 80 2%; mezclar hasta homogeneidad; desgasificar', equipo:'—', tiempo:'15 min'},
+      {desc:'Montar chip y jeringuillas', params:'Chip de flujo cruzado (PDMS); jeringas de 1 mL en bombas; purgar con aceite primero', equipo:'Bomba de jeringa', tiempo:'10 min'},
+      {desc:'Establecer caudales', params:'Q_aceite: 5–20 µL/min; Q_alginato: 1–3 µL/min; verificar tamaño de gota bajo microscopio (50–200 µm)', equipo:'Microscopio', tiempo:'10 min'},
+      {desc:'Resuspender células en alginato', params:'1–5×10⁶ cells/mL en solución de alginato; cargar jeringa inmediatamente', equipo:'Campana BSL-2', tiempo:'5 min'},
+      {desc:'Colectar gotas en CaCl₂', params:'Collector con CaCl₂ 100 mM; agitación suave; gelificación 5–10 min', equipo:'Agitador orbital', tiempo:'10 min'},
+      {desc:'Lavar y transferir cápsulas', params:'PBS × 3; suspender en medio de cultivo DMEM + 10% FBS; verificar viabilidad (Trypan Blue)', equipo:'Campana BSL-2', tiempo:'15 min'},
+    ]
+  },
+  {
+    id:'PROC-015', nombre:'PEDOT:PSS — Electrodos conductores biocompatibles', cat:'BioMEMS', status:'desarrollo',
+    equipos:'Spinner Laurell, Hot Plate, Potenciostato, UV-ozone o plasma',
+    chemicals:'PEDOT:PSS Clevios PH1000, DMSO 5% (v/v), H₂SO₄ 98%, etanol, adhesión promotor (GOPS 1% o PEI 0.1%)',
+    poe:'—', poeUrl:'',
+    notes:'PEDOT:PSS dopado con DMSO 5% aumenta la conductividad eléctrica ×100 (de ~1 S/cm a ~1000 S/cm). El post-tratamiento con H₂SO₄ (ácido sulfúrico concentrado, 15 min) remueve el exceso de PSS y mejora aún más la conductividad. Biocompatible para electrodos de estimulación/registro neural.',
+    pasos:[
+      {desc:'Preparar PEDOT:PSS + DMSO', params:'Clevios PH1000 + 5% DMSO (v/v); mezclar suavemente overnight; filtrar 0.45 µm', equipo:'—', tiempo:'12 h (prep)'},
+      {desc:'Activar sustrato', params:'Plasma O₂ 60 s para hidrofilizar; o APTES/PEI 0.1% 10 min para adhesión sobre SiO₂/vidrio', equipo:'PE-25', tiempo:'5 min'},
+      {desc:'Spin coating PEDOT:PSS', params:'500 rpm 5 s → 1000–2000 rpm 60 s; repite ×2–3 para capas más gruesas (100–200 nm/capa)', equipo:'Spinner Laurell', tiempo:'5 min × capas'},
+      {desc:'Annealing', params:'120 °C 20 min en N₂ o vacío; no superar 150 °C (degradación PSS)', equipo:'Hot Plate', tiempo:'20 min'},
+      {desc:'Post-tratamiento H₂SO₄ (opcional)', params:'Inmersión en H₂SO₄ 98%, 15 min; enjuagar exhaustivamente con DI water × 10', equipo:'Campana química', tiempo:'30 min'},
+      {desc:'Caracterización eléctrica', params:'Medir resistencia 4 puntas (TLM); σ objetivo > 500 S/cm; medir por CV en PBS la ventana electroquímica y carga de inyección', equipo:'Potenciostato / multímetro', tiempo:'30 min'},
+    ]
+  },
+  {
+    id:'PROC-016', nombre:'Silanización — Funcionalización covalente de vidrio/SiO₂', cat:'BioMEMS', status:'activo',
+    equipos:'Campana química, Horno de vacío, Agitador orbital, Wet Bench',
+    chemicals:'APTES (3-aminopropiltrietoxisilano) 1–5%, glutaraldehído 2.5%, H₂O₂ 30%, H₂SO₄ 98%, etanol absoluto, tolueno anhidro (si silanización en solvente), DI water',
+    poe:'—', poeUrl:'',
+    notes:'La silanización con APTES introduce grupos -NH₂ sobre vidrio/SiO₂ que permiten enlazar proteínas, anticuerpos o ácidos nucleicos vía glutaraldehído. La solución Piranha (H₂SO₄:H₂O₂ 3:1) activa la superficie — EXTREMADAMENTE PELIGROSA — usar escudo facial, guantes de nitrilo doble, en campana. Piranha reacciona violentamente con orgánicos.',
+    pasos:[
+      {desc:'Limpieza piranha (PELIGROSO)', params:'H₂SO₄:H₂O₂ 3:1 (piranha); preparar en campana; inmersión 30 min; enjuagar DI ×5; nunca guardar sobrante', equipo:'Campana química', tiempo:'45 min'},
+      {desc:'Silanización APTES', params:'APTES 3% en etanol/agua (95:5), 30–60 min agitación suave RT; o 1% APTES en tolueno anhidro 2 h', equipo:'Agitador', tiempo:'60 min'},
+      {desc:'Enjuague post-silanización', params:'Etanol absoluto × 3 → DI water × 2; secar suavemente con N₂', equipo:'—', tiempo:'10 min'},
+      {desc:'Curing térmico', params:'120 °C, 30–60 min en horno de vacío para condensar silanol y estabilizar la capa', equipo:'Horno vacío', tiempo:'60 min'},
+      {desc:'Activación con glutaraldehído', params:'GA 2.5% en PBS pH 7.4, 1 h RT; enjuagar PBS ×3 — genera bases de Schiff con proteínas', equipo:'—', tiempo:'70 min'},
+      {desc:'Inmovilizar biomolécula', params:'Proteína/anticuerpo 50–200 µg/mL en PBS, 2 h RT o 4 °C overnight; enjuagar PBS ×3', equipo:'—', tiempo:'2+ h'},
+      {desc:'Bloqueo y verificación', params:'BSA 1% o caseína 0.5%, 1 h; verificar funcionalización con fluorescencia (proteína marcada)', equipo:'Microscopio de fluorescencia', tiempo:'70 min'},
+    ]
+  },
+  {
+    id:'PROC-017', nombre:'Cultivo en chip — Órgano en chip (OoC) simple', cat:'BioMEMS', status:'desarrollo',
+    equipos:'Bomba de jeringa, Incubadora CO₂ 37 °C/5%, Microscopio de fluorescencia, Campana BSL-2',
+    chemicals:'Matrigel o colágeno I 2 mg/mL, DMEM/RPMI + suero, PBS, azul de tripano, células primarias o línea celular',
+    poe:'—', poeUrl:'',
+    notes:'Plataforma de órgano en chip para modelos fisiológicos bajo flujo controlado. El shear stress fisiológico endotelial (HUVEC) es ~1–10 dyn/cm² (Q ≈ 1–30 µL/min en canales de 200 µm × 50 µm). Matrigel gelifica a 37 °C — mantener frío durante la manipulación. La monitorización diaria con microscopía de contraste de fase es esencial.',
+    pasos:[
+      {desc:'Preparar chip microfluídico', params:'PROC-012 completo; coating fibronectina o colágeno I 2 mg/mL 1 h 37 °C', equipo:'(ver PROC-012)', tiempo:'(ver PROC-012)'},
+      {desc:'Sembrar células en chip', params:'1–2×10⁵ cells/mL; inyectar 20 µL; incubar estático 4–6 h para adhesión', equipo:'Campana BSL-2', tiempo:'6 h'},
+      {desc:'Iniciar perfusión', params:'DMEM/RPMI + 10% FBS; Q = 0.5–5 µL/min según τ objetivo; usar tubos de silicona estéril', equipo:'Bomba de jeringa', tiempo:'continuo'},
+      {desc:'Monitorización diaria', params:'Microscopía de contraste de fase: confluencia, morfología, alineación con flujo; cambio de medio cada 24–48 h', equipo:'Microscopio', tiempo:'diario'},
+      {desc:'Ensayo de viabilidad', params:'Calcein-AM (vivas, verde) + PI (muertas, rojo); 30 min a 37 °C; lavar PBS ×2 antes de imagen', equipo:'Microscopio fluorescencia', tiempo:'60 min'},
+      {desc:'Fijación y tinción (punto final)', params:'PFA 4% 15 min RT; PBS × 3; permeabilizar Triton 0.1% 10 min; DAPI + faloidina-488; montar con Fluoromount-G', equipo:'Campana BSL-2', tiempo:'3 h'},
+    ]
+  },
+  {
+    id:'PROC-018', nombre:'EIS — Espectroscopía de impedancia de biosensores', cat:'BioMEMS', status:'activo',
+    equipos:'Potenciostato con módulo EIS/FRA, celda electroquímica de 3 electrodos, Faraday cage',
+    chemicals:'[Fe(CN)₆]³⁻/⁴⁻ 5 mM en KCl 0.1 M (solución redox), PBS pH 7.4, analito objetivo',
+    poe:'—', poeUrl:'',
+    notes:'Técnica de caracterización no destructiva de biosensores. Mide el cambio en la resistencia de transferencia de carga (Rct) al unirse el analito al bioreceptor. Modelo de Randles: Rct crece con la inmovilización de cada capa (SAM → proteína → analito). Usar Faraday cage para evitar ruido eléctrico. El rango de frecuencia 100 kHz–0.1 Hz cubre capacitancia de doble capa y difusión.',
+    pasos:[
+      {desc:'Preparar solución redox', params:'[Fe(CN)₆]³⁻/⁴⁻ 5 mM + KCl 0.1 M en PBS pH 7.4; filtrar 0.22 µm; conservar en oscuridad', equipo:'—', tiempo:'10 min'},
+      {desc:'Montar celda en Faraday cage', params:'WE: electrodo biosensor; RE: Ag/AgCl 3M KCl; CE: Pt o grafito; verificar que no haya burbujas', equipo:'—', tiempo:'5 min'},
+      {desc:'CV de caracterización basal', params:'−0.2 a +0.6 V vs Ag/AgCl, 50 mV/s, 3 ciclos; verificar picos redox estables', equipo:'Potenciostato', tiempo:'5 min'},
+      {desc:'EIS basal (sin analito)', params:'E_dc = +0.22 V (E½ del par redox); ΔE = 10 mVrms; rango 100 kHz–0.1 Hz; 10 puntos/década', equipo:'Potenciostato + FRA', tiempo:'10 min'},
+      {desc:'Incubar con analito', params:'Concentración de trabajo en PBS; 30–60 min a RT; enjuagar con PBS × 2 sin secar totalmente', equipo:'—', tiempo:'60 min'},
+      {desc:'EIS post-analito', params:'Mismos parámetros que basal; comparar Rct y Warburg — señal: ΔRct/Rct,basal (%)', equipo:'Potenciostato + FRA', tiempo:'10 min'},
+      {desc:'Análisis y ajuste', params:'Ajustar circuito equivalente Randles (Rs + Rct//CPE + Zw) con software (ZSimpWin, EC-Lab o ZView)', equipo:'PC', tiempo:'20 min'},
     ]
   },
 ];
@@ -4519,41 +4697,49 @@ function initProcesos() {
   }
 }
 
-const procCatColor = {
-  'Litografía':'blue', 'Deposición':'purple', 'Grabado':'amber',
-  'Molde/PDMS':'teal', 'Limpieza':'muted', 'Bonding':'green',
-  'Electrodeposición':'accent', 'Otro':'muted'
+let activeProcCat = '';
+
+const STATUS_LABELS = {activo:'Activo', desarrollo:'En desarrollo', pausado:'Pausado', obsoleto:'Obsoleto'};
+const STATUS_BADGE  = {activo:'green',  desarrollo:'amber',         pausado:'muted',   obsoleto:'red'};
+const CAT_ICONS     = {
+  'Litografía':'◈', 'Deposición':'⬡', 'Grabado':'◬', 'Molde/PDMS':'⬟',
+  'Limpieza':'◎', 'Bonding':'⬢', 'Electrodeposición':'⏣', 'BioMEMS':'⬡', 'Otro':'◇'
 };
-const procStatusLabel = { activo:'Activo', desarrollo:'En desarrollo', pausado:'Pausado', obsoleto:'Obsoleto' };
-const procStatusColor = { activo:'green', desarrollo:'blue', pausado:'muted', obsoleto:'muted' };
+
+function setProcCat(cat) {
+  activeProcCat = cat;
+  renderProcesos();
+}
 
 function renderProcesos() {
   initProcesos();
-  const filterCat = document.getElementById('proc-filter-cat')?.value || '';
-  const list = filterCat ? procesos.filter(p => p.cat === filterCat) : procesos;
-  const tbody = document.getElementById('proc-tbody');
-  if (!tbody) return;
-  tbody.innerHTML = list.map(p => {
-    const catColor = procCatColor[p.cat] || 'muted';
-    const stColor = procStatusColor[p.status] || 'muted';
-    const poeLink = p.poeUrl
-      ? `<a href="${p.poeUrl}" target="_blank" style="font-family:var(--mono);font-size:10px;color:var(--accent);font-weight:600;white-space:nowrap">${p.poe||'Ver ↗'} ↗</a>`
-      : (p.poe ? `<span style="font-family:var(--mono);font-size:10px;color:var(--muted)">${p.poe}</span>` : '<span style="color:var(--muted);font-size:11px">—</span>');
-    const chemList = (p.chemicals||'').split(',').slice(0,3).map(c => `<span style="font-size:10px;color:var(--amber)">⚠ ${c.trim()}</span>`).join('<br>');
-    return `<tr style="cursor:pointer" onclick="openProcDetail('${p.id}')">
-      <td><strong>${p.nombre}</strong></td>
-      <td><span class="badge ${catColor}">${p.cat}</span></td>
-      <td style="font-family:var(--mono)">${(p.pasos||[]).length} pasos</td>
-      <td style="color:var(--muted);font-size:12px">${p.equipos||'—'}</td>
-      <td style="font-size:11px;line-height:1.8">${chemList||'—'}</td>
-      <td>${poeLink}</td>
-      <td><span class="badge ${stColor}">${procStatusLabel[p.status]||p.status}</span></td>
-      <td onclick="event.stopPropagation()" style="white-space:nowrap">
-        <button class="btn" style="font-size:10px;padding:3px 8px" onclick="openProcModal('${p.id}')">Editar</button>
-        <button class="btn" style="font-size:10px;padding:3px 8px;color:var(--red)" onclick="deleteProceso('${p.id}')">✕</button>
-      </td>
-    </tr>`;
-  }).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">Sin procesos cargados.</td></tr>';
+  const q = (document.getElementById('proc-search')?.value || '').toLowerCase();
+
+  const cats = [...new Set(procesos.map(p => p.cat))];
+  const pillsEl = document.getElementById('proc-cat-pills');
+  if (pillsEl) {
+    pillsEl.innerHTML =
+      `<span class="proc-pill ${activeProcCat===''?'active':''}" onclick="setProcCat('')">Todos</span>` +
+      cats.map(c => `<span class="proc-pill ${activeProcCat===c?'active':''}" onclick="setProcCat(${JSON.stringify(c)})">${c}</span>`).join('');
+  }
+
+  const filtered = procesos.filter(p => {
+    if (activeProcCat && p.cat !== activeProcCat) return false;
+    if (q && !p.nombre.toLowerCase().includes(q) && !p.cat.toLowerCase().includes(q) && !p.id.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  const listEl = document.getElementById('proc-list');
+  if (!listEl) return;
+  listEl.innerHTML = filtered.length ? filtered.map(p => `
+    <div class="proc-list-item ${currentProcId===p.id?'selected':''}" onclick="openProcDetail(${JSON.stringify(p.id)})">
+      <div class="proc-item-name">${p.nombre}</div>
+      <div class="proc-item-meta">
+        <span class="proc-item-cat">${CAT_ICONS[p.cat]||'◇'} ${p.cat}</span>
+        <span class="proc-status-dot ${p.status}"></span>
+      </div>
+    </div>
+  `).join('') : '<div style="font-size:12px;color:var(--muted);padding:8px 0">Sin resultados.</div>';
 }
 
 function openProcDetail(id) {
@@ -4561,34 +4747,72 @@ function openProcDetail(id) {
   const p = procesos.find(x => x.id === id);
   if (!p) return;
   currentProcId = id;
-  document.getElementById('proc-detail-title').textContent = p.nombre;
-  const catColor = procCatColor[p.cat] || 'muted';
-  document.getElementById('proc-detail-poe').innerHTML = p.poeUrl
-    ? `<a href="${p.poeUrl}" target="_blank" class="btn" style="font-size:11px;color:var(--accent);font-weight:600;text-decoration:none">📄 ${p.poe||'SOP'} ↗</a>` : '';
-  document.getElementById('proc-detail-meta').innerHTML = `
-    <span><span class="badge ${catColor}">${p.cat}</span></span>
-    <span style="color:var(--muted)">Equipos: <strong style="color:var(--text)">${p.equipos||'—'}</strong></span>
-    <span style="color:var(--amber)">HDS: <strong>${p.chemicals||'—'}</strong></span>
-    <span><span class="badge ${procStatusColor[p.status]||'muted'}">${procStatusLabel[p.status]||p.status}</span></span>`;
-  const stepsHtml = (p.pasos||[]).map((s,i) =>
-    `<tr>
-      <td style="font-family:var(--mono);color:var(--muted)">${String(i+1).padStart(2,'0')}</td>
-      <td><strong>${s.desc}</strong></td>
-      <td style="color:var(--muted);font-size:12px">${s.params||'—'}</td>
-      <td style="color:var(--muted)">${s.equipo||'—'}</td>
-      <td style="font-family:var(--mono)">${s.tiempo||'—'}</td>
-    </tr>`).join('');
-  document.getElementById('proc-detail-steps').innerHTML = stepsHtml || '<tr><td colspan="5" style="color:var(--muted)">Sin pasos cargados.</td></tr>';
-  const notesEl = document.getElementById('proc-detail-notes');
-  if (p.notes) { notesEl.textContent = '💡 ' + p.notes; notesEl.style.display = ''; }
-  else notesEl.style.display = 'none';
-  document.getElementById('proc-detail-panel').style.display = '';
-  document.getElementById('proc-detail-panel').scrollIntoView({behavior:'smooth', block:'start'});
+
+  const poeLink = p.poeUrl
+    ? `<a href="${p.poeUrl}" target="_blank" style="color:var(--accent);text-decoration:none;font-size:12px">${p.poe||'Ver SOP →'}</a>`
+    : (p.poe ? `<span style="font-size:12px">${p.poe}</span>` : '');
+
+  const stepsHtml = (p.pasos||[]).map((s,i) => `
+    <div class="proc-step-row">
+      <div class="proc-step-num">${String(i+1).padStart(2,'0')}</div>
+      <div><div class="proc-step-desc">${s.desc}</div></div>
+      <div class="proc-step-params">${s.params||'—'}</div>
+      <div class="proc-step-equip">${s.equipo||'—'}</div>
+      <div class="proc-step-tiempo">${s.tiempo||'—'}</div>
+    </div>
+  `).join('') || '<div style="color:var(--muted);font-size:12px;padding:8px 0">Sin pasos cargados.</div>';
+
+  document.getElementById('proc-detail-panel').innerHTML = `
+    <div class="card">
+      <div class="proc-ficha-header">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+          <div class="proc-ficha-nombre">${p.nombre}</div>
+          <div style="display:flex;gap:6px;flex-shrink:0">
+            <button class="btn" style="font-size:11px" onclick="openProcModal(${JSON.stringify(p.id)})">Editar</button>
+            <button class="btn" style="font-size:11px;color:var(--red)" onclick="deleteProceso(${JSON.stringify(p.id)})">Eliminar</button>
+          </div>
+        </div>
+        <div class="proc-ficha-badges">
+          <span class="badge ${STATUS_BADGE[p.status]||'muted'}">${STATUS_LABELS[p.status]||p.status}</span>
+          <span class="badge blue">${p.cat}</span>
+          <span class="badge muted">${p.id}</span>
+          ${poeLink}
+        </div>
+      </div>
+      <div class="proc-ficha-meta">
+        <div class="proc-meta-item">
+          <div class="proc-meta-label">Equipos</div>
+          <div class="proc-meta-value">${p.equipos||'—'}</div>
+        </div>
+        <div class="proc-meta-item">
+          <div class="proc-meta-label">Químicos / HDS</div>
+          <div class="proc-meta-value">${p.chemicals||'—'}</div>
+        </div>
+      </div>
+      <div class="proc-ficha-steps">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);font-weight:600;margin-bottom:8px;display:grid;grid-template-columns:28px 1fr 1.2fr auto auto;gap:10px">
+          <span>#</span><span>Paso</span><span>Parámetros</span><span style="text-align:right">Equipo</span><span style="text-align:right">Tiempo</span>
+        </div>
+        ${stepsHtml}
+      </div>
+      ${p.notes ? `<div class="proc-notes-box">⚠ ${p.notes}</div>` : '<div style="height:16px"></div>'}
+    </div>
+  `;
+  renderProcesos();
 }
+
 function closeProcDetail() {
-  document.getElementById('proc-detail-panel').style.display = 'none';
   currentProcId = null;
+  document.getElementById('proc-detail-panel').innerHTML = `
+    <div class="card">
+      <div class="card-body" style="text-align:center;padding:60px 20px;color:var(--muted)">
+        <div style="font-size:36px;margin-bottom:12px;opacity:0.4">⚗️</div>
+        <div style="font-size:13px">Seleccioná un proceso de la lista para ver su ficha técnica</div>
+      </div>
+    </div>`;
+  renderProcesos();
 }
+
 
 function openProcModal(id) {
   initProcesos();
@@ -4671,8 +4895,7 @@ function saveProceso() {
   }
   saveAll();
   closeProcModal();
-  renderProcesos();
-  if (editId === currentProcId) openProcDetail(editId);
+  openProcDetail(proc.id);
 }
 
 function deleteProceso(id) {
