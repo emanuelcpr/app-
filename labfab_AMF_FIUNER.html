@@ -3129,7 +3129,7 @@
     </div>
 
     <!-- MODAL: Quick Register con IA -->
-    <div id="qr-modal-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;align-items:flex-start;justify-content:center;padding-top:48px;overflow-y:auto">
+    <div id="qria-modal-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;align-items:flex-start;justify-content:center;padding-top:48px;overflow-y:auto">
       <div style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:28px;width:640px;max-width:96vw;margin-bottom:48px">
 
         <!-- Encabezado -->
@@ -3145,7 +3145,7 @@
         <!-- Selector de autor -->
         <div style="margin-top:16px;margin-bottom:12px">
           <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:6px">¿Quién registra?</label>
-          <div style="display:flex;gap:8px;flex-wrap:wrap" id="qr-author-btns">
+          <div style="display:flex;gap:8px;flex-wrap:wrap" id="qria-author-btns">
             <button class="cat-btn active" onclick="setQrAuthor('Emanuel Capra',this)">Emanuel Capra</button>
             <button class="cat-btn" onclick="setQrAuthor('Hernán Rodríguez',this)">Hernán Rodríguez</button>
             <button class="cat-btn" onclick="setQrAuthor('Tomás Tesarik',this)">Tomás Tesarik</button>
@@ -3156,24 +3156,24 @@
         <!-- Área de texto libre -->
         <div style="margin-bottom:14px">
           <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:6px">¿Qué hiciste hoy?</label>
-          <textarea id="qr-input" rows="5" placeholder="Ej: Hoy hice sputtering de oro con Tomás en el Quorum. Tardamos unas 2 horas, procesamos 3 sustratos de silicio. Todo salió bien, los espesores se ven buenos. Después limpié con acetona e IPA en la estación 687." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:12px;border-radius:8px;font-family:var(--font);font-size:13px;resize:vertical;line-height:1.6"></textarea>
+          <textarea id="qria-input" rows="5" placeholder="Ej: Hoy hice sputtering de oro con Tomás en el Quorum. Tardamos unas 2 horas, procesamos 3 sustratos de silicio. Todo salió bien, los espesores se ven buenos. Después limpié con acetona e IPA en la estación 687." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:12px;border-radius:8px;font-family:var(--font);font-size:13px;resize:vertical;line-height:1.6"></textarea>
           <div style="font-size:11px;color:var(--muted);margin-top:4px">Podés mencionar equipos, procesos, personas, materiales, duración, resultados, problemas — cuanto más detalle, mejor.</div>
         </div>
 
-        <button class="btn btn-primary" style="width:100%;padding:10px;font-size:13px" onclick="aiQuickRegister()" id="qr-interpret-btn">✨ Interpretar y sugerir registros</button>
+        <button class="btn btn-primary" style="width:100%;padding:10px;font-size:13px" onclick="aiQuickRegister()" id="qria-interpret-btn">✨ Interpretar y sugerir registros</button>
 
         <!-- Preview de registros interpretados -->
-        <div id="qr-preview" style="display:none;margin-top:20px">
-          <div style="font-size:12px;color:var(--muted);margin-bottom:4px" id="qr-interpretation-text"></div>
+        <div id="qria-preview" style="display:none;margin-top:20px">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:4px" id="qria-interpretation-text"></div>
           <div style="border-top:1px solid var(--border);margin:10px 0"></div>
           <div style="font-size:12px;font-weight:600;margin-bottom:10px;color:var(--text)">Registros a crear — marcá los que querés confirmar:</div>
-          <div id="qr-records-list" style="display:flex;flex-direction:column;gap:8px"></div>
+          <div id="qria-records-list" style="display:flex;flex-direction:column;gap:8px"></div>
 
           <div style="display:flex;gap:8px;margin-top:18px">
             <button class="btn btn-primary" style="flex:1;padding:10px" onclick="confirmQuickRegister()">✓ Confirmar seleccionados</button>
             <button class="btn" onclick="resetQuickRegister()">← Volver a editar</button>
           </div>
-          <div id="qr-confirm-msg" style="margin-top:10px;font-size:12px;display:none"></div>
+          <div id="qria-confirm-msg" style="margin-top:10px;font-size:12px;display:none"></div>
         </div>
 
       </div>
@@ -4365,30 +4365,30 @@ Consumibles: swipes, papel aluminio, guantes nitrilo, pinzas, sustratos de silic
 
 function setQrAuthor(name, btn) {
   qrAuthor = name;
-  document.querySelectorAll('#qr-author-btns .cat-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#qria-author-btns .cat-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
 }
 
 function openQuickRegister() {
-  document.getElementById('qr-input').value = '';
-  document.getElementById('qr-preview').style.display = 'none';
-  document.getElementById('qr-confirm-msg').style.display = 'none';
-  document.getElementById('qr-modal-bg').style.display = 'flex';
+  document.getElementById('qria-input').value = '';
+  document.getElementById('qria-preview').style.display = 'none';
+  document.getElementById('qria-confirm-msg').style.display = 'none';
+  document.getElementById('qria-modal-bg').style.display = 'flex';
 }
 
 function closeQuickRegister() {
-  document.getElementById('qr-modal-bg').style.display = 'none';
+  document.getElementById('qria-modal-bg').style.display = 'none';
 }
 
 function resetQuickRegister() {
-  document.getElementById('qr-preview').style.display = 'none';
-  document.getElementById('qr-confirm-msg').style.display = 'none';
+  document.getElementById('qria-preview').style.display = 'none';
+  document.getElementById('qria-confirm-msg').style.display = 'none';
 }
 
 async function aiQuickRegister() {
-  const text = document.getElementById('qr-input').value.trim();
+  const text = document.getElementById('qria-input').value.trim();
   if (!text) { alert('Describí al menos brevemente lo que hiciste.'); return; }
-  const btn = document.getElementById('qr-interpret-btn');
+  const btn = document.getElementById('qria-interpret-btn');
   setAiLoading(btn, true);
 
   const hoy = new Date().toISOString().slice(0,10);
@@ -4463,10 +4463,10 @@ Reglas:
     const parsed = JSON.parse(clean.slice(j1, j2+1));
     qrParsedRecords = parsed.registros || [];
 
-    document.getElementById('qr-interpretation-text').textContent = '💬 ' + (parsed.interpretacion || '');
+    document.getElementById('qria-interpretation-text').textContent = '💬 ' + (parsed.interpretacion || '');
     renderQrRecords();
-    document.getElementById('qr-preview').style.display = '';
-    document.getElementById('qr-confirm-msg').style.display = 'none';
+    document.getElementById('qria-preview').style.display = '';
+    document.getElementById('qria-confirm-msg').style.display = 'none';
   } catch(e) {
     alert('Error al interpretar: ' + e.message + '\nIntentá con una descripción más detallada.');
   }
@@ -4480,7 +4480,7 @@ const qrTipoLabel = {
 const qrTipoColor = { sesion_equipo:'blue', stock_consumo:'green', residuo:'amber' };
 
 function renderQrRecords() {
-  const list = document.getElementById('qr-records-list');
+  const list = document.getElementById('qria-records-list');
   list.innerHTML = qrParsedRecords.map((r, i) => {
     const sc = qrTipoColor[r.tipo] || 'muted';
     let detail = '';
@@ -4508,7 +4508,7 @@ function renderQrRecords() {
 }
 
 function confirmQuickRegister() {
-  const checkboxes = document.querySelectorAll('#qr-records-list input[type=checkbox]');
+  const checkboxes = document.querySelectorAll('#qria-records-list input[type=checkbox]');
   const hoy = new Date().toISOString().slice(0,10);
   const hora = new Date().toLocaleTimeString('es-AR', {hour:'2-digit',minute:'2-digit'});
   let created = 0;
@@ -4562,7 +4562,7 @@ function confirmQuickRegister() {
   renderHistory();
   renderWaste();
 
-  const msg = document.getElementById('qr-confirm-msg');
+  const msg = document.getElementById('qria-confirm-msg');
   msg.style.display = '';
   msg.style.color = 'var(--green)';
   msg.textContent = `✓ ${created} registro(s) creado(s) correctamente.`;
