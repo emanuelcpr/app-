@@ -3207,54 +3207,6 @@
       </div>
     </div>
 
-    <!-- MODAL: Quick Register con IA -->
-    <div id="qr-ai-modal-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;align-items:center;justify-content:center">
-      <div style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:28px;width:600px;max-width:96vw;max-height:92vh;overflow-y:auto;display:flex;flex-direction:column;gap:16px">
-        <div style="display:flex;align-items:center;gap:12px">
-          <span style="font-size:24px">✨</span>
-          <div>
-            <div style="font-weight:700;font-size:16px">Registrar con IA</div>
-            <div style="font-size:12px;color:var(--muted)">Describí lo que hiciste en lenguaje libre y la IA interpretará los registros.</div>
-          </div>
-          <button onclick="closeQrAiModal()" style="margin-left:auto;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
-        </div>
-
-        <!-- Autor -->
-        <div>
-          <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:6px">Autor del registro</label>
-          <div style="display:flex;gap:6px;flex-wrap:wrap" id="qrai-author-btns">
-            <button class="btn" onclick="setQraiAuthor('Emanuel Capra')" id="qrai-btn-ec" style="font-size:12px">Emanuel Capra</button>
-            <button class="btn" onclick="setQraiAuthor('Hernán Rodríguez')" id="qrai-btn-hr" style="font-size:12px">Hernán Rodríguez</button>
-            <button class="btn" onclick="setQraiAuthor('Tomás Tesarik')" id="qrai-btn-tt" style="font-size:12px">Tomás Tesarik</button>
-            <button class="btn" onclick="setQraiAuthor('Dr. Gastón Miño')" id="qrai-btn-gm" style="font-size:12px">Dr. Gastón Miño</button>
-          </div>
-        </div>
-
-        <!-- Texto libre -->
-        <div>
-          <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:6px">¿Qué hiciste hoy?</label>
-          <textarea id="qrai-text" rows="5" placeholder="Ej: Hoy hice dos corridas de sputtering de cromo con el Quorum, tardé como 3 horas en total. Después limpié con acetona 50 mL en el wet bench. Generé ese residuo de acetona también." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:10px 12px;border-radius:8px;font-size:13px;resize:vertical;line-height:1.5"></textarea>
-        </div>
-
-        <button class="btn btn-primary" id="qrai-analyze-btn" onclick="aiQuickRegister()" style="width:100%;font-size:14px;padding:12px">✨ Analizar con IA</button>
-
-        <!-- Preview de registros sugeridos -->
-        <div id="qrai-preview" style="display:none;flex-direction:column;gap:10px">
-          <div style="font-size:12px;color:var(--muted);border-top:1px solid var(--border2);padding-top:14px">
-            <span id="qrai-interpretation" style="font-style:italic"></span>
-          </div>
-          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px">Registros sugeridos — seleccioná los que querés guardar:</div>
-          <div id="qrai-records-list" style="display:flex;flex-direction:column;gap:8px"></div>
-          <div style="display:flex;gap:8px;margin-top:6px">
-            <button class="btn btn-primary" style="flex:1" onclick="confirmQraiRecords()">Guardar seleccionados</button>
-            <button class="btn" onclick="closeQrAiModal()">Cancelar</button>
-          </div>
-        </div>
-
-        <div id="qrai-status" style="font-size:12px;color:var(--muted);text-align:center;display:none"></div>
-      </div>
-    </div>
-
     <!-- MODAL: Importar referencias con IA -->
     <div id="ai-import-refs-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:400;align-items:center;justify-content:center">
       <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:28px;width:600px;max-width:96vw;max-height:90vh;overflow-y:auto">
@@ -4505,8 +4457,10 @@ Reglas:
   if (!result) return;
 
   try {
-    const clean = result.replace(/```json?/g,'').replace(/```/g,'').trim();
-    const parsed = JSON.parse(clean);
+    const clean = result.replace(/^```(?:json)?\s*/i,'').replace(/\s*```\s*$/,'').trim();
+    const j1 = clean.indexOf('{'), j2 = clean.lastIndexOf('}');
+    if (j1 === -1 || j2 === -1) throw new Error('Sin JSON en la respuesta.');
+    const parsed = JSON.parse(clean.slice(j1, j2+1));
     qrParsedRecords = parsed.registros || [];
 
     document.getElementById('qr-interpretation-text').textContent = '💬 ' + (parsed.interpretacion || '');
@@ -4514,7 +4468,7 @@ Reglas:
     document.getElementById('qr-preview').style.display = '';
     document.getElementById('qr-confirm-msg').style.display = 'none';
   } catch(e) {
-    alert('No se pudo interpretar la respuesta. Intentá con una descripción más detallada.');
+    alert('Error al interpretar: ' + e.message + '\nIntentá con una descripción más detallada.');
   }
 }
 
@@ -4849,184 +4803,6 @@ function copyAiReport() {
   navigator.clipboard.writeText(text).then(() => alert('Informe copiado al portapapeles.'));
 }
 
-// ═══════════ QUICK REGISTER CON IA ═══════════
-let qraiAuthor = 'Emanuel Capra';
-let qraiParsed = [];
-
-function openQuickRegister() {
-  document.getElementById('qrai-text').value = '';
-  document.getElementById('qrai-preview').style.display = 'none';
-  document.getElementById('qrai-status').style.display = 'none';
-  document.getElementById('qrai-records-list').innerHTML = '';
-  setQraiAuthor(qraiAuthor);
-  document.getElementById('qr-ai-modal-bg').style.display = 'flex';
-}
-function closeQrAiModal() {
-  document.getElementById('qr-ai-modal-bg').style.display = 'none';
-}
-document.addEventListener('DOMContentLoaded', function() {
-  const bg = document.getElementById('qr-ai-modal-bg');
-  if (bg) bg.addEventListener('click', function(e){ if(e.target===this) closeQrAiModal(); });
-});
-
-function setQraiAuthor(name) {
-  qraiAuthor = name;
-  ['ec','hr','tt','gm'].forEach(k => {
-    const b = document.getElementById('qrai-btn-'+k);
-    if (b) b.style.borderColor = '';
-  });
-  const map = {'Emanuel Capra':'ec','Hernán Rodríguez':'hr','Tomás Tesarik':'tt','Dr. Gastón Miño':'gm'};
-  const btn = document.getElementById('qrai-btn-'+map[name]);
-  if (btn) btn.style.borderColor = 'var(--green)';
-}
-
-async function aiQuickRegister() {
-  const text = document.getElementById('qrai-text').value.trim();
-  if (!text) { alert('Describí lo que hiciste primero.'); return; }
-  const btn = document.getElementById('qrai-analyze-btn');
-  const status = document.getElementById('qrai-status');
-  btn.disabled = true; btn.textContent = '⏳ Analizando...';
-  status.style.display = 'block'; status.textContent = 'Enviando a Gemini...';
-
-  const today = new Date().toISOString().slice(0,10);
-  const prompt = `Sos el asistente de registro del AMF FIUNER (Área de Microfabricación, Universidad Nacional de Entre Ríos, Argentina).
-
-El usuario "${qraiAuthor}" describió en lenguaje libre las tareas que realizó hoy (${today}):
-"""
-${text}
-"""
-
-Equipos disponibles:
-- EQP-AMF-001: Sputter Coater (Quorum Tech Q300TT) — deposición de metales
-- EQP-AMF-002: Plasma Etch (PE-25) — grabado por plasma seco
-- EQP-AMF-003: Wire Bonder (TPT HB16) — bonding de hilos
-- EQP-AMF-004: Alineador OAI 204 — fotolitografía UV
-- EQP-AMF-005: Purificador Thermo Fisher — purificación de agua
-- EQP-AMF-006: Wet Bench Thorbrell #1 — limpieza química
-- EQP-AMF-007: Wet Bench Thorbrell #2 — revelado/grabado
-- EQP-AMF-008: Bomba Edwards — vacío
-- EQP-AMF-009: Spin Processor (Laurell WS-650) — spin coating de fotorresinas
-
-Personal: Emanuel Capra, Hernán Rodríguez, Tomás Tesarik, Dr. Gastón Miño.
-
-Retorná ÚNICAMENTE un JSON válido con esta estructura exacta (sin markdown, sin explicación, solo el JSON):
-{
-  "interpretacion": "Resumen en 1-2 oraciones de qué hizo el usuario",
-  "registros": [
-    {
-      "tipo": "sesion_equipo",
-      "equipo_id": "EQP-AMF-001",
-      "equipo_nombre": "Sputter Coater (Quorum Q300TT)",
-      "proceso": "descripción breve del proceso",
-      "usuario": "${qraiAuthor}",
-      "otros_usuarios": [],
-      "duracion_horas": 2,
-      "resultado": "exitoso",
-      "observaciones": "...",
-      "fecha": "${today}"
-    },
-    {
-      "tipo": "stock_consumo",
-      "insumo": "Acetona",
-      "cantidad": 50,
-      "unidad": "mL",
-      "equipo": "Wet Bench"
-    },
-    {
-      "tipo": "residuo",
-      "quimico": "Acetona",
-      "cantidad": "50 mL",
-      "metodo": "Evaporación controlada",
-      "responsable": "${qraiAuthor}",
-      "fecha": "${today}"
-    }
-  ]
-}
-
-Solo incluí los tipos de registros que correspondan. Un consumo de insumo y su residuo pueden ir juntos si el usuario lo mencionó.`;
-
-  try {
-    const raw = await callGemini(prompt);
-    const clean = raw.replace(/```json|```/g,'').trim();
-    const data = JSON.parse(clean);
-    qraiParsed = data.registros || [];
-    document.getElementById('qrai-interpretation').textContent = data.interpretacion || '';
-    renderQraiRecords();
-    document.getElementById('qrai-preview').style.display = 'flex';
-    status.style.display = 'none';
-  } catch(e) {
-    status.textContent = 'Error al interpretar la respuesta de Gemini. Intentá de nuevo.';
-    console.error(e);
-  }
-  btn.disabled = false; btn.textContent = '✨ Analizar con IA';
-}
-
-function renderQraiRecords() {
-  const list = document.getElementById('qrai-records-list');
-  list.innerHTML = '';
-  const iconMap = { sesion_equipo:'🔬', stock_consumo:'📦', residuo:'⚗️' };
-  const labelMap = { sesion_equipo:'Sesión de equipo', stock_consumo:'Consumo de stock', residuo:'Residuo' };
-  qraiParsed.forEach((rec, i) => {
-    let detail = '';
-    if (rec.tipo === 'sesion_equipo') {
-      detail = `<b>${rec.equipo_nombre}</b> — ${rec.duracion_horas}h — ${rec.proceso}`;
-      if (rec.observaciones) detail += `<br><span style="color:var(--muted);font-size:11px">${rec.observaciones}</span>`;
-    } else if (rec.tipo === 'stock_consumo') {
-      detail = `<b>${rec.insumo}</b> — ${rec.cantidad} ${rec.unidad}`;
-      if (rec.equipo) detail += ` (${rec.equipo})`;
-    } else if (rec.tipo === 'residuo') {
-      detail = `<b>${rec.quimico}</b> — ${rec.cantidad} — ${rec.metodo}`;
-    }
-    list.insertAdjacentHTML('beforeend', `
-      <label style="display:flex;gap:10px;align-items:flex-start;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:12px;cursor:pointer">
-        <input type="checkbox" checked data-idx="${i}" style="margin-top:2px;width:15px;height:15px;flex-shrink:0">
-        <span style="font-size:14px;margin-top:1px">${iconMap[rec.tipo]||'📋'}</span>
-        <div style="flex:1">
-          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">${labelMap[rec.tipo]||rec.tipo}</div>
-          <div style="font-size:13px;line-height:1.4">${detail}</div>
-        </div>
-      </label>`);
-  });
-}
-
-function confirmQraiRecords() {
-  const checks = document.querySelectorAll('#qrai-records-list input[type=checkbox]');
-  let saved = 0;
-  checks.forEach(cb => {
-    if (!cb.checked) return;
-    const rec = qraiParsed[parseInt(cb.dataset.idx)];
-    if (!rec) return;
-    if (rec.tipo === 'sesion_equipo') {
-      sessionCounter++;
-      sessionHistory.unshift({
-        id: 'SES-'+String(sessionCounter).padStart(4,'0'),
-        eqId: rec.equipo_id, eqName: rec.equipo_nombre,
-        user: rec.usuario, otherUsers: rec.otros_usuarios||[],
-        process: rec.proceso, duration: rec.duracion_horas,
-        result: rec.resultado||'exitoso', notes: rec.observaciones||'',
-        date: rec.fecha, registeredBy: qraiAuthor, source: 'IA'
-      });
-    } else if (rec.tipo === 'stock_consumo') {
-      const key = rec.insumo.toLowerCase().replace(/\s+/g,'-');
-      stockLevels[key] = (stockLevels[key] || 0) - (rec.cantidad || 0);
-    } else if (rec.tipo === 'residuo') {
-      wasteRecords.unshift({
-        id: 'RES-'+Date.now(),
-        chemical: rec.quimico, amount: rec.cantidad,
-        method: rec.metodo, responsible: rec.responsable,
-        date: rec.fecha, source: 'IA'
-      });
-    }
-    saved++;
-  });
-  saveAll();
-  closeQrAiModal();
-  if (saved > 0) {
-    alert(`✅ ${saved} registro${saved>1?'s':''} guardado${saved>1?'s':''} correctamente.`);
-    renderSessions();
-  }
-}
-// ════════════════════════════════════════════
 
 // Init Gemini indicator
 (function() {
