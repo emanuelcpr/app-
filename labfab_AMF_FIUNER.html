@@ -1093,6 +1093,7 @@
 
       <!-- ── PANEL: Drogas y Químicos ── -->
       <div id="stock-panel-drogas">
+        <div id="stock-cycle-banner"></div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
           <input id="stock-search" type="text" placeholder="Buscar droga o insumo..." oninput="renderStock()"
             style="flex:1;min-width:180px;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:8px 12px;border-radius:7px;font-family:var(--font);font-size:13px">
@@ -1111,6 +1112,7 @@
                     <th>Categoría</th>
                     <th style="text-align:center;width:200px">Cantidad</th>
                     <th style="text-align:center;width:90px">Δ vs ant.</th>
+                    <th style="width:110px">Último relevo</th>
                     <th>Almacenamiento</th>
                     <th>Uso</th>
                     <th style="width:70px"></th>
@@ -1126,6 +1128,7 @@
 
       <!-- ── PANEL: Insumos y Consumibles ── -->
       <div id="stock-panel-insumos" style="display:none">
+        <div id="insumo-cycle-banner"></div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
           <input id="insumo-search" type="text" placeholder="Buscar consumible..." oninput="renderInsumos()"
             style="flex:1;min-width:180px;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:8px 12px;border-radius:7px;font-family:var(--font);font-size:13px">
@@ -1144,6 +1147,7 @@
                     <th>Categoría</th>
                     <th style="text-align:center;width:200px">Cantidad</th>
                     <th style="text-align:center;width:90px">Δ vs ant.</th>
+                    <th style="width:110px">Último relevo</th>
                     <th>Proveedor / Ref.</th>
                     <th>Uso</th>
                     <th style="width:70px"></th>
@@ -3875,56 +3879,56 @@ let stockItemCounter = 100;
 
 const STOCK_ITEMS_DEFAULT = [
   // FOTORESINAS
-  {id:'su8_2025',  name:'SU-8 2025',                 cat:'Fotoresinas', qty:400,  unit:'mL', min:100, lastQty:null, storage:'Droguero · 23°C', uso:'Litografía — resina negativa'},
-  {id:'su8_2150',  name:'SU-8 2150',                 cat:'Fotoresinas', qty:1000, unit:'mL', min:200, lastQty:null, storage:'Droguero · 23°C', uso:'Litografía — capa gruesa'},
-  {id:'man1405',   name:'maN 1405 · Neg. photoresist',cat:'Fotoresinas', qty:350,  unit:'mL', min:80,  lastQty:null, storage:'Droguero · 23°C', uso:'Litografía negativa'},
-  {id:'man1440',   name:'maN 1440 · Neg. photoresist',cat:'Fotoresinas', qty:600,  unit:'mL', min:80,  lastQty:null, storage:'Droguero · 23°C', uso:'Litografía negativa'},
-  {id:'map1275',   name:'MA-P 1275 · Pos. photoresist',cat:'Fotoresinas',qty:600,  unit:'mL', min:80,  lastQty:null, storage:'Droguero · 23°C', uso:'Litografía positiva'},
-  {id:'pmma_a8',   name:'950 PMMA A 8',              cat:'Fotoresinas', qty:600,  unit:'mL', min:80,  lastQty:null, storage:'Droguero · 23°C', uso:'Litografía e-beam'},
+  {id:'su8_2025',  name:'SU-8 2025',                 cat:'Fotoresinas', qty:400,  unit:'mL', min:100, lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C', uso:'Litografía — resina negativa'},
+  {id:'su8_2150',  name:'SU-8 2150',                 cat:'Fotoresinas', qty:1000, unit:'mL', min:200, lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C', uso:'Litografía — capa gruesa'},
+  {id:'man1405',   name:'maN 1405 · Neg. photoresist',cat:'Fotoresinas', qty:350,  unit:'mL', min:80,  lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C', uso:'Litografía negativa'},
+  {id:'man1440',   name:'maN 1440 · Neg. photoresist',cat:'Fotoresinas', qty:600,  unit:'mL', min:80,  lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C', uso:'Litografía negativa'},
+  {id:'map1275',   name:'MA-P 1275 · Pos. photoresist',cat:'Fotoresinas',qty:600,  unit:'mL', min:80,  lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C', uso:'Litografía positiva'},
+  {id:'pmma_a8',   name:'950 PMMA A 8',              cat:'Fotoresinas', qty:600,  unit:'mL', min:80,  lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C', uso:'Litografía e-beam'},
   // REVELADORES
-  {id:'mad533',    name:'ma-D 533 S Developer',       cat:'Reveladores', qty:1000, unit:'mL', min:200, lastQty:null, storage:'Droguero · 23°C', uso:'Litografía — maN 1400'},
-  {id:'mad531',    name:'ma-D 531 TMAH',              cat:'Reveladores', qty:500,  unit:'mL', min:100, lastQty:null, storage:'Droguero · 23°C', uso:'Revelador positiva — AZ'},
-  {id:'su8dev',    name:'SU-8 Developer (PGMEA)',     cat:'Reveladores', qty:2000, unit:'mL', min:500, lastQty:null, storage:'Droguero · 23°C', uso:'Revelador SU-8'},
-  {id:'pmma_dev',  name:'PMMA Developer (MIBK:IPA)',  cat:'Reveladores', qty:500,  unit:'mL', min:100, lastQty:null, storage:'Droguero · 23°C', uso:'Revelador PMMA e-beam'},
-  {id:'mrrem400',  name:'Remover mr-rem 400',         cat:'Reveladores', qty:500,  unit:'mL', min:100, lastQty:null, storage:'Droguero · 23°C', uso:'Removedor fotoresinas'},
-  {id:'futurrex',  name:'Removedor dry resist PMMA (Futurrex)',cat:'Reveladores',qty:200,unit:'mL',min:50,lastQty:null,storage:'Droguero · 23°C',uso:'Removedor PMMA'},
+  {id:'mad533',    name:'ma-D 533 S Developer',       cat:'Reveladores', qty:1000, unit:'mL', min:200, lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C', uso:'Litografía — maN 1400'},
+  {id:'mad531',    name:'ma-D 531 TMAH',              cat:'Reveladores', qty:500,  unit:'mL', min:100, lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C', uso:'Revelador positiva — AZ'},
+  {id:'su8dev',    name:'SU-8 Developer (PGMEA)',     cat:'Reveladores', qty:2000, unit:'mL', min:500, lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C', uso:'Revelador SU-8'},
+  {id:'pmma_dev',  name:'PMMA Developer (MIBK:IPA)',  cat:'Reveladores', qty:500,  unit:'mL', min:100, lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C', uso:'Revelador PMMA e-beam'},
+  {id:'mrrem400',  name:'Remover mr-rem 400',         cat:'Reveladores', qty:500,  unit:'mL', min:100, lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C', uso:'Removedor fotoresinas'},
+  {id:'futurrex',  name:'Removedor dry resist PMMA (Futurrex)',cat:'Reveladores',qty:200,unit:'mL',min:50,lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C',uso:'Removedor PMMA'},
   // POLÍMEROS
-  {id:'sylg_base', name:'Sylgard 184 Base (PDMS)',    cat:'Polímeros',   qty:500,  unit:'g',  min:100, lastQty:null, storage:'Droguero · 23°C', uso:'Moldes, microfluídica'},
-  {id:'sylg_cur',  name:'Sylgard 184 Curador',        cat:'Polímeros',   qty:50,   unit:'g',  min:10,  lastQty:null, storage:'Droguero · 23°C', uso:'Curador PDMS 10:1'},
-  {id:'med6215',   name:'MED-6215 · MED-4211 (silicona médica)',cat:'Polímeros',qty:200,unit:'g',min:50,lastQty:null,storage:'Droguero · 23°C',uso:'Encapsulado biocompatible'},
-  {id:'parylene',  name:'Parylene C (dímero)',         cat:'Polímeros',   qty:50,   unit:'g',  min:10,  lastQty:null, storage:'Droguero · 23°C', uso:'Recubrimiento conformal'},
-  {id:'hmds',      name:'HMDS (Clorotrimetilsilano)',  cat:'Polímeros',   qty:250,  unit:'mL', min:50,  lastQty:null, storage:'Campana · 23°C',  uso:'Promotor adhesión fotoresinas'},
+  {id:'sylg_base', name:'Sylgard 184 Base (PDMS)',    cat:'Polímeros',   qty:500,  unit:'g',  min:100, lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C', uso:'Moldes, microfluídica'},
+  {id:'sylg_cur',  name:'Sylgard 184 Curador',        cat:'Polímeros',   qty:50,   unit:'g',  min:10,  lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C', uso:'Curador PDMS 10:1'},
+  {id:'med6215',   name:'MED-6215 · MED-4211 (silicona médica)',cat:'Polímeros',qty:200,unit:'g',min:50,lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C',uso:'Encapsulado biocompatible'},
+  {id:'parylene',  name:'Parylene C (dímero)',         cat:'Polímeros',   qty:50,   unit:'g',  min:10,  lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C', uso:'Recubrimiento conformal'},
+  {id:'hmds',      name:'HMDS (Clorotrimetilsilano)',  cat:'Polímeros',   qty:250,  unit:'mL', min:50,  lastQty:null, lastRelevDate:null, storage:'Campana · 23°C',  uso:'Promotor adhesión fotoresinas'},
   // SOLVENTES
-  {id:'acetona',   name:'Acetona',                    cat:'Solventes',   qty:2000, unit:'mL', min:400, lastQty:null, storage:'Droguero ignífugo', uso:'Limpieza orgánica, strip'},
-  {id:'ipa',       name:'IPA (Isopropanol)',           cat:'Solventes',   qty:2000, unit:'mL', min:400, lastQty:null, storage:'Droguero ignífugo', uso:'Limpieza, enjuague'},
-  {id:'etanol',    name:'Etanol absoluto',             cat:'Solventes',   qty:1000, unit:'mL', min:200, lastQty:null, storage:'Droguero ignífugo', uso:'Silanización, limpieza'},
-  {id:'metanol',   name:'Metanol',                    cat:'Solventes',   qty:500,  unit:'mL', min:100, lastQty:null, storage:'Droguero ignífugo', uso:'Solvente analítico'},
-  {id:'h2o2',      name:'H₂O₂ 30% (Agua oxigenada)',  cat:'Solventes',   qty:1000, unit:'mL', min:200, lastQty:null, storage:'Heladera 4°C',     uso:'SC-1, Piranha, oxidante'},
-  {id:'formol',    name:'Formaldehído 37%',            cat:'Solventes',   qty:500,  unit:'mL', min:100, lastQty:null, storage:'Campana · 4°C',    uso:'Fijador histológico'},
+  {id:'acetona',   name:'Acetona',                    cat:'Solventes',   qty:2000, unit:'mL', min:400, lastQty:null, lastRelevDate:null, storage:'Droguero ignífugo', uso:'Limpieza orgánica, strip'},
+  {id:'ipa',       name:'IPA (Isopropanol)',           cat:'Solventes',   qty:2000, unit:'mL', min:400, lastQty:null, lastRelevDate:null, storage:'Droguero ignífugo', uso:'Limpieza, enjuague'},
+  {id:'etanol',    name:'Etanol absoluto',             cat:'Solventes',   qty:1000, unit:'mL', min:200, lastQty:null, lastRelevDate:null, storage:'Droguero ignífugo', uso:'Silanización, limpieza'},
+  {id:'metanol',   name:'Metanol',                    cat:'Solventes',   qty:500,  unit:'mL', min:100, lastQty:null, lastRelevDate:null, storage:'Droguero ignífugo', uso:'Solvente analítico'},
+  {id:'h2o2',      name:'H₂O₂ 30% (Agua oxigenada)',  cat:'Solventes',   qty:1000, unit:'mL', min:200, lastQty:null, lastRelevDate:null, storage:'Heladera 4°C',     uso:'SC-1, Piranha, oxidante'},
+  {id:'formol',    name:'Formaldehído 37%',            cat:'Solventes',   qty:500,  unit:'mL', min:100, lastQty:null, lastRelevDate:null, storage:'Campana · 4°C',    uso:'Fijador histológico'},
   // ÁCIDOS/BASES
-  {id:'hcl',       name:'HCl 37% (Ácido clorhídrico)',cat:'Ácidos/Bases',qty:600,  unit:'mL', min:100, lastQty:null, storage:'Campana · armario ácidos', uso:'SC-2, grabado, pH'},
-  {id:'hf',        name:'HF 49% (Ácido fluorhídrico)', cat:'Ácidos/Bases',qty:200, unit:'mL', min:50,  lastQty:null, storage:'Campana · armario HF',     uso:'Grabado SiO₂ — EXTREMO PELIGRO'},
-  {id:'hno3',      name:'HNO₃ 65% (Ácido nítrico)',   cat:'Ácidos/Bases',qty:500,  unit:'mL', min:100, lastQty:null, storage:'Campana · armario ácidos', uso:'Grabado metales, limpieza'},
-  {id:'h2so4',     name:'H₂SO₄ 98% (Ácido sulfúrico)',cat:'Ácidos/Bases',qty:600,  unit:'mL', min:100, lastQty:null, storage:'Campana · armario ácidos', uso:'Piranha, grabado'},
-  {id:'acac',      name:'Ácido acético glacial',       cat:'Ácidos/Bases',qty:500,  unit:'mL', min:100, lastQty:null, storage:'Campana · 23°C',           uso:'Buffer, revelador AZ'},
-  {id:'nh3',       name:'NH₄OH (Hidróxido de amonio)', cat:'Ácidos/Bases',qty:800,  unit:'mL', min:100, lastQty:null, storage:'Campana · 23°C',           uso:'SC-1 (RCA)'},
-  {id:'koh',       name:'KOH (Hidróxido de potasio)',  cat:'Ácidos/Bases',qty:300,  unit:'g',  min:50,  lastQty:null, storage:'Droguero · 23°C',          uso:'Grabado anisotrópico Si'},
-  {id:'nh4f',      name:'NH₄F (Fluoruro de amonio)',   cat:'Ácidos/Bases',qty:200,  unit:'g',  min:50,  lastQty:null, storage:'Droguero · 23°C',          uso:'BHF buffer (con HF)'},
+  {id:'hcl',       name:'HCl 37% (Ácido clorhídrico)',cat:'Ácidos/Bases',qty:600,  unit:'mL', min:100, lastQty:null, lastRelevDate:null, storage:'Campana · armario ácidos', uso:'SC-2, grabado, pH'},
+  {id:'hf',        name:'HF 49% (Ácido fluorhídrico)', cat:'Ácidos/Bases',qty:200, unit:'mL', min:50,  lastQty:null, lastRelevDate:null, storage:'Campana · armario HF',     uso:'Grabado SiO₂ — EXTREMO PELIGRO'},
+  {id:'hno3',      name:'HNO₃ 65% (Ácido nítrico)',   cat:'Ácidos/Bases',qty:500,  unit:'mL', min:100, lastQty:null, lastRelevDate:null, storage:'Campana · armario ácidos', uso:'Grabado metales, limpieza'},
+  {id:'h2so4',     name:'H₂SO₄ 98% (Ácido sulfúrico)',cat:'Ácidos/Bases',qty:600,  unit:'mL', min:100, lastQty:null, lastRelevDate:null, storage:'Campana · armario ácidos', uso:'Piranha, grabado'},
+  {id:'acac',      name:'Ácido acético glacial',       cat:'Ácidos/Bases',qty:500,  unit:'mL', min:100, lastQty:null, lastRelevDate:null, storage:'Campana · 23°C',           uso:'Buffer, revelador AZ'},
+  {id:'nh3',       name:'NH₄OH (Hidróxido de amonio)', cat:'Ácidos/Bases',qty:800,  unit:'mL', min:100, lastQty:null, lastRelevDate:null, storage:'Campana · 23°C',           uso:'SC-1 (RCA)'},
+  {id:'koh',       name:'KOH (Hidróxido de potasio)',  cat:'Ácidos/Bases',qty:300,  unit:'g',  min:50,  lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C',          uso:'Grabado anisotrópico Si'},
+  {id:'nh4f',      name:'NH₄F (Fluoruro de amonio)',   cat:'Ácidos/Bases',qty:200,  unit:'g',  min:50,  lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C',          uso:'BHF buffer (con HF)'},
   // SÓLIDOS
-  {id:'cuso4',     name:'CuSO₄·5H₂O (Sulfato cúprico)',cat:'Sólidos',   qty:200,  unit:'g',  min:30,  lastQty:null, storage:'Droguero · 23°C', uso:'Plating de cobre'},
-  {id:'edta',      name:'EDTA disódica',               cat:'Sólidos',    qty:100,  unit:'g',  min:20,  lastQty:null, storage:'Droguero · 23°C', uso:'Quelante, solución tampón'},
-  {id:'fecl3',     name:'FeCl₃ (Cloruro férrico)',     cat:'Sólidos',    qty:100,  unit:'g',  min:20,  lastQty:null, storage:'Droguero · 23°C', uso:'Grabado Cu, etching'},
-  {id:'ki_iodo',   name:'KI + I₂ (Yoduro potasio / Yodo)',cat:'Sólidos',qty:50,  unit:'g',  min:10,  lastQty:null, storage:'Droguero · oscuridad', uso:'Gold Etchant casero'},
-  {id:'agar',      name:'Agar-agar (electrodo referencia)',cat:'Sólidos', qty:50,  unit:'g',  min:10,  lastQty:null, storage:'Droguero · 23°C', uso:'Puente salino electroquímico'},
-  {id:'silicagel', name:'Sílicagel (desecante)',        cat:'Sólidos',    qty:500, unit:'g',  min:100, lastQty:null, storage:'Droguero · 23°C', uso:'Desecante · droguero'},
-  {id:'au_sol',    name:'Gold Solution 24k (electroless)',cat:'Sólidos',  qty:50,  unit:'mL', min:10,  lastQty:null, storage:'Heladera 4°C',    uso:'Deposición Au electroless'},
-  {id:'microsoap', name:'Micro-90 Soap (limpieza parylene)',cat:'Sólidos',qty:200,unit:'mL', min:50,  lastQty:null, storage:'Droguero · 23°C', uso:'Limpieza reactor parylene'},
+  {id:'cuso4',     name:'CuSO₄·5H₂O (Sulfato cúprico)',cat:'Sólidos',   qty:200,  unit:'g',  min:30,  lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C', uso:'Plating de cobre'},
+  {id:'edta',      name:'EDTA disódica',               cat:'Sólidos',    qty:100,  unit:'g',  min:20,  lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C', uso:'Quelante, solución tampón'},
+  {id:'fecl3',     name:'FeCl₃ (Cloruro férrico)',     cat:'Sólidos',    qty:100,  unit:'g',  min:20,  lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C', uso:'Grabado Cu, etching'},
+  {id:'ki_iodo',   name:'KI + I₂ (Yoduro potasio / Yodo)',cat:'Sólidos',qty:50,  unit:'g',  min:10,  lastQty:null, lastRelevDate:null, storage:'Droguero · oscuridad', uso:'Gold Etchant casero'},
+  {id:'agar',      name:'Agar-agar (electrodo referencia)',cat:'Sólidos', qty:50,  unit:'g',  min:10,  lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C', uso:'Puente salino electroquímico'},
+  {id:'silicagel', name:'Sílicagel (desecante)',        cat:'Sólidos',    qty:500, unit:'g',  min:100, lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C', uso:'Desecante · droguero'},
+  {id:'au_sol',    name:'Gold Solution 24k (electroless)',cat:'Sólidos',  qty:50,  unit:'mL', min:10,  lastQty:null, lastRelevDate:null, storage:'Heladera 4°C',    uso:'Deposición Au electroless'},
+  {id:'microsoap', name:'Micro-90 Soap (limpieza parylene)',cat:'Sólidos',qty:200,unit:'mL', min:50,  lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C', uso:'Limpieza reactor parylene'},
   // PREPARADAS
-  {id:'ki_au',     name:'KI/Au Etching (Gold Etchant TFA)',cat:'Preparadas',qty:250,unit:'mL',min:50,lastQty:null,storage:'Droguero · 23°C',uso:'Grabado Au — gold lift-off'},
-  {id:'kcl_sol',   name:'KCl 0.1 M (electroquímica)',  cat:'Preparadas', qty:500,  unit:'mL', min:100, lastQty:null, storage:'Droguero · 23°C', uso:'Electrolito redox, EIS'},
-  {id:'cuso4_pl',  name:'CuSO₄/H₂SO₄ (copper plating)',cat:'Preparadas',qty:250,  unit:'mL', min:50,  lastQty:null, storage:'Droguero · 23°C', uso:'Plating de cobre'},
-  {id:'buf_ph',    name:'Buffers pH 4/7/8.6/10',       cat:'Preparadas', qty:900,  unit:'mL', min:100, lastQty:null, storage:'Droguero · 23°C', uso:'Calibración pH, electroforesis'},
-  {id:'nafion',    name:'Nafion 5 wt.%',               cat:'Preparadas', qty:25,   unit:'mL', min:5,   lastQty:null, storage:'Heladera 4°C',    uso:'Electrolito seco, spin casting'},
+  {id:'ki_au',     name:'KI/Au Etching (Gold Etchant TFA)',cat:'Preparadas',qty:250,unit:'mL',min:50,lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C',uso:'Grabado Au — gold lift-off'},
+  {id:'kcl_sol',   name:'KCl 0.1 M (electroquímica)',  cat:'Preparadas', qty:500,  unit:'mL', min:100, lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C', uso:'Electrolito redox, EIS'},
+  {id:'cuso4_pl',  name:'CuSO₄/H₂SO₄ (copper plating)',cat:'Preparadas',qty:250,  unit:'mL', min:50,  lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C', uso:'Plating de cobre'},
+  {id:'buf_ph',    name:'Buffers pH 4/7/8.6/10',       cat:'Preparadas', qty:900,  unit:'mL', min:100, lastQty:null, lastRelevDate:null, storage:'Droguero · 23°C', uso:'Calibración pH, electroforesis'},
+  {id:'nafion',    name:'Nafion 5 wt.%',               cat:'Preparadas', qty:25,   unit:'mL', min:5,   lastQty:null, lastRelevDate:null, storage:'Heladera 4°C',    uso:'Electrolito seco, spin casting'},
 ];
 
 let stockItems = [];
@@ -3940,6 +3944,93 @@ const SCAT_BADGE = {
   'Solventes':'muted','Ácidos/Bases':'amber','Sólidos':'green',
   'Preparadas':'muted','BioMEMS':'accent','Otro':'muted'
 };
+
+
+// ── Relevamiento date helpers ──────────────────────────────────
+function relevDateHtml(dateStr) {
+  if (!dateStr) return '<span style="font-size:11px;color:var(--muted)">—</span>';
+  const d = new Date(dateStr);
+  const now = new Date();
+  const days = Math.floor((now - d) / 86400000);
+  const label = d.toLocaleDateString('es-AR', {day:'2-digit', month:'2-digit', year:'2-digit'});
+  let color = 'var(--green)';
+  let dot = '●';
+  if (days > 90) { color = 'var(--red)'; dot = '●'; }
+  else if (days > 60) { color = 'var(--amber)'; dot = '●'; }
+  const age = days === 0 ? 'hoy' : days === 1 ? 'ayer' : `hace ${days}d`;
+  return `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+    <span style="font-family:var(--mono);font-size:11px;font-weight:600">${label}</span>
+    <span style="font-size:10px;color:${color}">${dot} ${age}</span>
+  </div>`;
+}
+
+function buildCycleBanner(lastRelev, items, type) {
+  const CYCLE_DAYS = 90;
+  const now = new Date();
+
+  // Earliest un-relevado item warning
+  const neverRelev = items.filter(i => !i.lastRelevDate).length;
+  // Most stale item
+  let staleItem = null, staleDays = 0;
+  items.forEach(i => {
+    if (i.lastRelevDate) {
+      const d = Math.floor((now - new Date(i.lastRelevDate)) / 86400000);
+      if (d > staleDays) { staleDays = d; staleItem = i; }
+    }
+  });
+
+  if (!lastRelev) {
+    return `<div style="margin-bottom:14px;padding:12px 16px;border-radius:9px;background:var(--amber-dim);border:1px solid rgba(217,119,6,0.2);display:flex;align-items:center;gap:12px">
+      <span style="font-size:20px">📋</span>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--amber)">Sin relevamiento periódico registrado</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Realizá el primer relevamiento completo para activar el ciclo de 90 días. ${neverRelev} ítem${neverRelev!==1?'s':''} sin fecha de lectura.</div>
+      </div>
+      <div style="margin-left:auto;font-size:11px;color:var(--muted);white-space:nowrap">Ciclo: cada 90 días</div>
+    </div>`;
+  }
+
+  const lastDate = new Date(lastRelev.date);
+  const daysSince = Math.floor((now - lastDate) / 86400000);
+  const daysLeft = CYCLE_DAYS - daysSince;
+  const pct = Math.min(100, Math.round((daysSince / CYCLE_DAYS) * 100));
+  const nextDate = new Date(lastDate.getTime() + CYCLE_DAYS * 86400000);
+  const nextStr = nextDate.toLocaleDateString('es-AR', {day:'2-digit', month:'2-digit', year:'numeric'});
+
+  let statusColor, statusIcon, statusLabel;
+  if (daysLeft < 0) {
+    statusColor = 'var(--red)'; statusIcon = '🔴'; statusLabel = `Vencido hace ${-daysLeft} días`;
+  } else if (daysLeft <= 14) {
+    statusColor = 'var(--amber)'; statusIcon = '🟡'; statusLabel = `Vence en ${daysLeft} día${daysLeft!==1?'s':''}`;
+  } else {
+    statusColor = 'var(--green)'; statusIcon = '🟢'; statusLabel = `Próximo en ${daysLeft} días (${nextStr})`;
+  }
+
+  const barColor = daysLeft < 0 ? 'var(--red)' : daysLeft <= 14 ? 'var(--amber)' : 'var(--green)';
+  const neverStr = neverRelev > 0 ? ` · <span style="color:var(--amber)">${neverRelev} ítem${neverRelev!==1?'s':''} sin fecha individual</span>` : '';
+  const staleStr = staleItem && staleDays > 90 ? ` · ítem más viejo: <span style="color:var(--red)">${staleItem.name} (${staleDays}d)</span>` : '';
+
+  return `<div style="margin-bottom:14px;padding:12px 16px;border-radius:9px;background:var(--surface);border:1px solid var(--border2)">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+      <span style="font-size:16px">${statusIcon}</span>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600">Ciclo de relevamiento — cada 90 días</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:1px">
+          Último relevamiento completo: <strong style="font-family:var(--mono);color:var(--text)">${lastDate.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'})}</strong>
+          · ${daysSince === 0 ? 'realizado hoy' : `hace ${daysSince} día${daysSince!==1?'s':''}`}
+          ${neverStr}${staleStr}
+        </div>
+      </div>
+      <div style="text-align:right;white-space:nowrap">
+        <div style="font-size:12px;font-weight:600;color:${statusColor}">${statusLabel}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:1px">${pct}% del ciclo</div>
+      </div>
+    </div>
+    <div style="height:5px;border-radius:99px;background:var(--surface2);overflow:hidden">
+      <div style="height:100%;width:${pct}%;background:${barColor};border-radius:99px;transition:width 0.4s"></div>
+    </div>
+  </div>`;
+}
 
 function renderStock() {
   initStockItems();
@@ -3973,6 +4064,10 @@ function renderStock() {
     <div class="kpi-card blue"><div class="kpi-label">Con relevamiento</div><div class="kpi-value blue">${withRelev}</div></div>
   `;
 
+  // Cycle banner
+  const cycleBanner = document.getElementById('stock-cycle-banner');
+  if (cycleBanner) cycleBanner.innerHTML = buildCycleBanner(stockLastRelev, stockItems, 'drogas');
+
   const tbody = document.getElementById('stock-tbody');
   if (!tbody) return;
 
@@ -4003,13 +4098,14 @@ function renderStock() {
         </div>
       </td>
       <td style="text-align:center">${deltaHtml}</td>
+      <td style="text-align:center">${relevDateHtml(item.lastRelevDate)}</td>
       <td style="font-size:12px;color:var(--muted)">${item.storage||'—'}</td>
       <td style="font-size:12px;color:var(--muted)">${item.uso||'—'}</td>
       <td style="text-align:right">
         <button class="btn" style="font-size:10px;padding:3px 8px" onclick="openStockEdit(${JSON.stringify(item.id)})">Editar</button>
       </td>
     </tr>`;
-  }).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Sin resultados.</td></tr>';
+  }).join('') : '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">Sin resultados.</td></tr>';
 
   // Note
   const noteEl = document.getElementById('stock-relev-note');
@@ -4109,6 +4205,7 @@ function saveRelev() {
     if (item) {
       item.lastQty = item.qty;
       item.qty = rc.qty;
+      item.lastRelevDate = now;
       snapshot[rc.id] = rc.qty;
     }
   });
@@ -4183,42 +4280,42 @@ document.addEventListener('DOMContentLoaded', function() {
 
 const CONSUMIBLES_DEFAULT = [
   // Sustratos
-  {id:'wafer_si_100', name:'Oblea Si 100mm p-type ⟨100⟩', cat:'Sustratos', qty:8, unit:'unid', min:3, lastQty:null, prov:'Siegert Wafer · SW-P100-100-525', uso:'Sustrato base fotolitografía, deposición'},
-  {id:'wafer_si_50',  name:'Oblea Si 50mm p-type ⟨100⟩',  cat:'Sustratos', qty:12, unit:'unid', min:4, lastQty:null, prov:'Siegert Wafer · SW-P050-100-280', uso:'Prototipos y pruebas'},
-  {id:'vidrio_corning', name:'Vidrio Corning 0211 (25×75mm)', cat:'Sustratos', qty:40, unit:'unid', min:10, lastQty:null, prov:'Corning / Soluciones Fotónicas', uso:'Microscopía, electrodos Au, PDMS bonding'},
-  {id:'vidrio_boro', name:'Vidrio borosilicato 100mm',  cat:'Sustratos', qty:5, unit:'unid', min:2, lastQty:null, prov:'Mark Optics',  uso:'Dispositivos microfluídicos'},
-  {id:'cu_foil',     name:'Lámina Cu (Cu foil 18µm)',   cat:'Sustratos', qty:2, unit:'m²', min:0.5, lastQty:null, prov:'Alfa Aesar',  uso:'Deposición Cu, electrodos'},
+  {id:'wafer_si_100', name:'Oblea Si 100mm p-type ⟨100⟩', cat:'Sustratos', qty:8, unit:'unid', min:3, lastQty:null, lastRelevDate:null, prov:'Siegert Wafer · SW-P100-100-525', uso:'Sustrato base fotolitografía, deposición'},
+  {id:'wafer_si_50',  name:'Oblea Si 50mm p-type ⟨100⟩',  cat:'Sustratos', qty:12, unit:'unid', min:4, lastQty:null, lastRelevDate:null, prov:'Siegert Wafer · SW-P050-100-280', uso:'Prototipos y pruebas'},
+  {id:'vidrio_corning', name:'Vidrio Corning 0211 (25×75mm)', cat:'Sustratos', qty:40, unit:'unid', min:10, lastQty:null, lastRelevDate:null, prov:'Corning / Soluciones Fotónicas', uso:'Microscopía, electrodos Au, PDMS bonding'},
+  {id:'vidrio_boro', name:'Vidrio borosilicato 100mm',  cat:'Sustratos', qty:5, unit:'unid', min:2, lastQty:null, lastRelevDate:null, prov:'Mark Optics',  uso:'Dispositivos microfluídicos'},
+  {id:'cu_foil',     name:'Lámina Cu (Cu foil 18µm)',   cat:'Sustratos', qty:2, unit:'m²', min:0.5, lastQty:null, lastRelevDate:null, prov:'Alfa Aesar',  uso:'Deposición Cu, electrodos'},
 
   // Gases
-  {id:'gas_ar',      name:'Argón (Ar) 99.999%',         cat:'Gases', qty:1, unit:'cilindro', min:1, lastQty:null, prov:'Linde · 50L · 200bar', uso:'Sputtering, plasma'},
-  {id:'gas_n2',      name:'Nitrógeno (N₂) 99.998%',     cat:'Gases', qty:2, unit:'cilindro', min:1, lastQty:null, prov:'Linde · 50L · 200bar', uso:'Purga, secado de obleas, glove box'},
-  {id:'gas_o2',      name:'Oxígeno (O₂) 99.5%',         cat:'Gases', qty:1, unit:'cilindro', min:1, lastQty:null, prov:'Linde · 10L · 200bar', uso:'Plasma etching O₂, oxidación'},
-  {id:'gas_sf6',     name:'SF₆ 99.5%',                  cat:'Gases', qty:1, unit:'cilindro', min:0, lastQty:null, prov:'Linde · 10L · 50bar',  uso:'Plasma dry etching Si (Bosch process)'},
+  {id:'gas_ar',      name:'Argón (Ar) 99.999%',         cat:'Gases', qty:1, unit:'cilindro', min:1, lastQty:null, lastRelevDate:null, prov:'Linde · 50L · 200bar', uso:'Sputtering, plasma'},
+  {id:'gas_n2',      name:'Nitrógeno (N₂) 99.998%',     cat:'Gases', qty:2, unit:'cilindro', min:1, lastQty:null, lastRelevDate:null, prov:'Linde · 50L · 200bar', uso:'Purga, secado de obleas, glove box'},
+  {id:'gas_o2',      name:'Oxígeno (O₂) 99.5%',         cat:'Gases', qty:1, unit:'cilindro', min:1, lastQty:null, lastRelevDate:null, prov:'Linde · 10L · 200bar', uso:'Plasma etching O₂, oxidación'},
+  {id:'gas_sf6',     name:'SF₆ 99.5%',                  cat:'Gases', qty:1, unit:'cilindro', min:0, lastQty:null, lastRelevDate:null, prov:'Linde · 10L · 50bar',  uso:'Plasma dry etching Si (Bosch process)'},
 
   // Targets sputtering
-  {id:'target_au',   name:'Target Au 99.99% (50mm)',     cat:'Targets', qty:1, unit:'unid', min:1, lastQty:null, prov:'Plasmaterials / Kurt Lesker', uso:'Sputtering Au electrodes, biosensors'},
-  {id:'target_cr',   name:'Target Cr 99.95% (50mm)',     cat:'Targets', qty:1, unit:'unid', min:1, lastQty:null, prov:'Plasmaterials',  uso:'Capa adhesión Cr/Au'},
-  {id:'target_ti',   name:'Target Ti 99.99% (50mm)',     cat:'Targets', qty:1, unit:'unid', min:1, lastQty:null, prov:'Kurt Lesker',    uso:'Capa adhesión Ti/Au'},
-  {id:'target_al',   name:'Target Al 99.999% (50mm)',    cat:'Targets', qty:1, unit:'unid', min:0, lastQty:null, prov:'Plasmaterials',  uso:'Metalización Al, interconexiones'},
+  {id:'target_au',   name:'Target Au 99.99% (50mm)',     cat:'Targets', qty:1, unit:'unid', min:1, lastQty:null, lastRelevDate:null, prov:'Plasmaterials / Kurt Lesker', uso:'Sputtering Au electrodes, biosensors'},
+  {id:'target_cr',   name:'Target Cr 99.95% (50mm)',     cat:'Targets', qty:1, unit:'unid', min:1, lastQty:null, lastRelevDate:null, prov:'Plasmaterials',  uso:'Capa adhesión Cr/Au'},
+  {id:'target_ti',   name:'Target Ti 99.99% (50mm)',     cat:'Targets', qty:1, unit:'unid', min:1, lastQty:null, lastRelevDate:null, prov:'Kurt Lesker',    uso:'Capa adhesión Ti/Au'},
+  {id:'target_al',   name:'Target Al 99.999% (50mm)',    cat:'Targets', qty:1, unit:'unid', min:0, lastQty:null, lastRelevDate:null, prov:'Plasmaterials',  uso:'Metalización Al, interconexiones'},
 
   // Tubería y conexiones
-  {id:'tub_silicona', name:'Tubería silicona ID 1mm',   cat:'Tubería/Conexiones', qty:5, unit:'m', min:1, lastQty:null, prov:'Tygon / Sigma',   uso:'Microfluídica, conexiones bomba'},
-  {id:'tub_pdms',     name:'Tubería PDMS ID 0.5mm',     cat:'Tubería/Conexiones', qty:2, unit:'m', min:0.5, lastQty:null, prov:'Fabricación interna', uso:'Canales microfluídicos'},
-  {id:'conector_luer', name:'Luer lock adaptadores (1/16")', cat:'Tubería/Conexiones', qty:50, unit:'unid', min:20, lastQty:null, prov:'Kinesis / IDEX',   uso:'Puertos chips microfluídicos'},
-  {id:'jeringas_1ml',  name:'Jeringas 1 mL BD (sin aguja)', cat:'Descartables', qty:100, unit:'unid', min:30, lastQty:null, prov:'BD Plastipak',  uso:'Inyección reactivos, microfluídica'},
-  {id:'jeringas_10ml', name:'Jeringas 10 mL BD',            cat:'Descartables', qty:50,  unit:'unid', min:10, lastQty:null, prov:'BD Plastipak',  uso:'Preparación soluciones'},
+  {id:'tub_silicona', name:'Tubería silicona ID 1mm',   cat:'Tubería/Conexiones', qty:5, unit:'m', min:1, lastQty:null, lastRelevDate:null, prov:'Tygon / Sigma',   uso:'Microfluídica, conexiones bomba'},
+  {id:'tub_pdms',     name:'Tubería PDMS ID 0.5mm',     cat:'Tubería/Conexiones', qty:2, unit:'m', min:0.5, lastQty:null, lastRelevDate:null, prov:'Fabricación interna', uso:'Canales microfluídicos'},
+  {id:'conector_luer', name:'Luer lock adaptadores (1/16")', cat:'Tubería/Conexiones', qty:50, unit:'unid', min:20, lastQty:null, lastRelevDate:null, prov:'Kinesis / IDEX',   uso:'Puertos chips microfluídicos'},
+  {id:'jeringas_1ml',  name:'Jeringas 1 mL BD (sin aguja)', cat:'Descartables', qty:100, unit:'unid', min:30, lastQty:null, lastRelevDate:null, prov:'BD Plastipak',  uso:'Inyección reactivos, microfluídica'},
+  {id:'jeringas_10ml', name:'Jeringas 10 mL BD',            cat:'Descartables', qty:50,  unit:'unid', min:10, lastQty:null, lastRelevDate:null, prov:'BD Plastipak',  uso:'Preparación soluciones'},
 
   // Descartables
-  {id:'biopsy_2mm',    name:'Biopsy punch 2mm (Robbins)',   cat:'Descartables', qty:30, unit:'unid', min:10, lastQty:null, prov:'Robbins Instruments',  uso:'Perforación puertos PDMS'},
-  {id:'biopsy_1mm',    name:'Biopsy punch 1mm',             cat:'Descartables', qty:20, unit:'unid', min:5,  lastQty:null, prov:'Robbins Instruments',  uso:'Puertos microfluídicos finos'},
-  {id:'guantes_nitr',  name:'Guantes nitrilo S/M/L',        cat:'Descartables', qty:3,  unit:'caja', min:1,  lastQty:null, prov:'Kimberly-Clark / local', uso:'EPI sala limpia'},
-  {id:'toallas_kimwipes', name:'Toallas Kimwipes lint-free', cat:'Descartables', qty:4,  unit:'caja', min:1,  lastQty:null, prov:'Kimberly-Clark',  uso:'Limpieza óptica y superficies'},
-  {id:'wafer_boats',   name:'Porta-obleas (wafer boats) 4"',cat:'Descartables', qty:6,  unit:'unid', min:2,  lastQty:null, prov:'Entegris',         uso:'Transporte y almacenamiento obleas'},
+  {id:'biopsy_2mm',    name:'Biopsy punch 2mm (Robbins)',   cat:'Descartables', qty:30, unit:'unid', min:10, lastQty:null, lastRelevDate:null, prov:'Robbins Instruments',  uso:'Perforación puertos PDMS'},
+  {id:'biopsy_1mm',    name:'Biopsy punch 1mm',             cat:'Descartables', qty:20, unit:'unid', min:5,  lastQty:null, lastRelevDate:null, prov:'Robbins Instruments',  uso:'Puertos microfluídicos finos'},
+  {id:'guantes_nitr',  name:'Guantes nitrilo S/M/L',        cat:'Descartables', qty:3,  unit:'caja', min:1,  lastQty:null, lastRelevDate:null, prov:'Kimberly-Clark / local', uso:'EPI sala limpia'},
+  {id:'toallas_kimwipes', name:'Toallas Kimwipes lint-free', cat:'Descartables', qty:4,  unit:'caja', min:1,  lastQty:null, lastRelevDate:null, prov:'Kimberly-Clark',  uso:'Limpieza óptica y superficies'},
+  {id:'wafer_boats',   name:'Porta-obleas (wafer boats) 4"',cat:'Descartables', qty:6,  unit:'unid', min:2,  lastQty:null, lastRelevDate:null, prov:'Entegris',         uso:'Transporte y almacenamiento obleas'},
 
   // Wire Bonding
-  {id:'wire_au_25um',  name:'Hilo de Au 25 µm (25g spool)',  cat:'Wire Bonding', qty:2, unit:'spool', min:1, lastQty:null, prov:'Heraeus / MKS',  uso:'Wire bonding pads'},
-  {id:'wire_al_25um',  name:'Hilo de Al 25 µm',              cat:'Wire Bonding', qty:1, unit:'spool', min:0, lastQty:null, prov:'Heraeus',        uso:'Bonding Al — bajo costo'},
-  {id:'capillary',     name:'Capilar bonding 45°-25µm',      cat:'Wire Bonding', qty:3, unit:'unid', min:1, lastQty:null, prov:'SPT / PECO',     uso:'Punta bonder AMF-003'},
+  {id:'wire_au_25um',  name:'Hilo de Au 25 µm (25g spool)',  cat:'Wire Bonding', qty:2, unit:'spool', min:1, lastQty:null, lastRelevDate:null, prov:'Heraeus / MKS',  uso:'Wire bonding pads'},
+  {id:'wire_al_25um',  name:'Hilo de Al 25 µm',              cat:'Wire Bonding', qty:1, unit:'spool', min:0, lastQty:null, lastRelevDate:null, prov:'Heraeus',        uso:'Bonding Al — bajo costo'},
+  {id:'capillary',     name:'Capilar bonding 45°-25µm',      cat:'Wire Bonding', qty:3, unit:'unid', min:1, lastQty:null, lastRelevDate:null, prov:'SPT / PECO',     uso:'Punta bonder AMF-003'},
 ];
 
 let consumiblesItems = [];
@@ -4285,9 +4382,13 @@ function renderInsumos() {
     ).join('');
   }
 
+  // Cycle banner
+  const insCycleBanner = document.getElementById('insumo-cycle-banner');
+  if (insCycleBanner) insCycleBanner.innerHTML = buildCycleBanner(consumiblesLastRelev, consumiblesItems, 'insumos');
+
   const tbody = document.getElementById('insumo-tbody');
   if (!tbody) return;
-  if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px;font-size:13px">Sin resultados</td></tr>'; return; }
+  if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px;font-size:13px">Sin resultados</td></tr>'; return; }
 
   tbody.innerHTML = filtered.map(item => {
     const pct = calcInsumoDelta(item);
@@ -4310,6 +4411,7 @@ function renderInsumos() {
         </div>
       </td>
       <td style="padding:10px 14px;text-align:center">${deltaHtml}</td>
+      <td style="padding:10px 14px;text-align:center">${relevDateHtml(item.lastRelevDate)}</td>
       <td style="padding:10px 14px;font-size:12px;color:var(--muted)">${item.prov||'—'}</td>
       <td style="padding:10px 14px;font-size:12px;color:var(--muted)">${item.uso||'—'}</td>
       <td style="padding:10px 14px;text-align:right">
@@ -4390,6 +4492,7 @@ function saveInsumoRelev() {
     const newQty = inputEl ? (parseFloat(inputEl.value)||0) : rc.qty;
     item.lastQty = item.qty;
     item.qty = newQty;
+    item.lastRelevDate = now;
     snapshot[item.id] = newQty;
   });
   consumiblesLastRelev = { date: now, snapshot };
