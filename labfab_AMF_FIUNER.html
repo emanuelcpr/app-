@@ -709,15 +709,19 @@
 
     <!-- ═══════════ EQUIPOS ═══════════ -->
     <div class="section" id="sec-equipos">
+      <div id="eq-cycle-banner" style="margin-bottom:14px"></div>
       <div class="card" style="margin-bottom:16px">
         <div class="card-header">
           <span class="card-title">Equipos registrados</span>
-          <div class="card-actions"><button class="btn">+ Nuevo equipo</button></div>
+          <div class="card-actions">
+            <button class="btn" onclick="openEqCheck()">⚡ Prueba encendido</button>
+            <button class="btn">+ Nuevo equipo</button>
+          </div>
         </div>
         <div class="card-body" style="padding:0;max-height:560px;overflow-y:auto">
           <table>
             <thead style="position:sticky;top:0;background:var(--surface);z-index:1">
-              <tr><th>ID</th><th>Equipo</th><th>Marca · Modelo</th><th>N° Serie</th><th>Insumos directos</th><th>Insumos indirectos</th><th>Manual</th><th>Estado</th></tr>
+              <tr><th>ID</th><th>Equipo</th><th>Marca · Modelo</th><th>N° Serie</th><th>Insumos directos</th><th>Insumos indirectos</th><th>Manual</th><th style="width:110px">Prueba encendido</th><th>Estado</th></tr>
             </thead>
             <tbody>
               <tr>
@@ -728,6 +732,7 @@
                 <td style="font-size:12px;color:var(--muted)">Ar · Target metálico · Vacío propio</td>
                 <td style="font-size:12px;color:var(--muted)">Pulidor metales · Acetona · IPA · Swipes</td>
                 <td><a href="https://drive.google.com/file/d/1oNdnpX2e7z6HxLD9EHOcAZPjiBFznLdU/view" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">📘 Drive</a></td>
+                <td id="eq-check-EQP-AMF-001" style="text-align:center"></td>
                 <td><span class="badge green">Operativo</span></td>
               </tr>
               <tr>
@@ -738,6 +743,7 @@
                 <td style="font-size:12px;color:var(--muted)">Gas 1 · Gas 2 · Vacío propio</td>
                 <td style="font-size:12px;color:var(--muted)">—</td>
                 <td><a href="https://drive.google.com/file/d/113csnttivrMTsleydY99AVo5gJS1fDaa/view" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">📘 Drive</a></td>
+                <td id="eq-check-EQP-AMF-002" style="text-align:center"></td>
                 <td><span class="badge muted">Inactivo</span></td>
               </tr>
               <tr>
@@ -748,6 +754,7 @@
                 <td style="font-size:12px;color:var(--muted)">Hilo de oro</td>
                 <td style="font-size:12px;color:var(--muted)">—</td>
                 <td><a href="https://drive.google.com/file/d/1hA0kdUt6GXr-GDExb2bWJ1_nVLleSNnB/view" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">📘 Drive</a></td>
+                <td id="eq-check-EQP-AMF-003" style="text-align:center"></td>
                 <td><span class="badge green">Operativo</span></td>
               </tr>
               <tr>
@@ -758,6 +765,7 @@
                 <td style="font-size:12px;color:var(--muted)">Vacío 20–28" Hg · CDA 60 PSI · N₂ 40 PSI</td>
                 <td style="font-size:12px;color:var(--muted)">—</td>
                 <td><a href="https://drive.google.com/drive/folders/1gYQTRFFz_UapKXBVs7mg0zNxU9xbmdpa" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">📘 Drive</a></td>
+                <td id="eq-check-EQP-AMF-004" style="text-align:center"></td>
                 <td><span class="badge green">Operativo</span></td>
               </tr>
               <tr>
@@ -768,6 +776,7 @@
                 <td style="font-size:12px;color:var(--muted)">—</td>
                 <td style="font-size:12px;color:var(--muted)">—</td>
                 <td><a href="https://drive.google.com/drive/folders/1hw2I19e9qMSS_wCtSTa13FJp8o4U6-SR" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">📘 Drive</a></td>
+                <td id="eq-check-EQP-AMF-005" style="text-align:center"></td>
                 <td><span class="badge green">Operativo</span></td>
               </tr>
               <tr>
@@ -778,6 +787,7 @@
                 <td style="font-size:12px;color:var(--muted)">—</td>
                 <td style="font-size:12px;color:var(--muted)">Acetona · IPA · Protector de metales</td>
                 <td style="color:var(--muted);font-size:12px">—</td>
+                <td id="eq-check-EQP-AMF-006" style="text-align:center"></td>
                 <td><span class="badge green">Operativo</span></td>
               </tr>
               <tr>
@@ -788,6 +798,7 @@
                 <td style="font-size:12px;color:var(--muted)">—</td>
                 <td style="font-size:12px;color:var(--muted)">Acetona · IPA · Protector de metales</td>
                 <td style="color:var(--muted);font-size:12px">—</td>
+                <td id="eq-check-EQP-AMF-007" style="text-align:center"></td>
                 <td><span class="badge green">Operativo</span></td>
               </tr>
               <tr>
@@ -798,6 +809,7 @@
                 <td style="font-size:12px;color:var(--muted)">—</td>
                 <td style="font-size:12px;color:var(--muted)">—</td>
                 <td><a href="https://drive.google.com/file/d/10dWyEalOwRfAptQ6BYfIykDLLAdV2nCE/view" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">📘 Drive</a></td>
+                <td id="eq-check-EQP-AMF-008" style="text-align:center"></td>
                 <td><span class="badge green">Operativo</span></td>
               </tr>
               <tr>
@@ -808,6 +820,7 @@
                 <td style="font-size:12px;color:var(--muted)">N₂ / CDA 60–70 psi · Vacío · AC</td>
                 <td style="font-size:12px;color:var(--muted)">Papel aluminio · Swipes · Pinzas planas</td>
                 <td style="color:var(--muted);font-size:12px">—</td>
+                <td id="eq-check-EQP-AMF-009" style="text-align:center"></td>
                 <td><span class="badge green">Operativo</span></td>
               </tr>
               <tr>
@@ -818,6 +831,7 @@
                 <td style="font-size:12px;color:var(--muted)">Sala limpia</td>
                 <td style="font-size:12px;color:var(--muted)">—</td>
                 <td style="color:var(--muted);font-size:12px">—</td>
+                <td id="eq-check-EQP-AMF-010" style="text-align:center"></td>
                 <td><span class="badge red">⚠ Revisar</span></td>
               </tr>
               <tr>
@@ -828,6 +842,7 @@
                 <td style="font-size:12px;color:var(--muted)">Lámpara UV</td>
                 <td style="font-size:12px;color:var(--muted)">—</td>
                 <td><a href="https://drive.google.com/drive/folders/1gYQTRFFz_UapKXBVs7mg0zNxU9xbmdpa" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">📘 Drive</a></td>
+                <td id="eq-check-EQP-AMF-011" style="text-align:center"></td>
                 <td><span class="badge green">Operativo</span></td>
               </tr>
               <tr>
@@ -838,6 +853,7 @@
                 <td style="font-size:12px;color:var(--muted)">Lámpara UV</td>
                 <td style="font-size:12px;color:var(--muted)">—</td>
                 <td style="color:var(--muted);font-size:12px">—</td>
+                <td id="eq-check-EQP-AMF-012" style="text-align:center"></td>
                 <td><span class="badge amber">⚡ 892/1000h</span></td>
               </tr>
               <tr>
@@ -848,6 +864,7 @@
                 <td style="font-size:12px;color:var(--muted)">Sala limpia</td>
                 <td style="font-size:12px;color:var(--muted)">—</td>
                 <td style="color:var(--muted);font-size:12px">—</td>
+                <td id="eq-check-EQP-AMF-013" style="text-align:center"></td>
                 <td><span class="badge purple">214d s/rev.</span></td>
               </tr>
               <tr>
@@ -858,6 +875,7 @@
                 <td style="font-size:12px;color:var(--muted)">Ar · N₂ · Gases de proceso</td>
                 <td style="font-size:12px;color:var(--muted)">—</td>
                 <td style="color:var(--muted);font-size:12px">—</td>
+                <td id="eq-check-EQP-AMF-014" style="text-align:center"></td>
                 <td><span class="badge green">Operativo</span></td>
               </tr>
               <!-- EQUIPOS SIN ID OFICIAL AÚN (fuente: Equipamiento AMF y sala gris.xlsx) -->
@@ -2892,6 +2910,31 @@
     </div>
 
     <!-- ══ MODAL: Relevamiento de Insumos ══ -->
+    <!-- ══ MODAL: Prueba de Encendido de Equipos ══ -->
+    <div id="eq-check-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:510;align-items:flex-start;justify-content:center;padding-top:40px;overflow-y:auto">
+      <div style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;width:640px;max-width:96vw;margin-bottom:48px;overflow:hidden">
+        <div style="padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+          <div>
+            <div style="font-weight:700;font-size:15px">⚡ Prueba de Encendido</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px" id="eq-check-date-label"></div>
+          </div>
+          <button onclick="closeEqCheck()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+        </div>
+        <div style="padding:16px 22px;max-height:60vh;overflow-y:auto">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Registrá el resultado de encendido de cada equipo y sistema central. Marcá ✓ OK, ✗ Falla o — N/A.</div>
+          <div id="eq-check-rows"></div>
+          <div style="margin-top:14px">
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Observaciones generales</label>
+            <textarea id="eq-check-notes" rows="3" placeholder="Ej: Bomba de vacío tardó más en estabilizar. Revisar filtro HEPA." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px;font-family:var(--font);resize:vertical;box-sizing:border-box"></textarea>
+          </div>
+        </div>
+        <div style="padding:12px 22px 18px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--border)">
+          <button class="btn" onclick="closeEqCheck()">Cancelar</button>
+          <button class="btn btn-primary" onclick="saveEqCheck()">⚡ Guardar prueba</button>
+        </div>
+      </div>
+    </div>
+
     <div id="insumo-relev-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:510;align-items:center;justify-content:center">
       <div style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;width:600px;max-width:96vw;max-height:90vh;display:flex;flex-direction:column;overflow:hidden">
         <div style="padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
@@ -3375,7 +3418,9 @@ function saveAll() {
       stockItems: stockItems,
       stockLastRelev: stockLastRelev,
       consumiblesItems: consumiblesItems,
-      consumiblesLastRelev: consumiblesLastRelev
+      consumiblesLastRelev: consumiblesLastRelev,
+      eqChecks: eqChecks,
+      eqLastCheck: eqLastCheck
     };
     localStorage.setItem(LS_KEY, JSON.stringify(snap));
   } catch(e) { console.warn('localStorage save failed', e); }
@@ -3403,6 +3448,8 @@ function loadAll() {
     if (snap.stockLastRelev) stockLastRelev = snap.stockLastRelev;
     if (snap.consumiblesItems) consumiblesItems = snap.consumiblesItems;
     if (snap.consumiblesLastRelev) consumiblesLastRelev = snap.consumiblesLastRelev;
+    if (snap.eqChecks) eqChecks = snap.eqChecks;
+    if (snap.eqLastCheck) eqLastCheck = snap.eqLastCheck;
     return true;
   } catch(e) { console.warn('localStorage load failed', e); return false; }
 }
@@ -3521,6 +3568,7 @@ function show(id) {
   document.getElementById('topbar-sub').textContent = subs[id];
   if (id === 'procesos') renderProcesos();
   if (id === 'stock') renderStock();
+  if (id === 'equipos') { renderEqCycleBanner(); renderEqCheckCells(); }
 }
 
 function openModal() { document.getElementById('modal-bg').style.display='flex'; }
@@ -3871,6 +3919,204 @@ function initQRButtons() {
   });
 }
 setTimeout(initQRButtons, 200);
+
+// ═══════════ PRUEBA DE ENCENDIDO — EQUIPOS ═══════════
+
+const EQ_CHECK_LIST = [
+  {id:'EQP-AMF-001', name:'Sputter Coater',           group:'Deposición'},
+  {id:'EQP-AMF-002', name:'Plasma Etching',            group:'Grabado'},
+  {id:'EQP-AMF-003', name:'Wire Bonder',               group:'Bonding'},
+  {id:'EQP-AMF-004', name:'Alineador de Máscara',      group:'Litografía'},
+  {id:'EQP-AMF-005', name:'Purificador de Agua',       group:'Sistemas centrales'},
+  {id:'EQP-AMF-006', name:'Estación de Trabajo N°687', group:'Infraestructura'},
+  {id:'EQP-AMF-007', name:'Estación de Trabajo N°686', group:'Infraestructura'},
+  {id:'EQP-AMF-008', name:'Bomba de Vacío (Edwards)',  group:'Sistemas centrales'},
+  {id:'EQP-AMF-009', name:'Spin Processor',            group:'Litografía'},
+  {id:'EQP-AMF-010', name:'Filtro HEPA',               group:'Sistemas centrales'},
+  {id:'EQP-AMF-011', name:'Controlador UV',            group:'Litografía'},
+  {id:'EQP-AMF-012', name:'Fuente de Luz UV',          group:'Litografía'},
+  {id:'EQP-AMF-013', name:'Sistema de Aire (AACC)',    group:'Sistemas centrales'},
+  {id:'EQP-AMF-014', name:'Sistema de Gases',          group:'Sistemas centrales'},
+];
+
+// eqChecks: { [id]: { lastCheckDate: ISO, lastResult: 'ok'|'falla'|'na', lastNotes: '' } }
+let eqChecks = {};
+let eqLastCheck = null; // { date: ISO, notes: string, results: {id: result} }
+let eqCheckWorking = {}; // temp state during modal
+
+function initEqChecks() {
+  EQ_CHECK_LIST.forEach(eq => {
+    if (!eqChecks[eq.id]) eqChecks[eq.id] = { lastCheckDate: null, lastResult: null, lastNotes: '' };
+  });
+}
+
+function renderEqCycleBanner() {
+  const banner = document.getElementById('eq-cycle-banner');
+  if (!banner) return;
+  initEqChecks();
+  const CYCLE_DAYS = 90;
+  const now = new Date();
+  const checked = EQ_CHECK_LIST.filter(eq => eqChecks[eq.id]?.lastCheckDate).length;
+  const total = EQ_CHECK_LIST.length;
+
+  if (!eqLastCheck) {
+    banner.innerHTML = `<div style="margin-bottom:14px;padding:12px 16px;border-radius:9px;background:var(--amber-dim);border:1px solid rgba(217,119,6,0.2);display:flex;align-items:center;gap:12px">
+      <span style="font-size:20px">⚡</span>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--amber)">Sin prueba de encendido registrada</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Realizá la primera prueba para activar el ciclo de 90 días — ${total} equipos y sistemas a verificar.</div>
+      </div>
+      <div style="margin-left:auto"><button class="btn" onclick="openEqCheck()" style="white-space:nowrap;font-size:12px">⚡ Registrar ahora</button></div>
+    </div>`;
+    return;
+  }
+
+  const lastDate = new Date(eqLastCheck.date);
+  const daysSince = Math.floor((now - lastDate) / 86400000);
+  const daysLeft = CYCLE_DAYS - daysSince;
+  const pct = Math.min(100, Math.round((daysSince / CYCLE_DAYS) * 100));
+  const nextDate = new Date(lastDate.getTime() + CYCLE_DAYS * 86400000);
+  const nextStr = nextDate.toLocaleDateString('es-AR', {day:'2-digit', month:'2-digit', year:'numeric'});
+  const results = eqLastCheck.results || {};
+  const fallas = Object.values(results).filter(r => r === 'falla').length;
+
+  let statusColor, statusIcon, statusLabel;
+  if (daysLeft < 0) { statusColor = 'var(--red)'; statusIcon = '🔴'; statusLabel = `Vencido hace ${-daysLeft} días`; }
+  else if (daysLeft <= 14) { statusColor = 'var(--amber)'; statusIcon = '🟡'; statusLabel = `Vence en ${daysLeft} día${daysLeft!==1?'s':''}`; }
+  else { statusColor = 'var(--green)'; statusIcon = '🟢'; statusLabel = `Próximo en ${daysLeft} días (${nextStr})`; }
+
+  const barColor = daysLeft < 0 ? 'var(--red)' : daysLeft <= 14 ? 'var(--amber)' : 'var(--green)';
+  const fallaStr = fallas > 0 ? ` · <span style="color:var(--red);font-weight:600">${fallas} falla${fallas!==1?'s':''} registrada${fallas!==1?'s':''}</span>` : '';
+
+  banner.innerHTML = `<div style="margin-bottom:14px;padding:12px 16px;border-radius:9px;background:var(--surface);border:1px solid var(--border2)">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+      <span style="font-size:16px">${statusIcon}</span>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600">Ciclo de prueba de encendido — cada 90 días</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:1px">
+          Última prueba: <strong style="font-family:var(--mono);color:var(--text)">${lastDate.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'})}</strong>
+          · ${daysSince === 0 ? 'realizada hoy' : `hace ${daysSince} día${daysSince!==1?'s':''}`}
+          · ${checked}/${total} equipos relevados${fallaStr}
+          ${eqLastCheck.notes ? `<br><span style="color:var(--muted);font-style:italic">"${eqLastCheck.notes.slice(0,80)}${eqLastCheck.notes.length>80?'…':''}"</span>` : ''}
+        </div>
+      </div>
+      <div style="text-align:right;white-space:nowrap">
+        <div style="font-size:12px;font-weight:600;color:${statusColor}">${statusLabel}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:1px">${pct}% del ciclo</div>
+      </div>
+    </div>
+    <div style="height:5px;border-radius:99px;background:var(--surface2);overflow:hidden">
+      <div style="height:100%;width:${pct}%;background:${barColor};border-radius:99px;transition:width 0.4s"></div>
+    </div>
+  </div>`;
+}
+
+function renderEqCheckCells() {
+  initEqChecks();
+  EQ_CHECK_LIST.forEach(eq => {
+    const cell = document.getElementById(`eq-check-${eq.id}`);
+    if (!cell) return;
+    const ch = eqChecks[eq.id];
+    if (!ch || !ch.lastCheckDate) {
+      cell.innerHTML = '<span style="font-size:11px;color:var(--muted)">—</span>';
+      return;
+    }
+    const d = new Date(ch.lastCheckDate);
+    const days = Math.floor((new Date() - d) / 86400000);
+    const label = d.toLocaleDateString('es-AR', {day:'2-digit', month:'2-digit', year:'2-digit'});
+    const age = days === 0 ? 'hoy' : days === 1 ? 'ayer' : `hace ${days}d`;
+    let color = 'var(--green)';
+    if (days > 90) color = 'var(--red)';
+    else if (days > 60) color = 'var(--amber)';
+    const resultIcon = ch.lastResult === 'falla' ? '✗' : ch.lastResult === 'na' ? '—' : '✓';
+    const resultColor = ch.lastResult === 'falla' ? 'var(--red)' : ch.lastResult === 'na' ? 'var(--muted)' : 'var(--green)';
+    cell.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+      <span style="font-size:13px;font-weight:700;color:${resultColor}">${resultIcon}</span>
+      <span style="font-family:var(--mono);font-size:10px">${label}</span>
+      <span style="font-size:10px;color:${color}">${age}</span>
+    </div>`;
+  });
+}
+
+function openEqCheck() {
+  initEqChecks();
+  eqCheckWorking = {};
+  EQ_CHECK_LIST.forEach(eq => { eqCheckWorking[eq.id] = eqChecks[eq.id]?.lastResult || 'ok'; });
+
+  document.getElementById('eq-check-date-label').textContent =
+    'Fecha: ' + new Date().toLocaleDateString('es-AR', {weekday:'long', day:'2-digit', month:'long', year:'numeric'});
+  document.getElementById('eq-check-notes').value = '';
+
+  // Group by group
+  const groups = {};
+  EQ_CHECK_LIST.forEach(eq => {
+    if (!groups[eq.group]) groups[eq.group] = [];
+    groups[eq.group].push(eq);
+  });
+
+  const rowsEl = document.getElementById('eq-check-rows');
+  rowsEl.innerHTML = Object.entries(groups).map(([group, eqs]) => `
+    <div style="margin-bottom:12px">
+      <div style="font-size:10.5px;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">${group}</div>
+      ${eqs.map(eq => {
+        const cur = eqCheckWorking[eq.id] || 'ok';
+        const lastDate = eqChecks[eq.id]?.lastCheckDate ? new Date(eqChecks[eq.id].lastCheckDate).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'}) : '—';
+        return `<div style="display:grid;grid-template-columns:1fr auto auto auto 80px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
+          <div>
+            <div style="font-size:13px;font-weight:500">${eq.name}</div>
+            <div style="font-size:10px;color:var(--muted)">Último: ${lastDate}</div>
+          </div>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;color:var(--green)">
+            <input type="radio" name="eq-res-${eq.id}" value="ok" ${cur==='ok'?'checked':''} onchange="eqCheckWorking['${eq.id}']=this.value">
+            <span style="font-weight:700">✓</span> OK
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;color:var(--red)">
+            <input type="radio" name="eq-res-${eq.id}" value="falla" ${cur==='falla'?'checked':''} onchange="eqCheckWorking['${eq.id}']=this.value">
+            <span style="font-weight:700">✗</span> Falla
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;color:var(--muted)">
+            <input type="radio" name="eq-res-${eq.id}" value="na" ${cur==='na'?'checked':''} onchange="eqCheckWorking['${eq.id}']=this.value">
+            — N/A
+          </label>
+          <input type="text" placeholder="Obs." id="eq-note-${eq.id}" value="${eqChecks[eq.id]?.lastNotes||''}"
+            style="font-size:11px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:4px 7px;border-radius:5px;font-family:var(--font);width:100%;box-sizing:border-box">
+        </div>`;
+      }).join('')}
+    </div>`
+  ).join('');
+
+  document.getElementById('eq-check-bg').style.display = 'flex';
+}
+
+function closeEqCheck() {
+  document.getElementById('eq-check-bg').style.display = 'none';
+}
+
+function saveEqCheck() {
+  initEqChecks();
+  const now = new Date().toISOString();
+  const results = {};
+  EQ_CHECK_LIST.forEach(eq => {
+    const radios = document.querySelectorAll(`input[name="eq-res-${eq.id}"]`);
+    let result = 'ok';
+    radios.forEach(r => { if (r.checked) result = r.value; });
+    const noteEl = document.getElementById(`eq-note-${eq.id}`);
+    eqChecks[eq.id] = { lastCheckDate: now, lastResult: result, lastNotes: noteEl ? noteEl.value.trim() : '' };
+    results[eq.id] = result;
+  });
+  const notes = document.getElementById('eq-check-notes').value.trim();
+  eqLastCheck = { date: now, notes, results };
+  saveAll();
+  closeEqCheck();
+  renderEqCheckCells();
+  renderEqCycleBanner();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const bg = document.getElementById('eq-check-bg');
+  if (bg) bg.addEventListener('click', e => { if(e.target===bg) closeEqCheck(); });
+});
+
 
 // ═══════════ STOCK / INSUMOS ═══════════
 let stockLastRelev = null;  // { date: ISO string, snapshot: {id -> qty} }
