@@ -192,6 +192,15 @@
     font-size:13px; font-weight:600; box-sizing:border-box;
   }
   .relev-qty-input:focus { outline:none; border-color:var(--accent); }
+  .stock-tab {
+    padding: 9px 20px; border: none; background: none; cursor: pointer;
+    font-family: var(--font); font-size: 13px; font-weight: 500;
+    color: var(--muted); border-bottom: 3px solid transparent;
+    margin-bottom: -2px; transition: color 0.15s, border-color 0.15s;
+  }
+  .stock-tab:hover { color: var(--accent); }
+  .stock-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
 
   /* PROCESOS — panel UI */
   .proc-layout { display: grid; grid-template-columns: 290px 1fr; gap: 16px; align-items: start; }
@@ -1071,43 +1080,84 @@
 
     <!-- ═══════════ STOCK ═══════════ -->
     <div class="section" id="sec-stock">
-      <!-- HEADER -->
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
-        <input id="stock-search" type="text" placeholder="Buscar droga o insumo..." oninput="renderStock()"
-          style="flex:1;min-width:180px;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:8px 12px;border-radius:7px;font-family:var(--font);font-size:13px">
-        <div id="stock-cat-pills" style="display:flex;gap:5px;flex-wrap:wrap"></div>
-        <button class="btn" onclick="openStockRelev()" style="white-space:nowrap">📋 Relevar stock</button>
-        <button class="btn btn-primary" onclick="openStockNew()" style="white-space:nowrap">+ Nuevo insumo</button>
+
+      <!-- TABS -->
+      <div style="display:flex;gap:0;margin-bottom:18px;border-bottom:2px solid var(--border)">
+        <button id="stock-tab-drogas" class="stock-tab active" onclick="setStockTab('drogas')">
+          Drogas y Químicos
+        </button>
+        <button id="stock-tab-insumos" class="stock-tab" onclick="setStockTab('insumos')">
+          Insumos y Consumibles
+        </button>
       </div>
 
-      <!-- KPI row -->
-      <div id="stock-kpi-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px"></div>
-
-      <!-- Tabla -->
-      <div class="card">
-        <div class="card-body" style="padding:0">
-          <div style="overflow-x:auto;max-height:540px;overflow-y:auto">
-            <table id="stock-table" style="width:100%;border-collapse:collapse">
-              <thead style="position:sticky;top:0;background:var(--surface);z-index:2">
-                <tr>
-                  <th>Droga / Insumo</th>
-                  <th>Categoría</th>
-                  <th style="text-align:center;width:200px">Cantidad actual</th>
-                  <th style="text-align:center;width:90px">vs. anterior</th>
-                  <th>Almacenamiento</th>
-                  <th>Uso / Aplicación</th>
-                  <th style="width:80px"></th>
-                </tr>
-              </thead>
-              <tbody id="stock-tbody"></tbody>
-            </table>
+      <!-- ── PANEL: Drogas y Químicos ── -->
+      <div id="stock-panel-drogas">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+          <input id="stock-search" type="text" placeholder="Buscar droga o insumo..." oninput="renderStock()"
+            style="flex:1;min-width:180px;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:8px 12px;border-radius:7px;font-family:var(--font);font-size:13px">
+          <div id="stock-cat-pills" style="display:flex;gap:5px;flex-wrap:wrap"></div>
+          <button class="btn" onclick="openStockRelev()" style="white-space:nowrap">📋 Relevar</button>
+          <button class="btn btn-primary" onclick="openStockNew()" style="white-space:nowrap">+ Nuevo</button>
+        </div>
+        <div id="stock-kpi-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px"></div>
+        <div class="card">
+          <div class="card-body" style="padding:0">
+            <div style="overflow-x:auto;max-height:520px;overflow-y:auto">
+              <table style="width:100%;border-collapse:collapse">
+                <thead style="position:sticky;top:0;background:var(--surface);z-index:2">
+                  <tr>
+                    <th>Droga / Insumo</th>
+                    <th>Categoría</th>
+                    <th style="text-align:center;width:200px">Cantidad</th>
+                    <th style="text-align:center;width:90px">Δ vs ant.</th>
+                    <th>Almacenamiento</th>
+                    <th>Uso</th>
+                    <th style="width:70px"></th>
+                  </tr>
+                </thead>
+                <tbody id="stock-tbody"></tbody>
+              </table>
+            </div>
           </div>
         </div>
+        <div id="stock-relev-note" style="margin-top:8px;font-size:11px;color:var(--muted);text-align:right"></div>
       </div>
 
-      <div id="stock-relev-note" style="margin-top:8px;font-size:11px;color:var(--muted);text-align:right"></div>
-    </div>
+      <!-- ── PANEL: Insumos y Consumibles ── -->
+      <div id="stock-panel-insumos" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+          <input id="insumo-search" type="text" placeholder="Buscar consumible..." oninput="renderInsumos()"
+            style="flex:1;min-width:180px;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:8px 12px;border-radius:7px;font-family:var(--font);font-size:13px">
+          <div id="insumo-cat-pills" style="display:flex;gap:5px;flex-wrap:wrap"></div>
+          <button class="btn" onclick="openInsumoRelev()" style="white-space:nowrap">📋 Relevar</button>
+          <button class="btn btn-primary" onclick="openInsumoNew()" style="white-space:nowrap">+ Nuevo</button>
+        </div>
+        <div id="insumo-kpi-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px"></div>
+        <div class="card">
+          <div class="card-body" style="padding:0">
+            <div style="overflow-x:auto;max-height:520px;overflow-y:auto">
+              <table style="width:100%;border-collapse:collapse">
+                <thead style="position:sticky;top:0;background:var(--surface);z-index:2">
+                  <tr>
+                    <th>Consumible / Insumo</th>
+                    <th>Categoría</th>
+                    <th style="text-align:center;width:200px">Cantidad</th>
+                    <th style="text-align:center;width:90px">Δ vs ant.</th>
+                    <th>Proveedor / Ref.</th>
+                    <th>Uso</th>
+                    <th style="width:70px"></th>
+                  </tr>
+                </thead>
+                <tbody id="insumo-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div id="insumo-relev-note" style="margin-top:8px;font-size:11px;color:var(--muted);text-align:right"></div>
+      </div>
 
+    </div>
 
     <!-- ═══════════ PERSONAL ═══════════ -->
     <div class="section" id="sec-personal">
@@ -2784,6 +2834,83 @@
       </div>
     </div>
 
+    <!-- ══ MODAL: Nuevo/Editar Consumible ══ -->
+    <div id="insumo-new-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:510;align-items:center;justify-content:center">
+      <div style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;width:480px;max-width:96vw;padding:0;overflow:hidden">
+        <div style="padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+          <div style="font-weight:700;font-size:15px" id="insumo-new-title">Nuevo consumible</div>
+          <button onclick="closeInsumoNew()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+        </div>
+        <div style="padding:18px 22px;display:flex;flex-direction:column;gap:12px">
+          <input type="hidden" id="insumo-edit-id">
+          <div>
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Nombre *</label>
+            <input id="insumo-new-name" type="text" placeholder="Ej: Oblea Si 100mm" style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px;font-family:var(--font)">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div>
+              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Categoría *</label>
+              <select id="insumo-new-cat" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px;font-family:var(--font)">
+                <option>Sustratos</option><option>Gases</option><option>Targets</option>
+                <option>Tubería/Conexiones</option><option>Herramientas</option><option>Descartables</option>
+                <option>Wire Bonding</option><option>Otro</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Unidad</label>
+              <input id="insumo-new-unit" type="text" placeholder="unid, m, kg..." style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px;font-family:var(--font)">
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div>
+              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Cantidad actual</label>
+              <input id="insumo-new-qty" type="number" min="0" placeholder="0" style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px;font-family:var(--mono)">
+            </div>
+            <div>
+              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Mínimo alerta</label>
+              <input id="insumo-new-min" type="number" min="0" placeholder="0" style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px;font-family:var(--mono)">
+            </div>
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Proveedor / Referencia</label>
+            <input id="insumo-new-prov" type="text" placeholder="Ej: Siegert Wafer · SW-P100-100-525" style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px;font-family:var(--font)">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Uso / Aplicación</label>
+            <input id="insumo-new-uso" type="text" placeholder="Ej: Sustrato fotolitografía" style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px;font-family:var(--font)">
+          </div>
+        </div>
+        <div style="padding:0 22px 18px;display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn" onclick="closeInsumoNew()">Cancelar</button>
+          <button class="btn btn-primary" onclick="saveInsumoItem()">Guardar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MODAL: Relevamiento de Insumos ══ -->
+    <div id="insumo-relev-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:510;align-items:center;justify-content:center">
+      <div style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;width:600px;max-width:96vw;max-height:90vh;display:flex;flex-direction:column;overflow:hidden">
+        <div style="padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+          <div>
+            <div style="font-weight:700;font-size:15px">Relevar Consumibles</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Actualizá las cantidades. Los cambios quedan registrados como nuevo relevamiento.</div>
+          </div>
+          <button onclick="closeInsumoRelev()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+        </div>
+        <div style="overflow-y:auto;padding:16px 22px;flex:1">
+          <div style="display:grid;grid-template-columns:1fr 110px 90px 70px;gap:8px;font-size:10.5px;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:4px">
+            <span>Consumible</span><span style="text-align:center">Cant. actual</span><span style="text-align:center">Nueva</span><span style="text-align:center">Δ</span>
+          </div>
+          <div id="insumo-relev-body"></div>
+        </div>
+        <div style="padding:12px 22px 18px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--border);flex-shrink:0">
+          <button class="btn" onclick="closeInsumoRelev()">Cancelar</button>
+          <button class="btn btn-primary" onclick="saveInsumoRelev()">💾 Guardar relevamiento</button>
+        </div>
+      </div>
+    </div>
+
+
     <!-- ══ MODAL: Nuevo/Editar insumo ══ -->
     <div id="stock-new-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:510;align-items:center;justify-content:center">
       <div style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;width:480px;max-width:96vw;padding:0;overflow:hidden">
@@ -3242,7 +3369,9 @@ function saveAll() {
       procesos: procesos,
       procesoCounter: procesoCounter,
       stockItems: stockItems,
-      stockLastRelev: stockLastRelev
+      stockLastRelev: stockLastRelev,
+      consumiblesItems: consumiblesItems,
+      consumiblesLastRelev: consumiblesLastRelev
     };
     localStorage.setItem(LS_KEY, JSON.stringify(snap));
   } catch(e) { console.warn('localStorage save failed', e); }
@@ -3268,6 +3397,8 @@ function loadAll() {
     if (snap.procesoCounter) procesoCounter = snap.procesoCounter;
     if (snap.stockItems) stockItems = snap.stockItems;
     if (snap.stockLastRelev) stockLastRelev = snap.stockLastRelev;
+    if (snap.consumiblesItems) consumiblesItems = snap.consumiblesItems;
+    if (snap.consumiblesLastRelev) consumiblesLastRelev = snap.consumiblesLastRelev;
     return true;
   } catch(e) { console.warn('localStorage load failed', e); return false; }
 }
@@ -4047,6 +4178,299 @@ document.addEventListener('DOMContentLoaded', function() {
   const sb = document.getElementById('stock-new-bg');
   if (sb) sb.addEventListener('click', e => { if(e.target===sb) closeStockNew(); });
 });
+
+// ═══ INSUMOS Y CONSUMIBLES ═══
+
+const CONSUMIBLES_DEFAULT = [
+  // Sustratos
+  {id:'wafer_si_100', name:'Oblea Si 100mm p-type ⟨100⟩', cat:'Sustratos', qty:8, unit:'unid', min:3, lastQty:null, prov:'Siegert Wafer · SW-P100-100-525', uso:'Sustrato base fotolitografía, deposición'},
+  {id:'wafer_si_50',  name:'Oblea Si 50mm p-type ⟨100⟩',  cat:'Sustratos', qty:12, unit:'unid', min:4, lastQty:null, prov:'Siegert Wafer · SW-P050-100-280', uso:'Prototipos y pruebas'},
+  {id:'vidrio_corning', name:'Vidrio Corning 0211 (25×75mm)', cat:'Sustratos', qty:40, unit:'unid', min:10, lastQty:null, prov:'Corning / Soluciones Fotónicas', uso:'Microscopía, electrodos Au, PDMS bonding'},
+  {id:'vidrio_boro', name:'Vidrio borosilicato 100mm',  cat:'Sustratos', qty:5, unit:'unid', min:2, lastQty:null, prov:'Mark Optics',  uso:'Dispositivos microfluídicos'},
+  {id:'cu_foil',     name:'Lámina Cu (Cu foil 18µm)',   cat:'Sustratos', qty:2, unit:'m²', min:0.5, lastQty:null, prov:'Alfa Aesar',  uso:'Deposición Cu, electrodos'},
+
+  // Gases
+  {id:'gas_ar',      name:'Argón (Ar) 99.999%',         cat:'Gases', qty:1, unit:'cilindro', min:1, lastQty:null, prov:'Linde · 50L · 200bar', uso:'Sputtering, plasma'},
+  {id:'gas_n2',      name:'Nitrógeno (N₂) 99.998%',     cat:'Gases', qty:2, unit:'cilindro', min:1, lastQty:null, prov:'Linde · 50L · 200bar', uso:'Purga, secado de obleas, glove box'},
+  {id:'gas_o2',      name:'Oxígeno (O₂) 99.5%',         cat:'Gases', qty:1, unit:'cilindro', min:1, lastQty:null, prov:'Linde · 10L · 200bar', uso:'Plasma etching O₂, oxidación'},
+  {id:'gas_sf6',     name:'SF₆ 99.5%',                  cat:'Gases', qty:1, unit:'cilindro', min:0, lastQty:null, prov:'Linde · 10L · 50bar',  uso:'Plasma dry etching Si (Bosch process)'},
+
+  // Targets sputtering
+  {id:'target_au',   name:'Target Au 99.99% (50mm)',     cat:'Targets', qty:1, unit:'unid', min:1, lastQty:null, prov:'Plasmaterials / Kurt Lesker', uso:'Sputtering Au electrodes, biosensors'},
+  {id:'target_cr',   name:'Target Cr 99.95% (50mm)',     cat:'Targets', qty:1, unit:'unid', min:1, lastQty:null, prov:'Plasmaterials',  uso:'Capa adhesión Cr/Au'},
+  {id:'target_ti',   name:'Target Ti 99.99% (50mm)',     cat:'Targets', qty:1, unit:'unid', min:1, lastQty:null, prov:'Kurt Lesker',    uso:'Capa adhesión Ti/Au'},
+  {id:'target_al',   name:'Target Al 99.999% (50mm)',    cat:'Targets', qty:1, unit:'unid', min:0, lastQty:null, prov:'Plasmaterials',  uso:'Metalización Al, interconexiones'},
+
+  // Tubería y conexiones
+  {id:'tub_silicona', name:'Tubería silicona ID 1mm',   cat:'Tubería/Conexiones', qty:5, unit:'m', min:1, lastQty:null, prov:'Tygon / Sigma',   uso:'Microfluídica, conexiones bomba'},
+  {id:'tub_pdms',     name:'Tubería PDMS ID 0.5mm',     cat:'Tubería/Conexiones', qty:2, unit:'m', min:0.5, lastQty:null, prov:'Fabricación interna', uso:'Canales microfluídicos'},
+  {id:'conector_luer', name:'Luer lock adaptadores (1/16")', cat:'Tubería/Conexiones', qty:50, unit:'unid', min:20, lastQty:null, prov:'Kinesis / IDEX',   uso:'Puertos chips microfluídicos'},
+  {id:'jeringas_1ml',  name:'Jeringas 1 mL BD (sin aguja)', cat:'Descartables', qty:100, unit:'unid', min:30, lastQty:null, prov:'BD Plastipak',  uso:'Inyección reactivos, microfluídica'},
+  {id:'jeringas_10ml', name:'Jeringas 10 mL BD',            cat:'Descartables', qty:50,  unit:'unid', min:10, lastQty:null, prov:'BD Plastipak',  uso:'Preparación soluciones'},
+
+  // Descartables
+  {id:'biopsy_2mm',    name:'Biopsy punch 2mm (Robbins)',   cat:'Descartables', qty:30, unit:'unid', min:10, lastQty:null, prov:'Robbins Instruments',  uso:'Perforación puertos PDMS'},
+  {id:'biopsy_1mm',    name:'Biopsy punch 1mm',             cat:'Descartables', qty:20, unit:'unid', min:5,  lastQty:null, prov:'Robbins Instruments',  uso:'Puertos microfluídicos finos'},
+  {id:'guantes_nitr',  name:'Guantes nitrilo S/M/L',        cat:'Descartables', qty:3,  unit:'caja', min:1,  lastQty:null, prov:'Kimberly-Clark / local', uso:'EPI sala limpia'},
+  {id:'toallas_kimwipes', name:'Toallas Kimwipes lint-free', cat:'Descartables', qty:4,  unit:'caja', min:1,  lastQty:null, prov:'Kimberly-Clark',  uso:'Limpieza óptica y superficies'},
+  {id:'wafer_boats',   name:'Porta-obleas (wafer boats) 4"',cat:'Descartables', qty:6,  unit:'unid', min:2,  lastQty:null, prov:'Entegris',         uso:'Transporte y almacenamiento obleas'},
+
+  // Wire Bonding
+  {id:'wire_au_25um',  name:'Hilo de Au 25 µm (25g spool)',  cat:'Wire Bonding', qty:2, unit:'spool', min:1, lastQty:null, prov:'Heraeus / MKS',  uso:'Wire bonding pads'},
+  {id:'wire_al_25um',  name:'Hilo de Al 25 µm',              cat:'Wire Bonding', qty:1, unit:'spool', min:0, lastQty:null, prov:'Heraeus',        uso:'Bonding Al — bajo costo'},
+  {id:'capillary',     name:'Capilar bonding 45°-25µm',      cat:'Wire Bonding', qty:3, unit:'unid', min:1, lastQty:null, prov:'SPT / PECO',     uso:'Punta bonder AMF-003'},
+];
+
+let consumiblesItems = [];
+let consumiblesLastRelev = null;
+let consumiblesCatFilter = 'all';
+let insumoRelevWorkingCopy = [];
+let insumoEditId = null;
+
+function initInsumos() {
+  if (consumiblesItems.length === 0) {
+    consumiblesItems = JSON.parse(JSON.stringify(CONSUMIBLES_DEFAULT));
+  }
+}
+
+function setStockTab(tab) {
+  document.getElementById('stock-tab-drogas').classList.toggle('active', tab === 'drogas');
+  document.getElementById('stock-tab-insumos').classList.toggle('active', tab === 'insumos');
+  document.getElementById('stock-panel-drogas').style.display = tab === 'drogas' ? '' : 'none';
+  document.getElementById('stock-panel-insumos').style.display = tab === 'insumos' ? '' : 'none';
+  if (tab === 'insumos') renderInsumos();
+}
+
+function setInsumoCat(cat) { consumiblesCatFilter = cat; renderInsumos(); }
+
+function calcInsumoDelta(item) {
+  if (item.lastQty === null || item.lastQty === undefined) return null;
+  if (item.lastQty === 0) return item.qty > 0 ? 100 : 0;
+  return Math.round(((item.qty - item.lastQty) / item.lastQty) * 100);
+}
+
+function renderInsumos() {
+  initInsumos();
+  const q = (document.getElementById('insumo-search')?.value || '').toLowerCase();
+  const cats = ['all', ...new Set(consumiblesItems.map(i => i.cat))];
+  const pillsEl = document.getElementById('insumo-cat-pills');
+  if (pillsEl) {
+    pillsEl.innerHTML = cats.map(c =>
+      `<span class="scat-pill ${consumiblesCatFilter===c?'active':''}" onclick="setInsumoCat(${JSON.stringify(c)})">${c==='all'?'Todas':c}</span>`
+    ).join('');
+  }
+  const filtered = consumiblesItems.filter(item => {
+    const matchCat = consumiblesCatFilter === 'all' || item.cat === consumiblesCatFilter;
+    const matchQ   = !q || item.name.toLowerCase().includes(q) || item.cat.toLowerCase().includes(q) || (item.prov||'').toLowerCase().includes(q);
+    return matchCat && matchQ;
+  });
+
+  const total = consumiblesItems.length;
+  const low   = consumiblesItems.filter(i => i.qty <= i.min).length;
+  const withRelev = consumiblesItems.filter(i => i.lastQty !== null).length;
+
+  const kpiEl = document.getElementById('insumo-kpi-row');
+  if (kpiEl) {
+    const kpis = [
+      {label:'Total ítems', val:total, color:'accent'},
+      {label:'Stock bajo', val:low, color: low>0?'red':'green'},
+      {label:'Con relevamiento', val:withRelev, color:'muted'},
+      {label:'Sin relevar', val:total-withRelev, color: (total-withRelev)>0?'amber':'green'},
+    ];
+    kpiEl.innerHTML = kpis.map(k =>
+      `<div class="card" style="padding:12px 14px">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px">${k.label}</div>
+        <div style="font-size:22px;font-weight:700;font-family:var(--mono);color:var(--${k.color})">${k.val}</div>
+      </div>`
+    ).join('');
+  }
+
+  const tbody = document.getElementById('insumo-tbody');
+  if (!tbody) return;
+  if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px;font-size:13px">Sin resultados</td></tr>'; return; }
+
+  tbody.innerHTML = filtered.map(item => {
+    const pct = calcInsumoDelta(item);
+    const deltaHtml = pct === null ? '<span class="stock-delta eq">—</span>'
+      : pct > 0 ? `<span class="stock-delta up">▲${pct}%</span>`
+      : pct < 0 ? `<span class="stock-delta down">▼${Math.abs(pct)}%</span>`
+      : '<span class="stock-delta eq">0%</span>';
+    const rowStyle = item.qty <= item.min ? 'background:var(--red-dim);' : '';
+    return `<tr style="${rowStyle}">
+      <td style="padding:10px 14px;font-size:13px;font-weight:500">${item.name}</td>
+      <td style="padding:10px 14px"><span style="font-size:11px;padding:2px 7px;border-radius:99px;background:var(--surface2);color:var(--muted);border:1px solid var(--border2)">${item.cat}</span></td>
+      <td style="padding:10px 14px;text-align:center">
+        <div class="stock-stepper">
+          <button onclick="insumoAdj('${item.id}',-1)" style="width:26px;height:26px;border-radius:5px;border:1px solid var(--border2);background:var(--surface2);cursor:pointer;font-size:14px;color:var(--muted)">−</button>
+          <input class="stock-qty-input" type="number" min="0" value="${item.qty}"
+            onchange="insumoSetQty('${item.id}',this.value)"
+            style="width:64px;text-align:center;font-family:var(--mono);font-size:13px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:4px 6px;border-radius:5px">
+          <button onclick="insumoAdj('${item.id}',1)" style="width:26px;height:26px;border-radius:5px;border:1px solid var(--border2);background:var(--surface2);cursor:pointer;font-size:14px;color:var(--muted)">+</button>
+          <span style="font-size:11px;color:var(--muted);margin-left:3px">${item.unit}</span>
+        </div>
+      </td>
+      <td style="padding:10px 14px;text-align:center">${deltaHtml}</td>
+      <td style="padding:10px 14px;font-size:12px;color:var(--muted)">${item.prov||'—'}</td>
+      <td style="padding:10px 14px;font-size:12px;color:var(--muted)">${item.uso||'—'}</td>
+      <td style="padding:10px 14px;text-align:right">
+        <button onclick="openInsumoEdit('${item.id}')" style="font-size:11px;background:none;border:1px solid var(--border2);border-radius:5px;padding:3px 8px;cursor:pointer;color:var(--muted)">Editar</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  const noteEl = document.getElementById('insumo-relev-note');
+  if (noteEl) {
+    if (consumiblesLastRelev) {
+      const d = new Date(consumiblesLastRelev.date);
+      noteEl.innerHTML = `Último relevamiento: <strong style="font-family:var(--mono)">${d.toLocaleDateString('es-AR')} ${d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})}</strong> — ${consumiblesItems.filter(i=>i.lastQty!==null).length} ítems registrados`;
+    } else {
+      noteEl.textContent = 'Sin relevamiento previo';
+    }
+  }
+}
+
+function insumoAdj(id, delta) {
+  initInsumos();
+  const item = consumiblesItems.find(i => i.id === id);
+  if (!item) return;
+  item.qty = Math.max(0, item.qty + delta);
+  saveAll(); renderInsumos();
+}
+
+function insumoSetQty(id, val) {
+  initInsumos();
+  const item = consumiblesItems.find(i => i.id === id);
+  if (!item) return;
+  item.qty = Math.max(0, parseFloat(val) || 0);
+  saveAll(); renderInsumos();
+}
+
+function openInsumoRelev() {
+  initInsumos();
+  insumoRelevWorkingCopy = consumiblesItems.map(i => ({ id:i.id, name:i.name, cat:i.cat, unit:i.unit, qty:i.qty, lastQty:i.lastQty }));
+  const body = document.getElementById('insumo-relev-body');
+  if (!body) return;
+  body.innerHTML = insumoRelevWorkingCopy.map((rc,idx) => `
+    <div class="relev-row">
+      <div>
+        <div style="font-size:13px;font-weight:500">${rc.name}</div>
+        <div style="font-size:11px;color:var(--muted)">${rc.cat}</div>
+      </div>
+      <div style="text-align:center;font-family:var(--mono);font-size:13px;color:var(--muted);padding-top:6px">${rc.qty} ${rc.unit}</div>
+      <div>
+        <input class="relev-qty-input" type="number" min="0" value="${rc.qty}" id="irelev-qty-${idx}" onchange="iRelevUpdate(${idx},this.value)">
+      </div>
+      <div id="irelev-delta-${idx}" style="text-align:center;padding-top:6px">—</div>
+    </div>`
+  ).join('');
+  const bg = document.getElementById('insumo-relev-bg');
+  if (bg) { bg.style.display = 'flex'; }
+}
+
+function iRelevUpdate(idx, val) {
+  const newQty = parseFloat(val) || 0;
+  insumoRelevWorkingCopy[idx]._newQty = newQty;
+  const old = insumoRelevWorkingCopy[idx].qty;
+  const deltaEl = document.getElementById(`irelev-delta-${idx}`);
+  if (!deltaEl) return;
+  if (old === 0) { deltaEl.innerHTML = newQty > 0 ? '<span class="stock-delta up">nuevo</span>' : '<span class="stock-delta eq">0</span>'; return; }
+  const pct = Math.round(((newQty - old)/old)*100);
+  deltaEl.innerHTML = pct > 0 ? `<span class="stock-delta up">▲${pct}%</span>`
+    : pct < 0 ? `<span class="stock-delta down">▼${Math.abs(pct)}%</span>`
+    : '<span class="stock-delta eq">0%</span>';
+}
+
+function saveInsumoRelev() {
+  const now = new Date().toISOString();
+  const snapshot = {};
+  insumoRelevWorkingCopy.forEach((rc, idx) => {
+    const item = consumiblesItems.find(i => i.id === rc.id);
+    if (!item) return;
+    const inputEl = document.getElementById(`irelev-qty-${idx}`);
+    const newQty = inputEl ? (parseFloat(inputEl.value)||0) : rc.qty;
+    item.lastQty = item.qty;
+    item.qty = newQty;
+    snapshot[item.id] = newQty;
+  });
+  consumiblesLastRelev = { date: now, snapshot };
+  saveAll();
+  closeInsumoRelev();
+  renderInsumos();
+}
+
+function closeInsumoRelev() {
+  const bg = document.getElementById('insumo-relev-bg');
+  if (bg) bg.style.display = 'none';
+}
+
+function openInsumoNew() {
+  insumoEditId = null;
+  document.getElementById('insumo-new-title').textContent = 'Nuevo consumible';
+  ['insumo-edit-id','insumo-new-name','insumo-new-qty','insumo-new-min','insumo-new-prov','insumo-new-uso'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('insumo-new-cat').value = 'Sustratos';
+  document.getElementById('insumo-new-unit').value = 'unid';
+  const bg = document.getElementById('insumo-new-bg');
+  if (bg) bg.style.display = 'flex';
+}
+
+function openInsumoEdit(id) {
+  initInsumos();
+  const item = consumiblesItems.find(i => i.id === id);
+  if (!item) return;
+  insumoEditId = id;
+  document.getElementById('insumo-new-title').textContent = 'Editar consumible';
+  document.getElementById('insumo-edit-id').value = id;
+  document.getElementById('insumo-new-name').value = item.name;
+  document.getElementById('insumo-new-cat').value = item.cat;
+  document.getElementById('insumo-new-unit').value = item.unit;
+  document.getElementById('insumo-new-qty').value = item.qty;
+  document.getElementById('insumo-new-min').value = item.min;
+  document.getElementById('insumo-new-prov').value = item.prov||'';
+  document.getElementById('insumo-new-uso').value = item.uso||'';
+  document.getElementById('insumo-new-bg').style.display = 'flex';
+}
+
+function closeInsumoNew() {
+  const bg = document.getElementById('insumo-new-bg');
+  if (bg) bg.style.display = 'none';
+}
+
+function saveInsumoItem() {
+  initInsumos();
+  const name = document.getElementById('insumo-new-name').value.trim();
+  if (!name) { alert('El nombre es obligatorio.'); return; }
+  const item = {
+    id: insumoEditId || 'ins_' + Date.now(),
+    name,
+    cat:  document.getElementById('insumo-new-cat').value,
+    unit: document.getElementById('insumo-new-unit').value || 'unid',
+    qty:  parseFloat(document.getElementById('insumo-new-qty').value)||0,
+    min:  parseFloat(document.getElementById('insumo-new-min').value)||0,
+    prov: document.getElementById('insumo-new-prov').value.trim(),
+    uso:  document.getElementById('insumo-new-uso').value.trim(),
+    lastQty: null,
+  };
+  if (insumoEditId) {
+    const idx = consumiblesItems.findIndex(i => i.id === insumoEditId);
+    if (idx >= 0) { item.lastQty = consumiblesItems[idx].lastQty; consumiblesItems[idx] = item; }
+  } else {
+    consumiblesItems.push(item);
+  }
+  saveAll();
+  closeInsumoNew();
+  renderInsumos();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const ib = document.getElementById('insumo-new-bg');
+  if (ib) ib.addEventListener('click', e => { if(e.target===ib) closeInsumoNew(); });
+  const irb = document.getElementById('insumo-relev-bg');
+  if (irb) irb.addEventListener('click', e => { if(e.target===irb) closeInsumoRelev(); });
+});
+
 
 // ════════════════════════════════════
 
