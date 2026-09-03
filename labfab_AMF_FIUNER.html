@@ -3469,15 +3469,14 @@ function loadAll() {
 
 let _importPending = null;
 
-function exportData() {
+async function exportData() {
   try {
-    // Build a fresh snapshot
     const snap = {
       _meta: {
         version: 1,
         app: 'AMF FIUNER — Gestión de Laboratorio',
         exported: new Date().toISOString(),
-        exportedBy: 'Emanuel Capra · AMF FIUNER'
+        exportedBy: 'AMF FIUNER'
       },
       state, stockLevels,
       activeSessions: activeSessions.map(s => ({...s, startTime: s.startTime instanceof Date ? s.startTime.toISOString() : s.startTime})),
@@ -3491,18 +3490,21 @@ function exportData() {
       eqChecks, eqLastCheck
     };
     const json = JSON.stringify(snap, null, 2);
+    const date = new Date().toISOString().slice(0,10);
+    const filename = `AMF_FIUNER_datos_${date}.json`;
+    if (window.claude) {
+      const downloads = await claude.use('downloads');
+      if (downloads) { await downloads.save({ filename, data: json }); return; }
+    }
     const blob = new Blob([json], {type: 'application/json'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    const date = new Date().toISOString().slice(0,10);
-    a.href = url;
-    a.download = `AMF_FIUNER_datos_${date}.json`;
-    document.body.appendChild(a);
-    a.click();
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   } catch(e) {
-    alert('Error al exportar: ' + e.message);
+    if (e && e.code !== 'cancelled') alert('Error al exportar: ' + e.message);
   }
 }
 
