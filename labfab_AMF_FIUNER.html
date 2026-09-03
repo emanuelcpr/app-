@@ -709,14 +709,10 @@
 
     <!-- ═══════════ EQUIPOS ═══════════ -->
     <div class="section" id="sec-equipos">
-      <div id="eq-cycle-banner" style="margin-bottom:14px"></div>
       <div class="card" style="margin-bottom:16px">
         <div class="card-header">
           <span class="card-title">Equipos registrados</span>
-          <div class="card-actions">
-            <button class="btn" onclick="openEqCheck()">⚡ Prueba encendido</button>
-            <button class="btn">+ Nuevo equipo</button>
-          </div>
+          <div class="card-actions"><button class="btn">+ Nuevo equipo</button></div>
         </div>
         <div class="card-body" style="padding:0;max-height:560px;overflow-y:auto">
           <table>
@@ -998,7 +994,15 @@
 
     <!-- ═══════════ MANTENIMIENTO ═══════════ -->
     <div class="section" id="sec-mantenimiento">
-      <h3 class="section-title">Alertas activas — REG-AMF-14</h3>
+
+      <!-- Prueba de Encendido -->
+      <div id="eq-cycle-banner" style="margin-bottom:18px"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+        <h3 class="section-title" style="margin:0">Alertas activas — REG-AMF-14</h3>
+        <button class="btn btn-primary" onclick="openEqCheck()" style="display:flex;align-items:center;gap:7px;font-size:13px;padding:9px 18px">
+          <span style="font-size:16px">⚡</span> Registrar prueba de encendido
+        </button>
+      </div>
       <div class="alert-item">
         <div class="alert-icon" style="background:var(--red-dim);font-size:18px">🔴</div>
         <div class="alert-body">
@@ -1112,12 +1116,14 @@
       <!-- ── PANEL: Drogas y Químicos ── -->
       <div id="stock-panel-drogas">
         <div id="stock-cycle-banner"></div>
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
-          <input id="stock-search" type="text" placeholder="Buscar droga o insumo..." oninput="renderStock()"
-            style="flex:1;min-width:180px;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:8px 12px;border-radius:7px;font-family:var(--font);font-size:13px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <button onclick="openStockRelev()" style="display:flex;align-items:center;gap:8px;padding:10px 20px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">
+            <span style="font-size:16px">📋</span> Relevar stock completo
+          </button>
+          <input id="stock-search" type="text" placeholder="Buscar droga o químico..." oninput="renderStock()"
+            style="flex:1;min-width:160px;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:8px 12px;border-radius:7px;font-family:var(--font);font-size:13px">
           <div id="stock-cat-pills" style="display:flex;gap:5px;flex-wrap:wrap"></div>
-          <button class="btn" onclick="openStockRelev()" style="white-space:nowrap">📋 Relevar</button>
-          <button class="btn btn-primary" onclick="openStockNew()" style="white-space:nowrap">+ Nuevo</button>
+          <button class="btn" onclick="openStockNew()" style="white-space:nowrap;flex-shrink:0">+ Nuevo</button>
         </div>
         <div id="stock-kpi-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px"></div>
         <div class="card">
@@ -1147,12 +1153,14 @@
       <!-- ── PANEL: Insumos y Consumibles ── -->
       <div id="stock-panel-insumos" style="display:none">
         <div id="insumo-cycle-banner"></div>
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <button onclick="openInsumoRelev()" style="display:flex;align-items:center;gap:8px;padding:10px 20px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">
+            <span style="font-size:16px">📋</span> Relevar consumibles
+          </button>
           <input id="insumo-search" type="text" placeholder="Buscar consumible..." oninput="renderInsumos()"
-            style="flex:1;min-width:180px;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:8px 12px;border-radius:7px;font-family:var(--font);font-size:13px">
+            style="flex:1;min-width:160px;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:8px 12px;border-radius:7px;font-family:var(--font);font-size:13px">
           <div id="insumo-cat-pills" style="display:flex;gap:5px;flex-wrap:wrap"></div>
-          <button class="btn" onclick="openInsumoRelev()" style="white-space:nowrap">📋 Relevar</button>
-          <button class="btn btn-primary" onclick="openInsumoNew()" style="white-space:nowrap">+ Nuevo</button>
+          <button class="btn" onclick="openInsumoNew()" style="white-space:nowrap;flex-shrink:0">+ Nuevo</button>
         </div>
         <div id="insumo-kpi-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px"></div>
         <div class="card">
@@ -3568,7 +3576,8 @@ function show(id) {
   document.getElementById('topbar-sub').textContent = subs[id];
   if (id === 'procesos') renderProcesos();
   if (id === 'stock') renderStock();
-  if (id === 'equipos') { renderEqCycleBanner(); renderEqCheckCells(); }
+  if (id === 'equipos') { renderEqCheckCells(); }
+  if (id === 'mantenimiento') { renderEqCycleBanner(); renderEqCheckCells(); }
 }
 
 function openModal() { document.getElementById('modal-bg').style.display='flex'; }
