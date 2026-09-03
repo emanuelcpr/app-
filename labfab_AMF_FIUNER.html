@@ -6930,376 +6930,361 @@ updateClock(); setInterval(updateClock, 1000);
 
 
 <!-- ══════════════════════════════════════════
-     MOBILE APP LAYER
-     Se activa automáticamente en pantallas < 768px.
-     Mismos datos/localStorage que el desktop.
+     MOBILE APP LAYER — v2 (fully functional)
 ══════════════════════════════════════════ -->
+
+<!-- Mobile-friendly overrides for desktop modals -->
 <style>
-  @media (max-width: 767px) {
-    body > *:not(#mobile-app):not(#import-confirm-bg):not([id$="-modal-bg"]):not([id$="-bg"]) {
-      display: none !important;
-    }
-    #mobile-app { display: flex !important; }
+@media (max-width: 767px) {
+  /* Hide desktop, show mobile */
+  body > *:not(#mobile-app):not(#import-confirm-bg):not([id$="-modal-bg"]):not([id$="-bg"]):not(#waste-modal):not(#session-modal-bg):not(#end-session-modal-bg) {
+    display: none !important;
   }
-  #mobile-app {
-    display: none;
-    flex-direction: column;
-    height: 100dvh;
-    background: var(--bg);
-    font-family: var(--font);
-    overflow: hidden;
-    position: fixed;
-    inset: 0;
-    z-index: 50;
-  }
-  #m-topbar {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 14px 18px 10px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-shrink: 0;
-  }
-  #m-topbar .m-title { font-size: 15px; font-weight: 700; }
-  #m-topbar .m-subtitle { font-size: 11px; color: var(--muted); margin-top: 1px; }
-  #m-content {
-    flex: 1;
-    overflow-y: auto;
+  #mobile-app { display: flex !important; }
+
+  /* Make desktop modals full-screen on mobile */
+  #waste-modal > div,
+  #session-modal-bg > div,
+  #end-session-modal-bg > div,
+  #import-confirm-bg > div {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+    overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
-    padding: 0;
   }
-  #m-bottomnav {
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    display: flex;
-    flex-shrink: 0;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+  /* Bigger inputs in modals on mobile */
+  #waste-modal input, #waste-modal select, #waste-modal textarea,
+  #session-modal-bg input, #session-modal-bg select, #session-modal-bg textarea,
+  #end-session-modal-bg input, #end-session-modal-bg select, #end-session-modal-bg textarea {
+    font-size: 16px !important;
+    padding: 12px !important;
+    min-height: 44px !important;
   }
-  .m-nav-btn {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-    padding: 10px 4px;
-    border: none;
-    background: none;
-    cursor: pointer;
-    font-family: var(--font);
-    color: var(--muted);
-    font-size: 10px;
-    font-weight: 500;
-    transition: color 0.15s;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .m-nav-btn .m-nav-icon { font-size: 22px; line-height: 1; }
-  .m-nav-btn.active { color: var(--accent); }
-  .m-section { display: none; padding: 16px; }
-  .m-section.active { display: block; }
-  .m-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    margin-bottom: 10px;
-    overflow: hidden;
-  }
-  .m-card-header {
-    padding: 12px 16px;
-    font-weight: 600;
-    font-size: 13px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--surface2, var(--surface));
-  }
-  .m-stock-item {
-    display: flex;
-    align-items: center;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    gap: 12px;
-  }
-  .m-stock-item:last-child { border-bottom: none; }
-  .m-stock-name { flex: 1; font-size: 13px; font-weight: 500; }
-  .m-stock-unit { font-size: 11px; color: var(--muted); }
-  .m-qty-input {
-    width: 70px;
-    padding: 8px 10px;
-    border: 2px solid var(--border2);
-    border-radius: 8px;
-    font-size: 16px;
-    font-family: var(--mono);
-    font-weight: 600;
-    text-align: center;
-    background: var(--bg);
-    color: var(--text);
-    -webkit-appearance: none;
-  }
-  .m-qty-input:focus { border-color: var(--accent); outline: none; }
-  .m-qty-input.changed { border-color: var(--accent); background: var(--accent-dim, rgba(37,99,235,0.07)); }
-  .m-eq-item {
-    display: flex;
-    align-items: center;
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--border);
-    gap: 12px;
-  }
-  .m-eq-item:last-child { border-bottom: none; }
-  .m-eq-name { flex: 1; }
-  .m-eq-name .name { font-size: 13px; font-weight: 500; }
-  .m-eq-name .grp { font-size: 11px; color: var(--muted); margin-top: 1px; }
-  .m-eq-toggle {
-    display: flex;
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid var(--border2);
-    flex-shrink: 0;
-  }
-  .m-eq-btn {
-    padding: 8px 14px;
-    border: none;
-    background: none;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
-    font-family: var(--font);
-    color: var(--muted);
-    -webkit-tap-highlight-color: transparent;
-  }
-  .m-eq-btn.ok.sel { background: var(--green-dim, #d1fae5); color: var(--green); }
-  .m-eq-btn.fail.sel { background: var(--red-dim); color: var(--red); }
-  .m-fab {
-    position: fixed;
-    bottom: calc(70px + env(safe-area-inset-bottom, 0px));
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 100;
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: 28px;
-    padding: 14px 28px;
-    font-family: var(--font);
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 4px 20px rgba(37,99,235,0.35);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .m-fab:active { transform: translateX(-50%) scale(0.97); }
-  .m-banner {
-    margin: 16px 16px 0;
-    border-radius: 10px;
-    padding: 12px 14px;
-    font-size: 12px;
-    border: 1px solid;
-  }
-  .m-banner.ok { background: var(--green-dim, #d1fae5); border-color: var(--green); color: var(--green); }
-  .m-banner.warn { background: var(--amber-dim, #fef3c7); border-color: var(--amber, #d97706); color: var(--amber, #d97706); }
-  .m-banner.danger { background: var(--red-dim); border-color: var(--red); color: var(--red); }
-  .m-session-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-  }
-  .m-session-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-  .m-session-row:last-child { margin-bottom: 0; }
-  .m-btn {
-    border-radius: 10px;
-    border: none;
-    padding: 13px 18px;
-    font-family: var(--font);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    width: 100%;
-    margin-bottom: 10px;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .m-btn-primary { background: var(--accent); color: #fff; }
-  .m-btn-danger { background: var(--red-dim); color: var(--red); }
-  .m-btn-neutral { background: var(--surface); color: var(--text); border: 1px solid var(--border2); }
-  .m-subtab-bar {
-    display: flex;
-    border-bottom: 2px solid var(--border);
-    background: var(--surface);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-  .m-subtab {
-    flex: 1;
-    padding: 12px 8px;
-    border: none;
-    background: none;
-    font-family: var(--font);
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--muted);
-    cursor: pointer;
-    border-bottom: 3px solid transparent;
-    margin-bottom: -2px;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .m-subtab.active { color: var(--accent); border-bottom-color: var(--accent); }
-  .m-search {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1px solid var(--border2);
-    border-radius: 10px;
-    font-family: var(--font);
-    font-size: 14px;
-    background: var(--bg);
-    color: var(--text);
-    box-sizing: border-box;
-    margin: 12px 0 8px;
-  }
-  .m-search:focus { outline: none; border-color: var(--accent); }
-  .m-empty { text-align: center; color: var(--muted); padding: 32px 16px; font-size: 13px; }
-  .m-notes-area {
-    width: 100%;
-    min-height: 80px;
-    padding: 10px 14px;
-    border: 1px solid var(--border2);
-    border-radius: 10px;
-    font-family: var(--font);
-    font-size: 13px;
-    background: var(--bg);
-    color: var(--text);
-    box-sizing: border-box;
-    resize: none;
-    margin-top: 10px;
-  }
-  .m-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
-  .m-tick { display: flex; align-items: center; gap: 8px; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
-  .m-tick:last-child { border-bottom: none; }
-  .m-tick input[type=checkbox] { width: 20px; height: 20px; cursor: pointer; accent-color: var(--accent); }
+}
+
+/* ── Core layout ── */
+#mobile-app {
+  display: none;
+  flex-direction: column;
+  height: 100dvh;
+  background: var(--bg);
+  font-family: var(--font);
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+}
+#m-topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+#m-topbar .m-title { font-size: 15px; font-weight: 700; }
+#m-topbar .m-subtitle { font-size: 11px; color: var(--muted); margin-top: 1px; }
+#m-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+#m-bottomnav {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-shrink: 0;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.m-nav-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 3px; padding: 10px 4px;
+  border: none; background: none; cursor: pointer;
+  font-family: var(--font); color: var(--muted); font-size: 10px; font-weight: 500;
+  -webkit-tap-highlight-color: transparent;
+}
+.m-nav-btn .m-nav-icon { font-size: 22px; line-height: 1; }
+.m-nav-btn.active { color: var(--accent); }
+
+/* ── Sections ── */
+.m-section { display: none; padding-bottom: 90px; }
+.m-section.active { display: block; }
+
+/* ── Shared components ── */
+.m-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; margin: 12px 16px 0; overflow: hidden;
+}
+.m-card-header {
+  padding: 11px 16px; font-weight: 600; font-size: 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface2, var(--surface));
+  color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em;
+}
+.m-row {
+  display: flex; align-items: center; padding: 13px 16px;
+  border-bottom: 1px solid var(--border); gap: 12px;
+}
+.m-row:last-child { border-bottom: none; }
+.m-btn {
+  border-radius: 10px; border: none; padding: 13px 18px;
+  font-family: var(--font); font-size: 14px; font-weight: 600;
+  cursor: pointer; width: 100%; display: block; box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent; text-align: center;
+}
+.m-btn-primary { background: var(--accent); color: #fff; }
+.m-btn-danger  { background: var(--red-dim); color: var(--red); }
+.m-btn-neutral { background: var(--surface); color: var(--text); border: 1px solid var(--border2); }
+.m-btn-green   { background: var(--green-dim, #d1fae5); color: var(--green); }
+.m-actions { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
+.m-banner {
+  margin: 12px 16px 0; border-radius: 10px; padding: 11px 14px;
+  font-size: 12px; border: 1px solid; line-height: 1.4;
+}
+.m-banner.ok     { background: var(--green-dim,#d1fae5); border-color: var(--green); color: var(--green); }
+.m-banner.warn   { background: var(--amber-dim,#fef3c7); border-color: var(--amber,#d97706); color: var(--amber,#d97706); }
+.m-banner.danger { background: var(--red-dim); border-color: var(--red); color: var(--red); }
+.m-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 20px;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.03em;
+}
+.m-badge-green  { background: var(--green-dim,#d1fae5); color: var(--green); }
+.m-badge-red    { background: var(--red-dim); color: var(--red); }
+.m-badge-amber  { background: var(--amber-dim,#fef3c7); color: var(--amber,#d97706); }
+.m-badge-blue   { background: rgba(37,99,235,0.1); color: var(--accent); }
+.m-badge-gray   { background: var(--surface2); color: var(--muted); }
+.m-search-wrap  { padding: 12px 16px 4px; }
+.m-search {
+  width: 100%; padding: 10px 14px; border: 1px solid var(--border2);
+  border-radius: 10px; font-family: var(--font); font-size: 14px;
+  background: var(--bg); color: var(--text); box-sizing: border-box;
+}
+.m-search:focus { outline: none; border-color: var(--accent); }
+.m-empty { text-align: center; color: var(--muted); padding: 32px 16px; font-size: 13px; }
+.m-label {
+  font-size: 11px; font-weight: 600; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.m-subtab-bar {
+  display: flex; border-bottom: 2px solid var(--border);
+  background: var(--surface); position: sticky; top: 0; z-index: 10;
+}
+.m-subtab {
+  flex: 1; padding: 12px 8px; border: none; background: none;
+  font-family: var(--font); font-size: 13px; font-weight: 500;
+  color: var(--muted); cursor: pointer;
+  border-bottom: 3px solid transparent; margin-bottom: -2px;
+  -webkit-tap-highlight-color: transparent;
+}
+.m-subtab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── Stock specific ── */
+.m-qty-input {
+  width: 70px; padding: 8px 6px; border: 2px solid var(--border2);
+  border-radius: 8px; font-size: 18px; font-family: var(--mono);
+  font-weight: 600; text-align: center; background: var(--bg);
+  color: var(--text); -webkit-appearance: none;
+}
+.m-qty-input:focus { border-color: var(--accent); outline: none; }
+.m-qty-input.changed { border-color: var(--accent); background: rgba(37,99,235,0.07); }
+
+/* ── Equipment toggles ── */
+.m-eq-toggle {
+  display: flex; border-radius: 8px; overflow: hidden;
+  border: 1px solid var(--border2); flex-shrink: 0;
+}
+.m-eq-btn {
+  padding: 8px 12px; border: none; background: none; cursor: pointer;
+  font-size: 12px; font-weight: 600; font-family: var(--font); color: var(--muted);
+  -webkit-tap-highlight-color: transparent;
+}
+.m-eq-btn.ok.sel   { background: var(--green-dim,#d1fae5); color: var(--green); }
+.m-eq-btn.fail.sel { background: var(--red-dim); color: var(--red); }
+.m-eq-btn.na.sel   { background: var(--surface2); color: var(--muted); }
+
+/* ── FAB ── */
+.m-fab {
+  position: fixed;
+  bottom: calc(66px + env(safe-area-inset-bottom, 0px));
+  right: 16px; z-index: 100;
+  background: var(--accent); color: #fff; border: none; border-radius: 28px;
+  padding: 14px 20px; font-family: var(--font); font-size: 14px; font-weight: 700;
+  cursor: pointer; box-shadow: 0 4px 20px rgba(37,99,235,0.35);
+  display: flex; align-items: center; gap: 8px; white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+.m-fab:active { opacity: 0.9; }
+
+/* ── Proceso detail ── */
+#m-proc-detail { display: none; }
+#m-proc-detail.active { display: block; }
+.m-proc-step {
+  display: flex; gap: 12px; padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.m-proc-step:last-child { border-bottom: none; }
+.m-step-num {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--accent); color: #fff; font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
 </style>
 
 <div id="mobile-app">
-  <!-- Top bar -->
+  <!-- ── Top bar ── -->
   <div id="m-topbar">
     <div>
       <div class="m-title">AMF FIUNER</div>
       <div class="m-subtitle" id="m-clock-sub"></div>
     </div>
     <div style="display:flex;gap:8px;align-items:center">
-      <div id="m-sync-dot" style="width:8px;height:8px;border-radius:50%;background:var(--green);opacity:0.8"></div>
       <button id="m-install-btn" onclick="pwaInstall()" style="display:none;align-items:center;gap:5px;font-size:11px;padding:5px 10px;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:#fff;font-family:var(--font);cursor:pointer;font-weight:600">⬇ Instalar</button>
       <button onclick="mSwitchToDesktop()" style="font-size:11px;padding:5px 10px;border-radius:6px;border:1px solid var(--border2);background:none;color:var(--muted);font-family:var(--font);cursor:pointer">Vista completa</button>
     </div>
   </div>
 
-  <!-- Content area -->
+  <!-- ── Content ── -->
   <div id="m-content">
 
-    <!-- ─── TAB: STOCK ─── -->
-    <div id="m-sec-stock" class="m-section active">
+    <!-- ════ TAB: BITÁCORA ════ -->
+    <div id="m-sec-bitacora" class="m-section active">
+      <div id="m-bitacora-banner"></div>
+
+      <!-- Sesiones activas -->
+      <div class="m-card">
+        <div class="m-card-header">🟢 Sesiones activas</div>
+        <div id="m-active-sessions-list">
+          <div class="m-empty">No hay sesiones activas</div>
+        </div>
+      </div>
+
+      <!-- Historial reciente -->
+      <div class="m-card">
+        <div class="m-card-header">🕓 Historial reciente</div>
+        <div id="m-hist-list">
+          <div class="m-empty">Sin registros aún</div>
+        </div>
+      </div>
+
+      <div style="height:8px"></div>
+    </div>
+
+    <!-- ════ TAB: STOCK ════ -->
+    <div id="m-sec-stock" class="m-section">
       <div class="m-subtab-bar">
         <button class="m-subtab active" id="m-stab-drogas" onclick="mSetStockTab('drogas')">Drogas y Químicos</button>
         <button class="m-subtab" id="m-stab-insumos" onclick="mSetStockTab('insumos')">Insumos</button>
       </div>
-      <div style="padding:12px 16px 0">
+      <div class="m-search-wrap">
         <input class="m-search" id="m-stock-search" placeholder="Buscar ítem..." oninput="mRenderStockList()">
       </div>
       <div id="m-stock-banner"></div>
-      <div id="m-stock-list" style="padding:0 16px 120px"></div>
+      <div id="m-stock-list"></div>
     </div>
 
-    <!-- ─── TAB: EQUIPOS ─── -->
-    <div id="m-sec-equipos" class="m-section">
-      <div style="padding:16px 16px 0">
-        <div id="m-eq-banner"></div>
+    <!-- ════ TAB: RESIDUOS ════ -->
+    <div id="m-sec-residuos" class="m-section">
+      <div class="m-banner warn" style="margin:12px 16px 0">
+        ⚠ Registrá cada descarte de residuo peligroso — POE-AMF-16 / POE-AMF-19
       </div>
-      <div style="padding:8px 16px 4px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em">
-        Prueba de encendido · REG-AMF-14
+
+      <!-- Registros recientes -->
+      <div class="m-card">
+        <div class="m-card-header">🗂 Descartes recientes</div>
+        <div id="m-waste-list">
+          <div class="m-empty">Sin registros aún</div>
+        </div>
       </div>
-      <div id="m-eq-list" style="padding:0 16px 120px"></div>
-      <div style="padding:8px 16px 4px;font-size:11px;color:var(--muted);display:none" id="m-eq-notes-wrap">
-        <div class="m-label">Observaciones generales</div>
-        <textarea class="m-notes-area" id="m-eq-notes" placeholder="Ej: Bomba de vacío tardó 5 min en estabilizar..."></textarea>
-      </div>
+      <div style="height:8px"></div>
     </div>
 
-    <!-- ─── TAB: SESIONES ─── -->
-    <div id="m-sec-sesiones" class="m-section">
-      <div style="padding:16px 16px 120px">
-        <div class="m-label" style="margin-bottom:10px">Sesiones activas</div>
-        <div id="m-active-sessions"></div>
-        <button class="m-btn m-btn-primary" onclick="openNewSession(null,null)" style="margin-top:4px">
-          + Nueva sesión de uso
-        </button>
-        <div class="m-label" style="margin:18px 0 10px">Acceso rápido · Personal</div>
-        <div id="m-personal-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
-      </div>
-    </div>
-
-    <!-- ─── TAB: MÁS ─── -->
+    <!-- ════ TAB: MÁS ════ -->
     <div id="m-sec-mas" class="m-section">
-      <div style="padding:16px 16px 120px">
-        <div class="m-label" style="margin-bottom:12px">Más opciones</div>
-        <div class="m-card" style="margin-bottom:12px">
-          <div style="padding:14px 16px;font-size:13px;font-weight:600;margin-bottom:2px">Datos y sincronización</div>
-          <div style="padding:0 16px 14px;display:flex;flex-direction:column;gap:8px">
-            <button class="m-btn m-btn-neutral" style="margin:0" onclick="exportData()">⬇ Exportar datos (JSON)</button>
-            <button class="m-btn m-btn-neutral" style="margin:0" onclick="document.getElementById('import-file-input').click()">⬆ Importar datos (JSON)</button>
-          </div>
+
+      <!-- Personal -->
+      <div class="m-card">
+        <div class="m-card-header">👤 Personal en sala</div>
+        <div id="m-personal-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)"></div>
+      </div>
+
+      <!-- Procesos / SOP -->
+      <div class="m-card" style="margin-top:12px">
+        <div class="m-card-header" style="justify-content:space-between">
+          <span>📋 Biblioteca de procesos</span>
+          <button id="m-proc-back-btn" onclick="mProcBack()" style="display:none;font-size:11px;padding:3px 8px;border-radius:6px;border:1px solid var(--border2);background:none;color:var(--accent);font-family:var(--font);cursor:pointer">← Volver</button>
         </div>
-        <div class="m-card">
-          <div style="padding:14px 16px;font-size:13px;font-weight:600;margin-bottom:2px">Vista completa</div>
-          <div style="padding:0 16px 14px;font-size:12px;color:var(--muted);margin-bottom:8px">Accedé a informes, gestión de stock completa, residuos, certificaciones y más desde una pantalla más grande.</div>
-          <div style="padding:0 16px 14px">
-            <button class="m-btn m-btn-neutral" style="margin:0" onclick="mSwitchToDesktop()">Abrir vista completa →</button>
-          </div>
+        <div class="m-search-wrap" id="m-proc-search-wrap">
+          <input class="m-search" id="m-proc-search" placeholder="Buscar proceso..." oninput="mRenderProcList()">
+        </div>
+        <div id="m-proc-list"></div>
+        <div id="m-proc-detail"></div>
+      </div>
+
+      <!-- Prueba de encendido -->
+      <div class="m-card" style="margin-top:12px">
+        <div class="m-card-header">⚡ Prueba de encendido · REG-AMF-14</div>
+        <div id="m-eq-banner" style="margin:10px 16px 0"></div>
+        <div id="m-eq-list" style="margin-top:4px"></div>
+        <div style="padding:12px 16px 0">
+          <div class="m-label" style="margin-bottom:6px">Observaciones</div>
+          <textarea id="m-eq-notes" style="width:100%;min-height:72px;padding:10px 14px;border:1px solid var(--border2);border-radius:10px;font-family:var(--font);font-size:13px;background:var(--bg);color:var(--text);box-sizing:border-box;resize:none" placeholder="Ej: Bomba tardó 5 min en estabilizar..."></textarea>
+        </div>
+        <div class="m-actions">
+          <button class="m-btn m-btn-primary" onclick="mSaveEqCheck()">⚡ Guardar prueba de encendido</button>
         </div>
       </div>
+
+      <!-- Datos -->
+      <div class="m-card" style="margin-top:12px">
+        <div class="m-card-header">💾 Datos</div>
+        <div class="m-actions">
+          <button class="m-btn m-btn-neutral" onclick="exportData()">⬇ Exportar datos (JSON)</button>
+          <button class="m-btn m-btn-neutral" onclick="document.getElementById('import-file-input').click()">⬆ Importar datos (JSON)</button>
+        </div>
+      </div>
+      <div style="height:8px"></div>
     </div>
 
-  </div>
+  </div><!-- /#m-content -->
 
-  <!-- Bottom nav -->
+  <!-- ── Bottom nav ── -->
   <div id="m-bottomnav">
-    <button class="m-nav-btn active" id="m-nav-stock" onclick="mShowTab('stock')">
+    <button class="m-nav-btn active" id="m-nav-bitacora" onclick="mShowTab('bitacora')">
+      <span class="m-nav-icon">🧪</span>Bitácora
+    </button>
+    <button class="m-nav-btn" id="m-nav-stock" onclick="mShowTab('stock')">
       <span class="m-nav-icon">📦</span>Stock
     </button>
-    <button class="m-nav-btn" id="m-nav-equipos" onclick="mShowTab('equipos')">
-      <span class="m-nav-icon">⚡</span>Equipos
-    </button>
-    <button class="m-nav-btn" id="m-nav-sesiones" onclick="mShowTab('sesiones')">
-      <span class="m-nav-icon">🧪</span>Sesiones
+    <button class="m-nav-btn" id="m-nav-residuos" onclick="mShowTab('residuos')">
+      <span class="m-nav-icon">⚗️</span>Residuos
     </button>
     <button class="m-nav-btn" id="m-nav-mas" onclick="mShowTab('mas')">
       <span class="m-nav-icon">☰</span>Más
     </button>
   </div>
 
-  <!-- FAB (floating action button, context-sensitive) -->
+  <!-- ── FAB ── -->
   <button class="m-fab" id="m-fab" onclick="mFabAction()">
-    <span id="m-fab-icon">📋</span>
-    <span id="m-fab-label">Guardar relevamiento</span>
+    <span id="m-fab-icon">＋</span>
+    <span id="m-fab-label">Nueva sesión</span>
   </button>
-</div>
+</div><!-- /#mobile-app -->
 
 <script>
-// ══════════════════════════════════════════
-// MOBILE APP — lógica de vista
-// ══════════════════════════════════════════
+// ════════════════════════════════════════════════
+// MOBILE APP — v2
+// ════════════════════════════════════════════════
 
-let mCurrentTab = 'stock';
-let mCurrentStockTab = 'drogas'; // 'drogas' | 'insumos'
-let mStockWorking = {};   // {id: qty} ediciones pendientes drogas
-let mInsumoWorking = {};  // {id: qty} ediciones pendientes insumos
-let mEqWorking = {};      // {id: 'ok'|'fail'|null}
+let mCurrentTab = 'bitacora';
+let mCurrentStockTab = 'drogas';
+let mStockWorking = {};
+let mInsumoWorking = {};
+let mEqWorking = {};
 let mMobileActive = false;
+let mBitacoraTimer = null;
+
+// ── Init ──────────────────────────────────────
 
 function mInit() {
   const isMobile = window.innerWidth < 768 || ('ontouchstart' in window && window.innerWidth < 1024);
@@ -7312,19 +7297,35 @@ function mInit() {
   (consumiblesItems || []).forEach(i => { mInsumoWorking[i.id] = i.qty; });
   EQ_CHECK_LIST.forEach(eq => { mEqWorking[eq.id] = null; });
 
-  mRenderStockBanner();
-  mRenderStockList();
-  mRenderEqBanner();
-  mRenderEqList();
-  mRenderSesiones();
-  mRenderPersonal();
+  mRefreshAll();
   mClockTick();
   setInterval(mClockTick, 1000);
+
+  // Live session timer
+  mBitacoraTimer = setInterval(() => {
+    if (mCurrentTab === 'bitacora') mRenderActiveSessions();
+  }, 30000);
+}
+
+function mRefreshAll() {
+  mRenderActiveSessions();
+  mRenderHistorial();
+  mRenderBitacoraBanner();
+  mRenderStockBanner();
+  mRenderStockList();
+  mRenderWasteList();
+  mRenderPersonal();
+  mRenderEqBanner();
+  mRenderEqList();
+  mRenderProcList();
 }
 
 function mClockTick() {
   const el = document.getElementById('m-clock-sub');
-  if (el) el.textContent = new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'}) + ' · ' + new Date().toLocaleDateString('es-AR', {weekday:'long', day:'numeric', month:'short'});
+  if (!el) return;
+  const now = new Date();
+  el.textContent = now.toLocaleTimeString('es-AR', {hour:'2-digit',minute:'2-digit'})
+    + ' · ' + now.toLocaleDateString('es-AR', {weekday:'short', day:'numeric', month:'short'});
 }
 
 function mSwitchToDesktop() {
@@ -7332,32 +7333,116 @@ function mSwitchToDesktop() {
   mMobileActive = false;
 }
 
+// ── Tab switching ──────────────────────────────
+
 function mShowTab(tab) {
   mCurrentTab = tab;
-  ['stock','equipos','sesiones','mas'].forEach(t => {
+  ['bitacora','stock','residuos','mas'].forEach(t => {
     document.getElementById('m-sec-' + t).classList.toggle('active', t === tab);
     document.getElementById('m-nav-' + t).classList.toggle('active', t === tab);
   });
   const fab = document.getElementById('m-fab');
-  if (tab === 'stock') {
+  const fabIcon = document.getElementById('m-fab-icon');
+  const fabLabel = document.getElementById('m-fab-label');
+  if (tab === 'bitacora') {
     fab.style.display = 'flex';
-    document.getElementById('m-fab-icon').textContent = '💾';
-    document.getElementById('m-fab-label').textContent = 'Guardar relevamiento';
-  } else if (tab === 'equipos') {
+    fabIcon.textContent = '＋'; fabLabel.textContent = 'Nueva sesión';
+  } else if (tab === 'stock') {
     fab.style.display = 'flex';
-    document.getElementById('m-fab-icon').textContent = '⚡';
-    document.getElementById('m-fab-label').textContent = 'Registrar prueba';
+    fabIcon.textContent = '💾'; fabLabel.textContent = 'Guardar relevamiento';
+  } else if (tab === 'residuos') {
+    fab.style.display = 'flex';
+    fabIcon.textContent = '＋'; fabLabel.textContent = 'Registrar descarte';
   } else {
     fab.style.display = 'none';
   }
+  // Scroll to top
+  document.getElementById('m-content').scrollTop = 0;
 }
 
 function mFabAction() {
-  if (mCurrentTab === 'stock') mSaveStockRelev();
-  else if (mCurrentTab === 'equipos') mSaveEqCheck();
+  if (mCurrentTab === 'bitacora') openNewSession(null, null);
+  else if (mCurrentTab === 'stock') mSaveStockRelev();
+  else if (mCurrentTab === 'residuos') {
+    document.getElementById('waste-modal').style.display = 'flex';
+  }
 }
 
-// ─── STOCK ───
+// ── BITÁCORA ──────────────────────────────────
+
+function mRenderBitacoraBanner() {
+  const el = document.getElementById('m-bitacora-banner');
+  if (!el) return;
+  const n = (activeSessions || []).length;
+  if (n === 0) {
+    el.innerHTML = '<div class="m-banner warn" style="margin:12px 16px 0">Sin sesiones activas. Iniciá una sesión al comenzar a usar un equipo.</div>';
+  } else {
+    el.innerHTML = `<div class="m-banner ok" style="margin:12px 16px 0">✓ ${n} sesión${n>1?'es':''} activa${n>1?'s':''}.</div>`;
+  }
+}
+
+function mElapsed(startTime) {
+  const ms = new Date() - new Date(startTime);
+  const mins = Math.floor(ms / 60000);
+  const hrs = Math.floor(mins / 60);
+  if (hrs > 0) return `${hrs}h ${mins % 60}m`;
+  if (mins > 0) return `${mins}m`;
+  return 'recién iniciada';
+}
+
+function mRenderActiveSessions() {
+  const el = document.getElementById('m-active-sessions-list');
+  if (!el) return;
+  if (!activeSessions || activeSessions.length === 0) {
+    el.innerHTML = '<div class="m-empty">No hay sesiones activas</div>';
+    return;
+  }
+  let html = '';
+  activeSessions.forEach((s, idx) => {
+    const elapsed = mElapsed(s.startTime);
+    const proc = s.process ? `<span class="m-badge m-badge-blue">${s.process}</span>` : '';
+    html += `<div class="m-row" style="flex-direction:column;align-items:flex-start;gap:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+        <div>
+          <div style="font-weight:600;font-size:14px">${s.userName || s.user || '—'}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">${s.eqName || 'Sin equipo'} · ${elapsed}</div>
+        </div>
+        <span class="m-badge m-badge-green">● Activa</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        ${proc}
+        <span style="font-size:11px;color:var(--muted)">Inicio: ${new Date(s.startTime).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})}</span>
+      </div>
+      <button class="m-btn m-btn-danger" style="padding:9px;font-size:13px;margin:0" onclick="openEndSession(${s.id})">
+        Cerrar sesión
+      </button>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+function mRenderHistorial() {
+  const el = document.getElementById('m-hist-list');
+  if (!el) return;
+  const hist = (sessionHistory || []).slice().reverse().slice(0, 8);
+  if (hist.length === 0) { el.innerHTML = '<div class="m-empty">Sin registros aún</div>'; return; }
+  let html = '';
+  hist.forEach(s => {
+    const badge = s.result === 'Completado correctamente'
+      ? 'badge-green' : s.result === 'No se completó/incidente' ? 'badge-red' : 'badge-amber';
+    const fecha = s.endTime ? new Date(s.endTime).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}) : '—';
+    html += `<div class="m-row" style="gap:10px">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:500">${s.userName || s.user || '—'}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${s.eqName||'—'} · ${fecha} · ${s.duration||0}min</div>
+      </div>
+      <span class="m-badge m-${badge}">${s.result === 'Completado correctamente' ? '✓' : s.result === 'No se completó/incidente' ? '✗' : '!'}</span>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+// ── STOCK ──────────────────────────────────────
 
 function mSetStockTab(tab) {
   mCurrentStockTab = tab;
@@ -7371,19 +7456,19 @@ function mRenderStockBanner() {
   const el = document.getElementById('m-stock-banner');
   if (!el) return;
   const lastRelev = mCurrentStockTab === 'drogas' ? stockLastRelev : consumiblesLastRelev;
-  if (!lastRelev) {
-    el.innerHTML = '<div class="m-banner warn" style="margin:12px 16px 0">⚠ Sin relevamiento registrado — guardá las cantidades para comenzar el ciclo de 90 días.</div>';
+  const dateStr = lastRelev && (lastRelev.date || (typeof lastRelev === 'string' ? lastRelev : null));
+  if (!dateStr) {
+    el.innerHTML = '<div class="m-banner warn">⚠ Sin relevamiento registrado. Guardá las cantidades para comenzar el ciclo de 90 días.</div>';
     return;
   }
-  const days = Math.floor((new Date() - new Date(lastRelev)) / 86400000);
+  const days = Math.floor((new Date() - new Date(dateStr)) / 86400000);
   const left = 90 - days;
-  if (left <= 0) {
-    el.innerHTML = `<div class="m-banner danger" style="margin:12px 16px 0">🔴 Relevamiento vencido hace ${Math.abs(left)}d — realizá el relevamiento ahora.</div>`;
-  } else if (left <= 14) {
-    el.innerHTML = `<div class="m-banner warn" style="margin:12px 16px 0">⚠ Relevamiento en ${left}d — próximo a vencer.</div>`;
-  } else {
-    el.innerHTML = `<div class="m-banner ok" style="margin:12px 16px 0">✓ Relevamiento al día — próximo en ${left}d.</div>`;
-  }
+  if (left <= 0)
+    el.innerHTML = `<div class="m-banner danger">🔴 Relevamiento vencido hace ${Math.abs(left)}d — relevá ahora.</div>`;
+  else if (left <= 14)
+    el.innerHTML = `<div class="m-banner warn">⚠ Relevamiento en ${left}d — próximo a vencer.</div>`;
+  else
+    el.innerHTML = `<div class="m-banner ok">✓ Relevamiento al día — próximo en ${left}d.</div>`;
 }
 
 function mRenderStockList() {
@@ -7394,35 +7479,30 @@ function mRenderStockList() {
   const working = mCurrentStockTab === 'drogas' ? mStockWorking : mInsumoWorking;
 
   if (!items || items.length === 0) {
-    el.innerHTML = '<div class="m-empty">No hay ítems registrados.<br>Agregá desde la vista completa.</div>';
+    el.innerHTML = '<div class="m-empty">No hay ítems. Agregá desde la vista completa.</div>';
     return;
   }
+  const filtered = items.filter(i => !q || i.name.toLowerCase().includes(q) || (i.cat||'').toLowerCase().includes(q));
+  if (!filtered.length) { el.innerHTML = '<div class="m-empty">No se encontraron ítems.</div>'; return; }
 
-  // Group by category
   const cats = {};
-  items.filter(i => !q || i.name.toLowerCase().includes(q) || (i.cat||'').toLowerCase().includes(q))
-    .forEach(i => { (cats[i.cat||'Sin categoría'] = cats[i.cat||'Sin categoría']||[]).push(i); });
-
-  if (Object.keys(cats).length === 0) {
-    el.innerHTML = '<div class="m-empty">No se encontraron ítems.</div>';
-    return;
-  }
+  filtered.forEach(i => { (cats[i.cat||'Sin categoría'] = cats[i.cat||'Sin categoría']||[]).push(i); });
 
   let html = '';
   for (const [cat, citems] of Object.entries(cats)) {
-    html += `<div class="m-card" style="margin-bottom:10px">
-      <div class="m-card-header"><span style="font-size:14px">📂</span>${cat}</div>`;
+    html += `<div class="m-card">
+      <div class="m-card-header">📂 ${cat}</div>`;
     citems.forEach(item => {
       const cur = working[item.id] !== undefined ? working[item.id] : item.qty;
-      const changed = cur != item.qty ? 'changed' : '';
-      html += `<div class="m-stock-item">
-        <div style="flex:1">
-          <div class="m-stock-name">${item.name}</div>
-          <div class="m-stock-unit">${item.unit||''} ${item.storage ? '· ' + item.storage : ''}</div>
+      const isLow = item.min && cur <= item.min;
+      const changed = cur != item.qty ? ' changed' : '';
+      html += `<div class="m-row">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${item.name}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${item.unit||''} ${isLow ? '⚠ bajo mínimo' : ''}</div>
         </div>
-        <input type="number" class="m-qty-input ${changed}" value="${cur}" min="0" step="any"
-          oninput="mQtyChange('${item.id}', this.value)"
-          inputmode="decimal">
+        <input type="number" class="m-qty-input${changed}" value="${cur}" min="0" step="any"
+          inputmode="decimal" oninput="mQtyChange('${item.id}',this.value)">
       </div>`;
     });
     html += '</div>';
@@ -7433,10 +7513,6 @@ function mRenderStockList() {
 function mQtyChange(id, val) {
   const working = mCurrentStockTab === 'drogas' ? mStockWorking : mInsumoWorking;
   working[id] = parseFloat(val) || 0;
-  // Visual feedback on input
-  const items = mCurrentStockTab === 'drogas' ? stockItems : consumiblesItems;
-  const item = items.find(i => i.id === id);
-  // update class immediately via the event target
 }
 
 function mSaveStockRelev() {
@@ -7444,7 +7520,6 @@ function mSaveStockRelev() {
   const items = isDrogas ? stockItems : consumiblesItems;
   const working = isDrogas ? mStockWorking : mInsumoWorking;
   const now = new Date().toISOString();
-
   let changed = 0;
   items.forEach(item => {
     const newQty = working[item.id] !== undefined ? working[item.id] : item.qty;
@@ -7453,249 +7528,294 @@ function mSaveStockRelev() {
     item.qty = newQty;
     item.lastRelevDate = now;
   });
-
   if (isDrogas) {
-    stockLastRelev = now;
-    // also sync snapshot
-    const snap = {};
-    items.forEach(i => { snap[i.id] = i.qty; });
+    stockLastRelev = { date: now, by: 'mobile' };
+    const snap = {}; items.forEach(i => { snap[i.id] = i.qty; });
     Object.assign(stockLevels, snap);
   } else {
-    consumiblesLastRelev = now;
+    consumiblesLastRelev = { date: now, by: 'mobile' };
   }
-
   saveAll();
-  // Refresh desktop views if they were rendered
   if (typeof renderStock === 'function') renderStock();
-
-  const msg = changed > 0
-    ? `✓ Relevamiento guardado — ${changed} cantidad${changed>1?'es':''} actualizada${changed>1?'s':''}.`
-    : '✓ Relevamiento guardado — sin cambios en cantidades.';
-
-  mShowToast(msg, 'ok');
+  mShowToast(changed > 0 ? `💾 Relevamiento guardado — ${changed} cantidades actualizadas.` : '💾 Relevamiento guardado.', 'ok');
   mRenderStockBanner();
+  mRenderStockList();
 }
 
-// ─── EQUIPOS ───
+// ── RESIDUOS ──────────────────────────────────
+
+function mRenderWasteList() {
+  const el = document.getElementById('m-waste-list');
+  if (!el) return;
+  const records = (wasteRecords || []).slice().reverse().slice(0, 10);
+  if (!records.length) { el.innerHTML = '<div class="m-empty">Sin registros aún</div>'; return; }
+  const catColors = {
+    'Ácido peligroso': 'badge-red', 'Base peligrosa': 'badge-amber',
+    'Solvente orgánico': 'badge-amber', 'Oxidante': 'badge-red',
+    'Residuo mixto': 'badge-gray'
+  };
+  let html = '';
+  records.forEach(r => {
+    const cls = catColors[r.cat] || 'badge-gray';
+    const fecha = r.fecha ? new Date(r.fecha).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'}) : '—';
+    html += `<div class="m-row" style="gap:10px">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:500">${r.chem}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${r.qty} ${r.unit} · ${r.treat}</div>
+        <div style="font-size:11px;color:var(--muted)">${fecha} · ${r.resp}</div>
+      </div>
+      <span class="m-badge m-${cls}">${r.cat||'Residuo'}</span>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+// ── PERSONAL ──────────────────────────────────
+
+function mRenderPersonal() {
+  const el = document.getElementById('m-personal-grid');
+  if (!el) return;
+  const people = Object.entries(state || {});
+  if (!people.length) { el.innerHTML = '<div class="m-empty">Sin personal configurado</div>'; return; }
+  let html = '';
+  people.forEach(([id, p]) => {
+    const inside = p.inside;
+    html += `<button onclick="toggleAccess('${id}');setTimeout(mRenderPersonal,100);" style="
+      padding:16px 10px; border:none; cursor:pointer; font-family:var(--font);
+      background:${inside ? 'var(--green-dim,#d1fae5)' : 'var(--surface2)'};
+      color:${inside ? 'var(--green)' : 'var(--muted)'};
+      display:flex; flex-direction:column; align-items:center; gap:5px;
+      -webkit-tap-highlight-color:transparent;">
+      <span style="font-size:24px">${inside ? '🟢' : '⚪'}</span>
+      <span style="font-size:12px;font-weight:600;text-align:center">${p.name||id}</span>
+      <span style="font-size:10px">${inside ? 'En sala' : 'Fuera'}</span>
+    </button>`;
+  });
+  el.innerHTML = html;
+}
+
+// ── EQUIPOS (Prueba de encendido) ─────────────
 
 function mRenderEqBanner() {
   const el = document.getElementById('m-eq-banner');
   if (!el) return;
   if (!eqLastCheck) {
-    el.innerHTML = '<div class="m-banner warn">⚠ Sin prueba de encendido registrada. Registrá la primera prueba.</div>';
+    el.innerHTML = '<div class="m-banner warn" style="margin:0">⚠ Sin prueba registrada.</div>';
     return;
   }
   const days = Math.floor((new Date() - new Date(eqLastCheck.date)) / 86400000);
   const left = 90 - days;
-  if (left <= 0) {
-    el.innerHTML = `<div class="m-banner danger">🔴 Prueba de encendido vencida hace ${Math.abs(left)}d.</div>`;
-  } else if (left <= 14) {
-    el.innerHTML = `<div class="m-banner warn">⚠ Próxima prueba en ${left}d.</div>`;
-  } else {
-    el.innerHTML = `<div class="m-banner ok">✓ Prueba al día — próxima en ${left}d.</div>`;
-  }
+  if (left <= 0)
+    el.innerHTML = `<div class="m-banner danger" style="margin:0">🔴 Prueba vencida hace ${Math.abs(left)}d.</div>`;
+  else if (left <= 14)
+    el.innerHTML = `<div class="m-banner warn" style="margin:0">⚠ Próxima prueba en ${left}d.</div>`;
+  else
+    el.innerHTML = `<div class="m-banner ok" style="margin:0">✓ Prueba al día — próxima en ${left}d.</div>`;
 }
 
 function mRenderEqList() {
   const el = document.getElementById('m-eq-list');
   if (!el) return;
-
-  // Group by group
   const groups = {};
   EQ_CHECK_LIST.forEach(eq => { (groups[eq.group] = groups[eq.group]||[]).push(eq); });
-
   let html = '';
   for (const [grp, eqs] of Object.entries(groups)) {
-    html += `<div class="m-card" style="margin-bottom:10px">
-      <div class="m-card-header"><span style="font-size:14px">🔧</span>${grp}</div>`;
+    html += `<div style="padding:8px 16px 2px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em">${grp}</div>`;
     eqs.forEach(eq => {
-      const cur = mEqWorking[eq.id] || null;
+      const cur = mEqWorking[eq.id];
       const lastDate = eqChecks[eq.id]?.lastCheckDate;
-      const lastLabel = lastDate ? new Date(lastDate).toLocaleDateString('es-AR', {day:'2-digit',month:'2-digit',year:'2-digit'}) : '—';
-      html += `<div class="m-eq-item">
-        <div class="m-eq-name">
-          <div class="name">${eq.name}</div>
-          <div class="grp">Último: ${lastLabel}</div>
+      const lastLabel = lastDate ? new Date(lastDate).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'}) : '—';
+      html += `<div class="m-row">
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:500">${eq.name}</div>
+          <div style="font-size:11px;color:var(--muted)">Último: ${lastLabel}</div>
         </div>
         <div class="m-eq-toggle">
           <button class="m-eq-btn ok ${cur==='ok'?'sel':''}" onclick="mEqToggle('${eq.id}','ok')">✓ OK</button>
           <button class="m-eq-btn fail ${cur==='fail'?'sel':''}" onclick="mEqToggle('${eq.id}','fail')">✗ Falla</button>
+          <button class="m-eq-btn na ${cur==='na'?'sel':''}" onclick="mEqToggle('${eq.id}','na')">N/A</button>
         </div>
       </div>`;
     });
-    html += '</div>';
   }
-  // Notes section
-  html += `<div style="margin-bottom:10px">
-    <div class="m-label">Observaciones (opcional)</div>
-    <textarea class="m-notes-area" id="m-eq-notes" placeholder="Ej: Bomba tardó 5 min en estabilizar..." style="margin-top:6px"></textarea>
-  </div>`;
-
   el.innerHTML = html;
 }
 
 function mEqToggle(id, val) {
   mEqWorking[id] = mEqWorking[id] === val ? null : val;
   mRenderEqList();
-  // restore notes text
-  const notes = document.getElementById('m-eq-notes');
-  // (re-rendered, but value is stored in mEqWorking so it's fine)
 }
-
-let mEqNotesVal = '';
-// Save notes before re-render
-const _origMRenderEqList = mRenderEqList;
 
 function mSaveEqCheck() {
   const results = {};
   let anySet = false;
-  EQ_CHECK_LIST.forEach(eq => {
-    if (mEqWorking[eq.id]) { results[eq.id] = mEqWorking[eq.id]; anySet = true; }
-  });
-  if (!anySet) {
-    mShowToast('Marcá al menos un equipo antes de guardar.', 'warn');
-    return;
-  }
+  EQ_CHECK_LIST.forEach(eq => { if (mEqWorking[eq.id]) { results[eq.id] = mEqWorking[eq.id]; anySet = true; } });
+  if (!anySet) { mShowToast('Marcá al menos un equipo antes de guardar.', 'warn'); return; }
   const now = new Date().toISOString();
   const notes = document.getElementById('m-eq-notes')?.value || '';
-
-  // Persist per-equipo
   EQ_CHECK_LIST.forEach(eq => {
-    if (mEqWorking[eq.id]) {
-      eqChecks[eq.id] = { lastCheckDate: now, lastResult: mEqWorking[eq.id], lastNotes: notes };
-    }
+    if (mEqWorking[eq.id]) eqChecks[eq.id] = { lastCheckDate: now, lastResult: mEqWorking[eq.id], lastNotes: notes };
   });
   eqLastCheck = { date: now, notes, results };
   saveAll();
-
-  // Reset working
   EQ_CHECK_LIST.forEach(eq => { mEqWorking[eq.id] = null; });
-
   if (typeof renderEqCycleBanner === 'function') renderEqCycleBanner();
   if (typeof renderEqCheckCells === 'function') renderEqCheckCells();
-
-  mShowToast('⚡ Prueba de encendido registrada correctamente.', 'ok');
+  mShowToast('⚡ Prueba de encendido registrada.', 'ok');
   mRenderEqBanner();
   mRenderEqList();
 }
 
-// ─── SESIONES ───
+// ── PROCESOS ──────────────────────────────────
 
-function mRenderSesiones() {
-  const el = document.getElementById('m-active-sessions');
+let mProcSelected = null;
+
+function mRenderProcList() {
+  const el = document.getElementById('m-proc-list');
   if (!el) return;
-  if (!activeSessions || activeSessions.length === 0) {
-    el.innerHTML = '<div style="color:var(--muted);font-size:13px;margin-bottom:12px">No hay sesiones activas.</div>';
-    return;
-  }
+  if (mProcSelected !== null) return; // showing detail
+  const q = (document.getElementById('m-proc-search')?.value || '').toLowerCase();
+  const list = (procesos || []).filter(p => !q
+    || p.nombre.toLowerCase().includes(q)
+    || (p.cat||'').toLowerCase().includes(q)
+    || (p.equips||'').toLowerCase().includes(q));
+  if (!list.length) { el.innerHTML = '<div class="m-empty">No hay procesos registrados.</div>'; return; }
+
+  const statusBadge = {
+    activo: 'm-badge-green', desarrollo: 'm-badge-amber',
+    pausado: 'm-badge-gray', obsoleto: 'm-badge-red'
+  };
   let html = '';
-  activeSessions.forEach((s, idx) => {
-    const ms = new Date() - new Date(s.startTime);
-    const mins = Math.floor(ms/60000); const hrs = Math.floor(mins/60);
-    const elapsed = hrs > 0 ? `${hrs}h ${mins%60}m` : `${mins}m`;
-    html += `<div class="m-session-card">
-      <div style="font-weight:600;font-size:14px;margin-bottom:6px">${s.userName}</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:4px">
-        ${s.eqName || 'Sin equipo'} · ${elapsed}
+  list.forEach(p => {
+    const cls = statusBadge[p.status] || 'm-badge-gray';
+    html += `<div class="m-row" onclick="mShowProc('${p.id}')" style="cursor:pointer">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600">${p.nombre}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${p.cat||''}${p.equips ? ' · ' + p.equips : ''}</div>
       </div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">
-        Inicio: ${new Date(s.startTime).toLocaleTimeString('es-AR')}
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+        <span class="m-badge m-${cls}">${p.status||'activo'}</span>
+        <span style="font-size:14px;color:var(--muted)">›</span>
       </div>
-      <button class="m-btn m-btn-danger" style="margin:0;padding:10px" onclick="mCloseSession(${idx})">
-        Cerrar sesión
-      </button>
     </div>`;
   });
   el.innerHTML = html;
 }
 
-function mCloseSession(idx) {
-  const s = activeSessions[idx];
-  if (!s) return;
-  if (!confirm(`¿Cerrás la sesión de ${s.userName}?`)) return;
-  const duration = Math.round((new Date() - new Date(s.startTime)) / 60000);
-  sessionHistory.push({
-    id: ++sessionCounter,
-    userName: s.userName,
-    eqId: s.eqId,
-    eqName: s.eqName,
-    startTime: s.startTime instanceof Date ? s.startTime.toISOString() : s.startTime,
-    endTime: new Date().toISOString(),
-    duration,
-    observations: ''
-  });
-  activeSessions.splice(idx, 1);
-  saveAll();
-  if (typeof renderActiveSessions === 'function') renderActiveSessions();
-  if (typeof renderHistory === 'function') renderHistory();
-  mRenderSesiones();
-  mShowToast('Sesión cerrada.', 'ok');
+function mShowProc(id) {
+  const p = (procesos || []).find(pr => pr.id === id);
+  if (!p) return;
+  mProcSelected = id;
+  document.getElementById('m-proc-list').style.display = 'none';
+  document.getElementById('m-proc-search-wrap').style.display = 'none';
+  document.getElementById('m-proc-back-btn').style.display = 'block';
+  const el = document.getElementById('m-proc-detail');
+  el.classList.add('active');
+
+  let stepsHtml = '';
+  if (p.steps && p.steps.length) {
+    p.steps.forEach((s, i) => {
+      stepsHtml += `<div class="m-proc-step">
+        <div class="m-step-num">${i+1}</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:500">${s.desc||''}</div>
+          ${s.params ? `<div style="font-size:11px;font-family:var(--mono);color:var(--accent);margin-top:4px;background:var(--surface2);padding:4px 8px;border-radius:6px">${s.params}</div>` : ''}
+          ${s.equip ? `<div style="font-size:11px;color:var(--muted);margin-top:3px">🔧 ${s.equip}</div>` : ''}
+          ${s.time ? `<div style="font-size:11px;color:var(--muted)">⏱ ${s.time}</div>` : ''}
+        </div>
+      </div>`;
+    });
+  } else {
+    stepsHtml = '<div class="m-empty">Sin pasos definidos</div>';
+  }
+
+  el.innerHTML = `
+    <div style="padding:14px 16px 0">
+      <div style="font-size:15px;font-weight:700;margin-bottom:4px">${p.nombre}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">${p.cat||''} · ${p.poe||''}</div>
+      ${p.chemicals ? `<div style="font-size:12px;margin-bottom:6px"><span style="font-weight:600">Químicos:</span> ${p.chemicals}</div>` : ''}
+      ${p.equips ? `<div style="font-size:12px;margin-bottom:6px"><span style="font-weight:600">Equipos:</span> ${p.equips}</div>` : ''}
+      ${p.notes ? `<div style="font-size:12px;color:var(--muted);margin-bottom:10px">${p.notes}</div>` : ''}
+    </div>
+    <div style="border-top:1px solid var(--border);padding:8px 0 0">
+      ${stepsHtml}
+    </div>`;
 }
 
-function mRenderPersonal() {
-  const el = document.getElementById('m-personal-grid');
-  if (!el) return;
-  const people = Object.entries(state);
-  if (!people.length) { el.innerHTML = ''; return; }
-  let html = '';
-  people.forEach(([id, p]) => {
-    const inside = p.inside;
-    html += `<button onclick="toggleAccess('${id}');mRenderPersonal();" style="
-      padding:14px 10px;border-radius:10px;border:1px solid var(--border2);
-      background:${inside ? 'var(--green-dim,#d1fae5)' : 'var(--surface)'};
-      color:${inside ? 'var(--green)' : 'var(--text)'};
-      font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;
-      display:flex;flex-direction:column;align-items:center;gap:4px;
-      -webkit-tap-highlight-color:transparent;">
-      <span style="font-size:20px">${inside ? '🟢' : '⚪'}</span>
-      <span>${p.name || id}</span>
-      <span style="font-weight:400;font-size:10px;color:var(--muted)">${inside ? 'En sala' : 'Fuera'}</span>
-    </button>`;
-  });
-  el.innerHTML = html;
+function mProcBack() {
+  mProcSelected = null;
+  document.getElementById('m-proc-list').style.display = '';
+  document.getElementById('m-proc-search-wrap').style.display = '';
+  document.getElementById('m-proc-back-btn').style.display = 'none';
+  const el = document.getElementById('m-proc-detail');
+  el.classList.remove('active');
+  el.innerHTML = '';
 }
 
-// ─── TOAST ───
+// ── TOAST ──────────────────────────────────────
 
 function mShowToast(msg, type) {
   let t = document.getElementById('m-toast');
   if (!t) {
     t = document.createElement('div');
     t.id = 'm-toast';
-    t.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:9999;padding:12px 20px;border-radius:12px;font-family:var(--font);font-size:13px;font-weight:500;max-width:85vw;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.2);transition:opacity 0.3s';
+    t.style.cssText = 'position:fixed;bottom:82px;left:50%;transform:translateX(-50%);z-index:9999;padding:12px 20px;border-radius:12px;font-family:var(--font);font-size:13px;font-weight:500;max-width:85vw;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.2);transition:opacity 0.3s;pointer-events:none';
     document.body.appendChild(t);
   }
-  t.style.background = type === 'ok' ? 'var(--green)' : type === 'warn' ? 'var(--amber,#d97706)' : '#ef4444';
+  t.style.background = type === 'ok' ? '#16a34a' : type === 'warn' ? '#d97706' : '#dc2626';
   t.style.color = '#fff';
   t.textContent = msg;
   t.style.opacity = '1';
   clearTimeout(t._timer);
-  t._timer = setTimeout(() => { t.style.opacity = '0'; }, 3000);
+  t._timer = setTimeout(() => { t.style.opacity = '0'; }, 3200);
 }
 
-// Patch startSession to also refresh mobile sessions list
-const _origStartSession = typeof startSession === 'function' ? startSession : null;
-if (_origStartSession) {
+// ── Patch desktop functions to refresh mobile ──
+
+// After startSession: refresh bitácora
+const _mOrigStartSession = typeof startSession === 'function' ? startSession : null;
+if (_mOrigStartSession) {
   window.startSession = function() {
-    _origStartSession();
-    if (mMobileActive) setTimeout(mRenderSesiones, 100);
+    _mOrigStartSession();
+    if (mMobileActive) {
+      setTimeout(() => { mRenderActiveSessions(); mRenderBitacoraBanner(); mRenderHistorial(); }, 100);
+    }
   };
 }
 
-// ─── INIT ───
+// After endSession: refresh bitácora
+const _mOrigEndSession = typeof endSession === 'function' ? endSession : null;
+if (_mOrigEndSession) {
+  window.endSession = function() {
+    _mOrigEndSession();
+    if (mMobileActive) {
+      setTimeout(() => { mRenderActiveSessions(); mRenderBitacoraBanner(); mRenderHistorial(); }, 100);
+    }
+  };
+}
+
+// After addWaste: refresh waste list
+const _mOrigAddWaste = typeof addWaste === 'function' ? addWaste : null;
+if (_mOrigAddWaste) {
+  window.addWaste = function() {
+    _mOrigAddWaste();
+    if (mMobileActive) setTimeout(() => mRenderWasteList(), 100);
+  };
+}
+
+// ── Init ──────────────────────────────────────
+
 document.addEventListener('DOMContentLoaded', function() {
-  // small delay so all desktop vars are initialized
-  setTimeout(mInit, 50);
+  setTimeout(mInit, 80);
 });
 </script>
-
 
 <script>
 // ══ PWA: Service Worker ══
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
   navigator.serviceWorker.register('./sw.js', {scope: './'})
     .then(reg => console.log('SW registrado:', reg.scope))
-    .catch(err => console.warn('SW no disponible (normal en local):', err));
+    .catch(err => console.warn('SW no disponible:', err));
 }
 
 // ══ PWA: Install prompt ══
@@ -7703,7 +7823,6 @@ let deferredInstallPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   deferredInstallPrompt = e;
-  // Show install button in mobile topbar
   const btn = document.getElementById('m-install-btn');
   if (btn) btn.style.display = 'flex';
 });
@@ -7718,6 +7837,5 @@ function pwaInstall() {
   deferredInstallPrompt.userChoice.then(() => { deferredInstallPrompt = null; });
 }
 </script>
-
 </body>
 </html>
