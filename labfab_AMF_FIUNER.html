@@ -158,6 +158,41 @@
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: rgba(37,99,235,0.03); }
 
+  /* STOCK — stepper + delta badge */
+  .stock-stepper { display:inline-flex; align-items:center; gap:4px; }
+  .stock-stepper button {
+    width:24px; height:24px; border-radius:5px; border:1px solid var(--border2);
+    background:var(--surface2); color:var(--text); cursor:pointer; font-size:14px;
+    line-height:1; display:flex; align-items:center; justify-content:center;
+    transition:background 0.1s;
+  }
+  .stock-stepper button:hover { background:var(--surface); border-color:var(--accent); }
+  .stock-qty-input {
+    width:64px; text-align:center; background:var(--surface2); border:1px solid var(--border2);
+    color:var(--text); padding:3px 4px; border-radius:5px; font-family:var(--mono);
+    font-size:13px; font-weight:600;
+  }
+  .stock-qty-input:focus { outline:none; border-color:var(--accent); }
+  .stock-delta { font-size:10.5px; font-weight:700; padding:2px 6px; border-radius:99px; font-family:var(--mono); white-space:nowrap; }
+  .stock-delta.up   { background:rgba(16,185,129,0.12); color:#10b981; }
+  .stock-delta.down { background:rgba(239,68,68,0.12);  color:#ef4444; }
+  .stock-delta.eq   { background:rgba(0,0,0,0.06);      color:var(--muted); }
+  .scat-pill {
+    font-size:10.5px; padding:3px 9px; border-radius:99px; cursor:pointer;
+    border:1px solid var(--border2); color:var(--muted); background:var(--surface2);
+    transition:all 0.12s; user-select:none; white-space:nowrap;
+  }
+  .scat-pill:hover { border-color:var(--accent); color:var(--accent); }
+  .scat-pill.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .relev-row { display:grid; grid-template-columns:1fr 110px 90px 70px; gap:8px; align-items:center; padding:7px 0; border-bottom:1px solid var(--border); font-size:13px; }
+  .relev-row:last-child { border-bottom:none; }
+  .relev-qty-input {
+    width:100%; text-align:center; background:var(--surface2); border:1px solid var(--border2);
+    color:var(--text); padding:5px 6px; border-radius:6px; font-family:var(--mono);
+    font-size:13px; font-weight:600; box-sizing:border-box;
+  }
+  .relev-qty-input:focus { outline:none; border-color:var(--accent); }
+
   /* PROCESOS — panel UI */
   .proc-layout { display: grid; grid-template-columns: 290px 1fr; gap: 16px; align-items: start; }
   .proc-list-wrap { position: sticky; top: 0; }
@@ -425,7 +460,7 @@
       Mantenimiento
       <span class="nav-badge warn">3</span>
     </div>
-    <div class="nav-item" onclick="show('stock')">
+    <div class="nav-item" onclick="show('stock');renderStock()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
       Stock
       <span class="nav-badge">1</span>
@@ -1036,423 +1071,43 @@
 
     <!-- ═══════════ STOCK ═══════════ -->
     <div class="section" id="sec-stock">
-
-      <!-- HEADER + BÚSQUEDA -->
+      <!-- HEADER -->
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
-        <input id="stock-search" type="text" placeholder="Buscar droga o insumo..." oninput="filterStock()"
-          style="flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:8px 12px;border-radius:7px;font-family:var(--font);font-size:13px">
-        <div style="display:flex;gap:6px;flex-wrap:wrap" id="cat-filters">
-          <button class="cat-btn active" onclick="setCat('all',this)">Todas</button>
-          <button class="cat-btn" onclick="setCat('Fotoresinas',this)">Fotoresinas</button>
-          <button class="cat-btn" onclick="setCat('Reveladores',this)">Reveladores</button>
-          <button class="cat-btn" onclick="setCat('Polímeros',this)">Polímeros</button>
-          <button class="cat-btn" onclick="setCat('Solventes',this)">Solventes</button>
-          <button class="cat-btn" onclick="setCat('Ácidos/Bases',this)">Ácidos/Bases</button>
-          <button class="cat-btn" onclick="setCat('Sólidos',this)">Sólidos</button>
-          <button class="cat-btn" onclick="setCat('Preparadas',this)">Preparadas</button>
-        </div>
-        <button class="btn btn-primary">+ Agregar ítem</button>
+        <input id="stock-search" type="text" placeholder="Buscar droga o insumo..." oninput="renderStock()"
+          style="flex:1;min-width:180px;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:8px 12px;border-radius:7px;font-family:var(--font);font-size:13px">
+        <div id="stock-cat-pills" style="display:flex;gap:5px;flex-wrap:wrap"></div>
+        <button class="btn" onclick="openStockRelev()" style="white-space:nowrap">📋 Relevar stock</button>
+        <button class="btn btn-primary" onclick="openStockNew()" style="white-space:nowrap">+ Nuevo insumo</button>
       </div>
 
-      <style>
-        .cat-btn{padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--muted);font-family:var(--font);transition:all 0.15s}
-        .cat-btn:hover{background:var(--surface2);color:var(--text)}
-        .cat-btn.active{background:var(--accent-dim);color:var(--accent);border-color:rgba(59,130,246,0.3)}
-        .stock-row{display:none}
-        .stock-row.visible{display:table-row}
-        .stock-row:hover td{background:rgba(255,255,255,0.02)}
-      </style>
+      <!-- KPI row -->
+      <div id="stock-kpi-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px"></div>
 
+      <!-- Tabla -->
       <div class="card">
-        <div class="card-body" style="padding:0;max-height:520px;overflow-y:auto">
-          <table id="stock-table" style="width:100%;border-collapse:collapse">
-            <thead style="position:sticky;top:0;background:var(--surface);z-index:1">
-              <tr>
-                <th>Droga / Insumo</th>
-                <th>Categoría</th>
-                <th>Cantidad</th>
-                <th>Almacenamiento</th>
-                <th>Uso / Aplicación</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="stock-body">
-
-              <!-- FOTORESINAS -->
-              <tr class="stock-row visible" data-cat="Fotoresinas" data-name="su8 2025">
-                <td><strong>SU-8 2025</strong></td>
-                <td><span class="badge purple">Fotoresina</span></td>
-                <td><span style="font-family:var(--mono)">400 mL</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Litografía — resina negativa</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Fotoresinas" data-name="su8 2150">
-                <td><strong>SU-8 2150</strong></td>
-                <td><span class="badge purple">Fotoresina</span></td>
-                <td><span style="font-family:var(--mono)">1 L</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Litografía — capa gruesa</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Fotoresinas" data-name="man 1405">
-                <td><strong>maN 1405 · Neg. photoresist</strong></td>
-                <td><span class="badge purple">Fotoresina</span></td>
-                <td><span style="font-family:var(--mono)">100 mL</span> <span style="font-size:11px;color:var(--muted)">(+ &lt;250 mL)</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Litografía negativa</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Fotoresinas" data-name="man 1440">
-                <td><strong>maN 1440 · Neg. photoresist</strong></td>
-                <td><span class="badge purple">Fotoresina</span></td>
-                <td><span style="font-family:var(--mono)">100 mL</span> <span style="font-size:11px;color:var(--muted)">(+ 500 mL)</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Litografía negativa</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Fotoresinas" data-name="ma-p 1275">
-                <td><strong>MA-P 1275 · Pos. photoresist</strong></td>
-                <td><span class="badge purple">Fotoresina</span></td>
-                <td><span style="font-family:var(--mono)">100 mL</span> <span style="font-size:11px;color:var(--muted)">(+ &lt;500 mL)</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Litografía positiva</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Fotoresinas" data-name="950 pmma a8">
-                <td><strong>950 PMMA A 8</strong></td>
-                <td><span class="badge purple">Fotoresina</span></td>
-                <td><span style="font-family:var(--mono)">100 mL</span> <span style="font-size:11px;color:var(--muted)">(+ 500 mL)</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Litografía e-beam</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-
-              <!-- REVELADORES / REMOVEDORES -->
-              <tr class="stock-row visible" data-cat="Reveladores" data-name="ma-d 533 developer">
-                <td><strong>ma-D 533 S Developer</strong></td>
-                <td><span class="badge blue">Revelador</span></td>
-                <td><span style="font-family:var(--mono)">1 L</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Litografía — maN 1400</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Reveladores" data-name="ma-d 531 tmah">
-                <td><strong>Ma-D 531 (TMAH)</strong></td>
-                <td><span class="badge blue">Revelador</span></td>
-                <td><span style="font-family:var(--mono)">3 L</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Litografía — resinas positivas</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Reveladores" data-name="revelador su8">
-                <td><strong>SU-8 Developer</strong></td>
-                <td><span class="badge blue">Revelador</span></td>
-                <td><span style="font-family:var(--mono)">2 L × 2</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Litografía SU-8</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Reveladores" data-name="pmma developer revelador">
-                <td><strong>PMMA Developer</strong></td>
-                <td><span class="badge blue">Revelador</span></td>
-                <td><span style="font-family:var(--mono)">1 L</span> <span style="font-size:11px;color:var(--muted)">(+ 0.8 L Rev 950)</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Litografía e-beam</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Reveladores" data-name="remover mr-rem 400">
-                <td><strong>Remover mr-Rem 400</strong></td>
-                <td><span class="badge blue">Removedor</span></td>
-                <td><span style="font-family:var(--mono)">1 L</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Litografía</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Reveladores" data-name="removedor dry resist pmma futurrex">
-                <td><strong>Removedor Dry Resist / PMMA / Futurrex</strong></td>
-                <td><span class="badge blue">Removedor</span></td>
-                <td><span style="font-family:var(--mono)">500 mL · 50 mL · 200 mL</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Litografía / Lift-off / e-beam</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-
-              <!-- POLÍMEROS / PDMS -->
-              <tr class="stock-row visible" data-cat="Polímeros" data-name="silicone elastomer 184 pdms">
-                <td><strong>Sylgard 184 — Elastomer + Curing Agent</strong></td>
-                <td><span class="badge teal" style="background:var(--teal-dim);color:var(--teal)">Polímero</span></td>
-                <td><span style="font-family:var(--mono)">500 g + 50 g</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">PDMS — molde SU-8</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Polímeros" data-name="kit pdms">
-                <td><strong>Kit PDMS</strong></td>
-                <td><span class="badge teal" style="background:var(--teal-dim);color:var(--teal)">Polímero</span></td>
-                <td><span style="font-family:var(--mono)">100 mL + 3.6 kg</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">PDMS — molde SU-8</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Polímeros" data-name="med 6215 med 4211">
-                <td><strong>MED-6215 A+B · MED-4211 A+B</strong></td>
-                <td><span class="badge teal" style="background:var(--teal-dim);color:var(--teal)">Polímero</span></td>
-                <td><span style="font-family:var(--mono)">50g+500g · 500g+500g</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Polimerización silicona médica</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Polímeros" data-name="galxyl c parylene diclorop-xililene">
-                <td><strong>Galxyl C (Di-Cloro-Di-p-Xililene)</strong></td>
-                <td><span class="badge teal" style="background:var(--teal-dim);color:var(--teal)">Polímero</span></td>
-                <td><span style="font-family:var(--mono)">400 g</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Deposición de parileno</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Polímeros" data-name="clorotrimetilsilano hdms">
-                <td><strong>Clorotrimetilsilano · HDMS</strong></td>
-                <td><span class="badge teal" style="background:var(--teal-dim);color:var(--teal)">Adhesión</span></td>
-                <td><span style="font-family:var(--mono)">100 mL c/u</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Funcionalización / Promotor adhesión</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-
-              <!-- SOLVENTES -->
-              <tr class="stock-row visible" data-cat="Solventes" data-name="acetona">
-                <td><strong>Acetona</strong></td>
-                <td><span class="badge amber">Solvente</span></td>
-                <td><span style="font-family:var(--mono)">200 mL</span></td>
-                <td style="font-size:12px;color:var(--muted)">Bajo mesada · solventes · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Litografía, limpieza</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Solventes" data-name="alcohol isopropilico ipa">
-                <td><strong>Alcohol Isopropílico (IPA)</strong></td>
-                <td><span class="badge amber">Solvente</span></td>
-                <td><span style="font-family:var(--mono)">200 mL + 1 L</span></td>
-                <td style="font-size:12px;color:var(--muted)">Bajo mesada · solventes · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Limpieza general</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Solventes" data-name="alcohol etilico etanol">
-                <td><strong>Alcohol Etílico / Absoluto</strong></td>
-                <td><span class="badge amber">Solvente</span></td>
-                <td><span style="font-family:var(--mono)">2 L + 200 mL</span></td>
-                <td style="font-size:12px;color:var(--muted)">Bajo mesada · solventes · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Litografía, limpieza</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Solventes" data-name="metanol">
-                <td><strong>Metanol</strong></td>
-                <td><span class="badge amber">Solvente</span></td>
-                <td><span style="font-family:var(--mono)">1 L</span></td>
-                <td style="font-size:12px;color:var(--muted)">Bajo mesada · solventes · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Electroforesis</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Solventes" data-name="agua oxigenada peroxido hidrogeno">
-                <td><strong>Agua Oxigenada 100 Vol.</strong></td>
-                <td><span class="badge amber">Solvente</span></td>
-                <td><span style="font-family:var(--mono)">&gt;1 L</span></td>
-                <td style="font-size:12px;color:var(--muted)">Bajo mesada · solventes · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Ataque Cu · Solución Piranha</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Solventes" data-name="formaldehido">
-                <td><strong>Formaldehído Solución</strong></td>
-                <td><span class="badge amber">Solvente</span></td>
-                <td><span style="font-family:var(--mono)">&lt;1 L</span></td>
-                <td style="font-size:12px;color:var(--muted)">Bajo mesada · solventes · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Electroless plating Cu (agente reductor)</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-
-              <!-- ÁCIDOS / BASES -->
-              <tr class="stock-row visible" data-cat="Ácidos/Bases" data-name="acido clorhidrico hcl">
-                <td><strong>Ácido Clorhídrico 36.5–38%</strong></td>
-                <td><span class="badge red">Ácido</span></td>
-                <td><span style="font-family:var(--mono)">&lt;1 L</span></td>
-                <td style="font-size:12px;color:var(--muted)">Bajo mesada · ác-base · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Ajuste pH · soluciones tampón</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Ácidos/Bases" data-name="acido fluorhidrico hf">
-                <td><strong>Ácido Fluorhídrico 50%</strong></td>
-                <td><span class="badge red">Ácido</span></td>
-                <td><span style="font-family:var(--mono)">&lt;1 L</span></td>
-                <td style="font-size:12px;color:var(--muted)">Bajo mesada · ác-base · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Ataque húmedo SiO₂ (BHF)</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Ácidos/Bases" data-name="acido nitrico">
-                <td><strong>Ácido Nítrico 65%</strong></td>
-                <td><span class="badge red">Ácido</span></td>
-                <td><span style="font-family:var(--mono)">&lt;1 L</span></td>
-                <td style="font-size:12px;color:var(--muted)">Bajo mesada · ác-base · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Ataque plata</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Ácidos/Bases" data-name="acido sulfurico piranha">
-                <td><strong>Ácido Sulfúrico 95–98%</strong></td>
-                <td><span class="badge red">Ácido</span></td>
-                <td><span style="font-family:var(--mono)">&lt;1 L</span></td>
-                <td style="font-size:12px;color:var(--muted)">Bajo mesada · ác-base · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Plating Cu · Piranha Clean</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Ácidos/Bases" data-name="acido acetico glacial">
-                <td><strong>Ácido Acético Glacial</strong></td>
-                <td><span class="badge red">Ácido</span></td>
-                <td><span style="font-family:var(--mono)">&lt;1 L</span></td>
-                <td style="font-size:12px;color:var(--muted)">Bajo mesada · ác-base · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Ataque Cu (1:1:18 AcOH:H₂O₂:H₂O)</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Ácidos/Bases" data-name="hidróxido amonio nh3">
-                <td><strong>Hidróxido de Amonio 25–30%</strong></td>
-                <td><span class="badge red">Base</span></td>
-                <td><span style="font-family:var(--mono)">&lt;1 L</span></td>
-                <td style="font-size:12px;color:var(--muted)">Bajo mesada · ác-base · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">RCA Clean</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Ácidos/Bases" data-name="hidróxido potasio koh">
-                <td><strong>Hidróxido de Potasio (KOH)</strong></td>
-                <td><span class="badge red">Base</span></td>
-                <td><span style="font-family:var(--mono)">250 g</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Ataque Si anisótropo · revelado</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Ácidos/Bases" data-name="nh4f fluoruro amonio">
-                <td><strong>NH₄F 40%</strong></td>
-                <td><span class="badge red">Ácido</span></td>
-                <td><span style="font-family:var(--mono)">250 mL</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">BHF — Ataque húmedo SiO₂</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-
-              <!-- SÓLIDOS -->
-              <tr class="stock-row visible" data-cat="Sólidos" data-name="sulfato cuprico">
-                <td><strong>Sulfato Cúprico Pentahidrato PA</strong></td>
-                <td><span class="badge muted">Sólido</span></td>
-                <td><span style="font-family:var(--mono)">250 g</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Copper plating</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Sólidos" data-name="edta disodica">
-                <td><strong>EDTA Disódica Dihidrato PA</strong></td>
-                <td><span class="badge muted">Sólido</span></td>
-                <td><span style="font-family:var(--mono)">500 g</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Soluciones tampón</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Sólidos" data-name="cloruro ferrico">
-                <td><strong>Cloruro Férrico Concentrado</strong></td>
-                <td><span class="badge muted">Sólido</span></td>
-                <td><span style="font-family:var(--mono)">250 mL</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Ataque cobre (PCB)</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Sólidos" data-name="ioduro potasio iodo">
-                <td><strong>Ioduro de Potasio + Iodo Bisublimado</strong></td>
-                <td><span class="badge muted">Sólido</span></td>
-                <td><span style="font-family:var(--mono)">50 g + 50 g</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Ataque de oro (KI solution)</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Sólidos" data-name="agar electrodo referencia">
-                <td><strong>Agar / Agar Agar</strong></td>
-                <td><span class="badge muted">Sólido</span></td>
-                <td><span style="font-family:var(--mono)">5 g + 100 g</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Electrodo de referencia Ag/AgCl</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Sólidos" data-name="silicagel">
-                <td><strong>Silicagel con indicador de humedad</strong></td>
-                <td><span class="badge muted">Sólido</span></td>
-                <td><span style="font-family:var(--mono)">200 g</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Desecador</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Sólidos" data-name="gold solution 24k electroless">
-                <td><strong>Gold Solution 24K + Polish + Cleanser</strong></td>
-                <td><span class="badge muted">Sólido</span></td>
-                <td><span style="font-family:var(--mono)">125 mL + 125 mL + 100 mL</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Electroless gold plating</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Sólidos" data-name="micro soap jabón parylene">
-                <td><strong>Micro Organic Soap</strong></td>
-                <td><span class="badge muted">Sólido</span></td>
-                <td><span style="font-family:var(--mono)">3 L</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Prep. superficies parileno · limpieza</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-
-              <!-- SOLUCIONES PREPARADAS -->
-              <tr class="stock-row visible" data-cat="Preparadas" data-name="ki au etching gold">
-                <td><strong>KI Au Etching</strong></td>
-                <td><span class="badge green">Preparada</span></td>
-                <td><span style="font-family:var(--mono)">10 mL</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Ataque de oro</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Preparadas" data-name="kcl solución electroquímica">
-                <td><strong>KCl 2M</strong></td>
-                <td><span class="badge green">Preparada</span></td>
-                <td><span style="font-family:var(--mono)">100 mL</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Prueba electrodo referencia</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Preparadas" data-name="cuso4 h2so4 copper plating">
-                <td><strong>CuSO₄ + H₂SO₄ (copper plating)</strong></td>
-                <td><span class="badge green">Preparada</span></td>
-                <td><span style="font-family:var(--mono)">250 mL</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Plating de cobre</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Preparadas" data-name="buffer ph calibración">
-                <td><strong>Buffer pH 4 / 7 / 8.6 / 10</strong></td>
-                <td><span class="badge green">Preparada</span></td>
-                <td><span style="font-family:var(--mono)">1L / 1L / 900mL / 800mL</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Calibración pHímetro · electroforesis</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-              <tr class="stock-row visible" data-cat="Preparadas" data-name="nafion electrodo">
-                <td><strong>Nafion Perfluorinated 5 wt.%</strong></td>
-                <td><span class="badge green">Preparada</span></td>
-                <td><span style="font-family:var(--mono)">25 mL</span></td>
-                <td style="font-size:12px;color:var(--muted)">Droguero · 23°C</td>
-                <td style="font-size:12px;color:var(--muted)">Electrolito seco — spin casting</td>
-                <td><button class="btn" style="padding:4px 10px;font-size:11px">Editar</button></td>
-              </tr>
-
-            </tbody>
-          </table>
+        <div class="card-body" style="padding:0">
+          <div style="overflow-x:auto;max-height:540px;overflow-y:auto">
+            <table id="stock-table" style="width:100%;border-collapse:collapse">
+              <thead style="position:sticky;top:0;background:var(--surface);z-index:2">
+                <tr>
+                  <th>Droga / Insumo</th>
+                  <th>Categoría</th>
+                  <th style="text-align:center;width:200px">Cantidad actual</th>
+                  <th style="text-align:center;width:90px">vs. anterior</th>
+                  <th>Almacenamiento</th>
+                  <th>Uso / Aplicación</th>
+                  <th style="width:80px"></th>
+                </tr>
+              </thead>
+              <tbody id="stock-tbody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <div style="margin-top:10px;font-size:12px;color:var(--muted);text-align:right">
-        Última verificación inventario: <span style="font-family:var(--mono)">Dic 2023</span> — <span style="color:var(--amber)">⚠ Pendiente verificación 2024/2025</span>
-      </div>
+      <div id="stock-relev-note" style="margin-top:8px;font-size:11px;color:var(--muted);text-align:right"></div>
     </div>
+
 
     <!-- ═══════════ PERSONAL ═══════════ -->
     <div class="section" id="sec-personal">
@@ -3101,6 +2756,87 @@
     </div>
 
     <!-- MODAL: Nuevo / Editar Proceso -->
+    <!-- ══ MODAL: Relevar stock ══ -->
+    <div id="relev-modal-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:510;align-items:flex-start;justify-content:center;padding:30px 16px;overflow-y:auto">
+      <div style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;width:660px;max-width:100%;padding:0;overflow:hidden">
+        <div style="padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-weight:700;font-size:15px">Relevamiento de stock</div>
+            <div id="relev-modal-date" style="font-size:12px;color:var(--muted);margin-top:2px"></div>
+          </div>
+          <button onclick="closeStockRelev()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:0 4px">✕</button>
+        </div>
+        <div style="padding:12px 22px 6px;display:flex;gap:8px;align-items:center">
+          <input id="relev-search" type="text" placeholder="Filtrar..." oninput="renderRelevRows()"
+            style="flex:1;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:6px 10px;border-radius:6px;font-size:12px;font-family:var(--font)">
+          <span style="font-size:11px;color:var(--muted)" id="relev-count-label"></span>
+        </div>
+        <div style="padding:4px 22px 0">
+          <div style="display:grid;grid-template-columns:1fr 110px 90px 70px;gap:8px;padding:6px 0;font-size:10px;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">
+            <span>Insumo</span><span style="text-align:center">Cantidad actual</span><span style="text-align:center">Anterior</span><span style="text-align:center">Δ</span>
+          </div>
+        </div>
+        <div id="relev-rows" style="padding:0 22px;max-height:400px;overflow-y:auto"></div>
+        <div style="padding:14px 22px 18px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn" onclick="closeStockRelev()">Cancelar</button>
+          <button class="btn btn-primary" onclick="saveRelev()">Guardar relevamiento</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MODAL: Nuevo/Editar insumo ══ -->
+    <div id="stock-new-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:510;align-items:center;justify-content:center">
+      <div style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;width:480px;max-width:96vw;padding:0;overflow:hidden">
+        <div style="padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+          <div style="font-weight:700;font-size:15px" id="stock-new-title">Nuevo insumo</div>
+          <button onclick="closeStockNew()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+        </div>
+        <div style="padding:18px 22px;display:flex;flex-direction:column;gap:12px">
+          <input type="hidden" id="stock-edit-id">
+          <div>
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Nombre *</label>
+            <input id="stock-new-name" type="text" placeholder="Ej: Fotoresina AZ1512" style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px;font-family:var(--font)">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div>
+              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Categoría *</label>
+              <select id="stock-new-cat" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px;font-family:var(--font)">
+                <option>Fotoresinas</option><option>Reveladores</option><option>Polímeros</option>
+                <option>Solventes</option><option>Ácidos/Bases</option><option>Sólidos</option>
+                <option>Preparadas</option><option>BioMEMS</option><option>Otro</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Unidad</label>
+              <input id="stock-new-unit" type="text" placeholder="mL, g, unid, µL..." style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px;font-family:var(--font)">
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div>
+              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Cantidad actual</label>
+              <input id="stock-new-qty" type="number" min="0" placeholder="0" style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px;font-family:var(--mono)">
+            </div>
+            <div>
+              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Mínimo alerta</label>
+              <input id="stock-new-min" type="number" min="0" placeholder="0" style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px;font-family:var(--mono)">
+            </div>
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Almacenamiento</label>
+            <input id="stock-new-storage" type="text" placeholder="Ej: Droguero · 23°C, Heladera 4°C" style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px;font-family:var(--font)">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Uso / Aplicación</label>
+            <input id="stock-new-uso" type="text" placeholder="Ej: Litografía positiva, limpieza orgánica" style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px;font-family:var(--font)">
+          </div>
+        </div>
+        <div style="padding:0 22px 18px;display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn" onclick="closeStockNew()">Cancelar</button>
+          <button class="btn btn-primary" onclick="saveStockItem()">Guardar</button>
+        </div>
+      </div>
+    </div>
+
     <div id="proc-modal-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;align-items:flex-start;justify-content:center;padding-top:40px;overflow-y:auto">
       <div style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:28px;width:680px;max-width:96vw;margin-bottom:48px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
@@ -3504,7 +3240,9 @@ function saveAll() {
       projects: projects,
       projectCounter: projectCounter,
       procesos: procesos,
-      procesoCounter: procesoCounter
+      procesoCounter: procesoCounter,
+      stockItems: stockItems,
+      stockLastRelev: stockLastRelev
     };
     localStorage.setItem(LS_KEY, JSON.stringify(snap));
   } catch(e) { console.warn('localStorage save failed', e); }
@@ -3528,6 +3266,8 @@ function loadAll() {
     if (snap.projectCounter) projectCounter = snap.projectCounter;
     if (snap.procesos) procesos = snap.procesos;
     if (snap.procesoCounter) procesoCounter = snap.procesoCounter;
+    if (snap.stockItems) stockItems = snap.stockItems;
+    if (snap.stockLastRelev) stockLastRelev = snap.stockLastRelev;
     return true;
   } catch(e) { console.warn('localStorage load failed', e); return false; }
 }
@@ -3645,6 +3385,7 @@ function show(id) {
   document.getElementById('topbar-title').textContent = sections[id];
   document.getElementById('topbar-sub').textContent = subs[id];
   if (id === 'procesos') renderProcesos();
+  if (id === 'stock') renderStock();
 }
 
 function openModal() { document.getElementById('modal-bg').style.display='flex'; }
@@ -3996,22 +3737,320 @@ function initQRButtons() {
 }
 setTimeout(initQRButtons, 200);
 
-let currentCat = 'all';
-function filterStock() {
-  const q = (document.getElementById('stock-search').value || '').toLowerCase();
-  document.querySelectorAll('.stock-row').forEach(row => {
-    const catMatch = currentCat === 'all' || row.dataset.cat === currentCat;
-    const nameMatch = !q || (row.dataset.name || '').includes(q);
-    row.classList.toggle('visible', catMatch && nameMatch);
-  });
-}
-function setCat(cat, btn) {
-  currentCat = cat;
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  filterStock();
+// ═══════════ STOCK / INSUMOS ═══════════
+let stockLastRelev = null;  // { date: ISO string, snapshot: {id -> qty} }
+let stockCatFilter = 'all';
+let stockItemCounter = 100;
+
+const STOCK_ITEMS_DEFAULT = [
+  // FOTORESINAS
+  {id:'su8_2025',  name:'SU-8 2025',                 cat:'Fotoresinas', qty:400,  unit:'mL', min:100, lastQty:null, storage:'Droguero · 23°C', uso:'Litografía — resina negativa'},
+  {id:'su8_2150',  name:'SU-8 2150',                 cat:'Fotoresinas', qty:1000, unit:'mL', min:200, lastQty:null, storage:'Droguero · 23°C', uso:'Litografía — capa gruesa'},
+  {id:'man1405',   name:'maN 1405 · Neg. photoresist',cat:'Fotoresinas', qty:350,  unit:'mL', min:80,  lastQty:null, storage:'Droguero · 23°C', uso:'Litografía negativa'},
+  {id:'man1440',   name:'maN 1440 · Neg. photoresist',cat:'Fotoresinas', qty:600,  unit:'mL', min:80,  lastQty:null, storage:'Droguero · 23°C', uso:'Litografía negativa'},
+  {id:'map1275',   name:'MA-P 1275 · Pos. photoresist',cat:'Fotoresinas',qty:600,  unit:'mL', min:80,  lastQty:null, storage:'Droguero · 23°C', uso:'Litografía positiva'},
+  {id:'pmma_a8',   name:'950 PMMA A 8',              cat:'Fotoresinas', qty:600,  unit:'mL', min:80,  lastQty:null, storage:'Droguero · 23°C', uso:'Litografía e-beam'},
+  // REVELADORES
+  {id:'mad533',    name:'ma-D 533 S Developer',       cat:'Reveladores', qty:1000, unit:'mL', min:200, lastQty:null, storage:'Droguero · 23°C', uso:'Litografía — maN 1400'},
+  {id:'mad531',    name:'ma-D 531 TMAH',              cat:'Reveladores', qty:500,  unit:'mL', min:100, lastQty:null, storage:'Droguero · 23°C', uso:'Revelador positiva — AZ'},
+  {id:'su8dev',    name:'SU-8 Developer (PGMEA)',     cat:'Reveladores', qty:2000, unit:'mL', min:500, lastQty:null, storage:'Droguero · 23°C', uso:'Revelador SU-8'},
+  {id:'pmma_dev',  name:'PMMA Developer (MIBK:IPA)',  cat:'Reveladores', qty:500,  unit:'mL', min:100, lastQty:null, storage:'Droguero · 23°C', uso:'Revelador PMMA e-beam'},
+  {id:'mrrem400',  name:'Remover mr-rem 400',         cat:'Reveladores', qty:500,  unit:'mL', min:100, lastQty:null, storage:'Droguero · 23°C', uso:'Removedor fotoresinas'},
+  {id:'futurrex',  name:'Removedor dry resist PMMA (Futurrex)',cat:'Reveladores',qty:200,unit:'mL',min:50,lastQty:null,storage:'Droguero · 23°C',uso:'Removedor PMMA'},
+  // POLÍMEROS
+  {id:'sylg_base', name:'Sylgard 184 Base (PDMS)',    cat:'Polímeros',   qty:500,  unit:'g',  min:100, lastQty:null, storage:'Droguero · 23°C', uso:'Moldes, microfluídica'},
+  {id:'sylg_cur',  name:'Sylgard 184 Curador',        cat:'Polímeros',   qty:50,   unit:'g',  min:10,  lastQty:null, storage:'Droguero · 23°C', uso:'Curador PDMS 10:1'},
+  {id:'med6215',   name:'MED-6215 · MED-4211 (silicona médica)',cat:'Polímeros',qty:200,unit:'g',min:50,lastQty:null,storage:'Droguero · 23°C',uso:'Encapsulado biocompatible'},
+  {id:'parylene',  name:'Parylene C (dímero)',         cat:'Polímeros',   qty:50,   unit:'g',  min:10,  lastQty:null, storage:'Droguero · 23°C', uso:'Recubrimiento conformal'},
+  {id:'hmds',      name:'HMDS (Clorotrimetilsilano)',  cat:'Polímeros',   qty:250,  unit:'mL', min:50,  lastQty:null, storage:'Campana · 23°C',  uso:'Promotor adhesión fotoresinas'},
+  // SOLVENTES
+  {id:'acetona',   name:'Acetona',                    cat:'Solventes',   qty:2000, unit:'mL', min:400, lastQty:null, storage:'Droguero ignífugo', uso:'Limpieza orgánica, strip'},
+  {id:'ipa',       name:'IPA (Isopropanol)',           cat:'Solventes',   qty:2000, unit:'mL', min:400, lastQty:null, storage:'Droguero ignífugo', uso:'Limpieza, enjuague'},
+  {id:'etanol',    name:'Etanol absoluto',             cat:'Solventes',   qty:1000, unit:'mL', min:200, lastQty:null, storage:'Droguero ignífugo', uso:'Silanización, limpieza'},
+  {id:'metanol',   name:'Metanol',                    cat:'Solventes',   qty:500,  unit:'mL', min:100, lastQty:null, storage:'Droguero ignífugo', uso:'Solvente analítico'},
+  {id:'h2o2',      name:'H₂O₂ 30% (Agua oxigenada)',  cat:'Solventes',   qty:1000, unit:'mL', min:200, lastQty:null, storage:'Heladera 4°C',     uso:'SC-1, Piranha, oxidante'},
+  {id:'formol',    name:'Formaldehído 37%',            cat:'Solventes',   qty:500,  unit:'mL', min:100, lastQty:null, storage:'Campana · 4°C',    uso:'Fijador histológico'},
+  // ÁCIDOS/BASES
+  {id:'hcl',       name:'HCl 37% (Ácido clorhídrico)',cat:'Ácidos/Bases',qty:600,  unit:'mL', min:100, lastQty:null, storage:'Campana · armario ácidos', uso:'SC-2, grabado, pH'},
+  {id:'hf',        name:'HF 49% (Ácido fluorhídrico)', cat:'Ácidos/Bases',qty:200, unit:'mL', min:50,  lastQty:null, storage:'Campana · armario HF',     uso:'Grabado SiO₂ — EXTREMO PELIGRO'},
+  {id:'hno3',      name:'HNO₃ 65% (Ácido nítrico)',   cat:'Ácidos/Bases',qty:500,  unit:'mL', min:100, lastQty:null, storage:'Campana · armario ácidos', uso:'Grabado metales, limpieza'},
+  {id:'h2so4',     name:'H₂SO₄ 98% (Ácido sulfúrico)',cat:'Ácidos/Bases',qty:600,  unit:'mL', min:100, lastQty:null, storage:'Campana · armario ácidos', uso:'Piranha, grabado'},
+  {id:'acac',      name:'Ácido acético glacial',       cat:'Ácidos/Bases',qty:500,  unit:'mL', min:100, lastQty:null, storage:'Campana · 23°C',           uso:'Buffer, revelador AZ'},
+  {id:'nh3',       name:'NH₄OH (Hidróxido de amonio)', cat:'Ácidos/Bases',qty:800,  unit:'mL', min:100, lastQty:null, storage:'Campana · 23°C',           uso:'SC-1 (RCA)'},
+  {id:'koh',       name:'KOH (Hidróxido de potasio)',  cat:'Ácidos/Bases',qty:300,  unit:'g',  min:50,  lastQty:null, storage:'Droguero · 23°C',          uso:'Grabado anisotrópico Si'},
+  {id:'nh4f',      name:'NH₄F (Fluoruro de amonio)',   cat:'Ácidos/Bases',qty:200,  unit:'g',  min:50,  lastQty:null, storage:'Droguero · 23°C',          uso:'BHF buffer (con HF)'},
+  // SÓLIDOS
+  {id:'cuso4',     name:'CuSO₄·5H₂O (Sulfato cúprico)',cat:'Sólidos',   qty:200,  unit:'g',  min:30,  lastQty:null, storage:'Droguero · 23°C', uso:'Plating de cobre'},
+  {id:'edta',      name:'EDTA disódica',               cat:'Sólidos',    qty:100,  unit:'g',  min:20,  lastQty:null, storage:'Droguero · 23°C', uso:'Quelante, solución tampón'},
+  {id:'fecl3',     name:'FeCl₃ (Cloruro férrico)',     cat:'Sólidos',    qty:100,  unit:'g',  min:20,  lastQty:null, storage:'Droguero · 23°C', uso:'Grabado Cu, etching'},
+  {id:'ki_iodo',   name:'KI + I₂ (Yoduro potasio / Yodo)',cat:'Sólidos',qty:50,  unit:'g',  min:10,  lastQty:null, storage:'Droguero · oscuridad', uso:'Gold Etchant casero'},
+  {id:'agar',      name:'Agar-agar (electrodo referencia)',cat:'Sólidos', qty:50,  unit:'g',  min:10,  lastQty:null, storage:'Droguero · 23°C', uso:'Puente salino electroquímico'},
+  {id:'silicagel', name:'Sílicagel (desecante)',        cat:'Sólidos',    qty:500, unit:'g',  min:100, lastQty:null, storage:'Droguero · 23°C', uso:'Desecante · droguero'},
+  {id:'au_sol',    name:'Gold Solution 24k (electroless)',cat:'Sólidos',  qty:50,  unit:'mL', min:10,  lastQty:null, storage:'Heladera 4°C',    uso:'Deposición Au electroless'},
+  {id:'microsoap', name:'Micro-90 Soap (limpieza parylene)',cat:'Sólidos',qty:200,unit:'mL', min:50,  lastQty:null, storage:'Droguero · 23°C', uso:'Limpieza reactor parylene'},
+  // PREPARADAS
+  {id:'ki_au',     name:'KI/Au Etching (Gold Etchant TFA)',cat:'Preparadas',qty:250,unit:'mL',min:50,lastQty:null,storage:'Droguero · 23°C',uso:'Grabado Au — gold lift-off'},
+  {id:'kcl_sol',   name:'KCl 0.1 M (electroquímica)',  cat:'Preparadas', qty:500,  unit:'mL', min:100, lastQty:null, storage:'Droguero · 23°C', uso:'Electrolito redox, EIS'},
+  {id:'cuso4_pl',  name:'CuSO₄/H₂SO₄ (copper plating)',cat:'Preparadas',qty:250,  unit:'mL', min:50,  lastQty:null, storage:'Droguero · 23°C', uso:'Plating de cobre'},
+  {id:'buf_ph',    name:'Buffers pH 4/7/8.6/10',       cat:'Preparadas', qty:900,  unit:'mL', min:100, lastQty:null, storage:'Droguero · 23°C', uso:'Calibración pH, electroforesis'},
+  {id:'nafion',    name:'Nafion 5 wt.%',               cat:'Preparadas', qty:25,   unit:'mL', min:5,   lastQty:null, storage:'Heladera 4°C',    uso:'Electrolito seco, spin casting'},
+];
+
+let stockItems = [];
+
+function initStockItems() {
+  if (stockItems.length === 0) {
+    stockItems = JSON.parse(JSON.stringify(STOCK_ITEMS_DEFAULT));
+  }
 }
 
+const SCAT_BADGE = {
+  'Fotoresinas':'purple','Reveladores':'blue','Polímeros':'teal',
+  'Solventes':'muted','Ácidos/Bases':'amber','Sólidos':'green',
+  'Preparadas':'muted','BioMEMS':'accent','Otro':'muted'
+};
+
+function renderStock() {
+  initStockItems();
+  const q = (document.getElementById('stock-search')?.value || '').toLowerCase();
+
+  // Pills
+  const cats = ['all', ...new Set(stockItems.map(i => i.cat))];
+  const pillsEl = document.getElementById('stock-cat-pills');
+  if (pillsEl) {
+    pillsEl.innerHTML = cats.map(c =>
+      `<span class="scat-pill ${stockCatFilter===c?'active':''}" onclick="setStockCat(${JSON.stringify(c)})">${c==='all'?'Todas':c}</span>`
+    ).join('');
+  }
+
+  const filtered = stockItems.filter(item => {
+    if (stockCatFilter !== 'all' && item.cat !== stockCatFilter) return false;
+    if (q && !item.name.toLowerCase().includes(q) && !item.cat.toLowerCase().includes(q) && !item.uso.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  // KPIs
+  const total = stockItems.length;
+  const low = stockItems.filter(i => i.qty <= i.min).length;
+  const ok  = total - low;
+  const withRelev = stockItems.filter(i => i.lastQty !== null).length;
+  const kpiEl = document.getElementById('stock-kpi-row');
+  if (kpiEl) kpiEl.innerHTML = `
+    <div class="kpi-card green"><div class="kpi-label">Total ítems</div><div class="kpi-value">${total}</div></div>
+    <div class="kpi-card green"><div class="kpi-label">Stock OK</div><div class="kpi-value green">${ok}</div></div>
+    <div class="kpi-card ${low>0?'amber':'green'}"><div class="kpi-label">Stock bajo</div><div class="kpi-value ${low>0?'amber':''}">${low}</div></div>
+    <div class="kpi-card blue"><div class="kpi-label">Con relevamiento</div><div class="kpi-value blue">${withRelev}</div></div>
+  `;
+
+  const tbody = document.getElementById('stock-tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = filtered.length ? filtered.map(item => {
+    const pct = calcDelta(item);
+    const deltaHtml = pct === null
+      ? '<span class="stock-delta eq">—</span>'
+      : pct > 0
+        ? `<span class="stock-delta up">▲${pct}%</span>`
+        : pct < 0
+          ? `<span class="stock-delta down">▼${Math.abs(pct)}%</span>`
+          : '<span class="stock-delta eq">0%</span>';
+    const isLow = item.qty <= item.min;
+    return `<tr>
+      <td>
+        <strong style="font-size:13px">${item.name}</strong>
+        ${isLow ? '<span style="font-size:10px;color:var(--amber);margin-left:6px">⚠ bajo mínimo</span>' : ''}
+      </td>
+      <td><span class="badge ${SCAT_BADGE[item.cat]||'muted'}">${item.cat}</span></td>
+      <td style="text-align:center">
+        <div class="stock-stepper">
+          <button onclick="stockAdj(${JSON.stringify(item.id)}, -1)" title="−1">−</button>
+          <input class="stock-qty-input" type="number" min="0" value="${item.qty}"
+            onchange="stockSetQty(${JSON.stringify(item.id)}, this.value)"
+            style="${isLow?'color:var(--amber)':''}">
+          <button onclick="stockAdj(${JSON.stringify(item.id)}, 1)" title="+1">+</button>
+          <span style="font-size:11px;color:var(--muted);margin-left:4px">${item.unit}</span>
+        </div>
+      </td>
+      <td style="text-align:center">${deltaHtml}</td>
+      <td style="font-size:12px;color:var(--muted)">${item.storage||'—'}</td>
+      <td style="font-size:12px;color:var(--muted)">${item.uso||'—'}</td>
+      <td style="text-align:right">
+        <button class="btn" style="font-size:10px;padding:3px 8px" onclick="openStockEdit(${JSON.stringify(item.id)})">Editar</button>
+      </td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Sin resultados.</td></tr>';
+
+  // Note
+  const noteEl = document.getElementById('stock-relev-note');
+  if (noteEl) {
+    if (stockLastRelev) {
+      const d = new Date(stockLastRelev.date);
+      noteEl.innerHTML = `Último relevamiento: <strong style="font-family:var(--mono)">${d.toLocaleDateString('es-AR')} ${d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})}</strong> — ${stockItems.filter(i=>i.lastQty!==null).length} ítems registrados`;
+    } else {
+      noteEl.innerHTML = '<span style="color:var(--amber)">⚠ Sin relevamiento registrado todavía — hacé click en "Relevar stock" para comenzar.</span>';
+    }
+  }
+}
+
+function calcDelta(item) {
+  if (item.lastQty === null || item.lastQty === undefined) return null;
+  if (item.lastQty === 0) return item.qty > 0 ? 100 : 0;
+  return Math.round(((item.qty - item.lastQty) / item.lastQty) * 100);
+}
+
+function setStockCat(cat) {
+  stockCatFilter = cat;
+  renderStock();
+}
+
+function stockAdj(id, delta) {
+  initStockItems();
+  const item = stockItems.find(i => i.id === id);
+  if (!item) return;
+  item.qty = Math.max(0, (parseFloat(item.qty) || 0) + delta);
+  saveAll();
+  renderStock();
+}
+
+function stockSetQty(id, val) {
+  initStockItems();
+  const item = stockItems.find(i => i.id === id);
+  if (!item) return;
+  item.qty = Math.max(0, parseFloat(val) || 0);
+  saveAll();
+  renderStock();
+}
+
+// ─── RELEVAMIENTO ────────────────────────────────────────────────
+let relevWorkingCopy = [];
+
+function openStockRelev() {
+  initStockItems();
+  relevWorkingCopy = stockItems.map(i => ({ id: i.id, name: i.name, cat: i.cat, unit: i.unit, qty: i.qty, lastQty: i.lastQty }));
+  document.getElementById('relev-modal-date').textContent =
+    'Fecha: ' + new Date().toLocaleDateString('es-AR', {weekday:'long', day:'2-digit', month:'long', year:'numeric'});
+  document.getElementById('relev-search').value = '';
+  renderRelevRows();
+  document.getElementById('relev-modal-bg').style.display = 'flex';
+}
+function closeStockRelev() { document.getElementById('relev-modal-bg').style.display = 'none'; }
+
+function renderRelevRows() {
+  const q = (document.getElementById('relev-search')?.value || '').toLowerCase();
+  const filtered = relevWorkingCopy.filter(i => !q || i.name.toLowerCase().includes(q) || i.cat.toLowerCase().includes(q));
+  const rowsEl = document.getElementById('relev-rows');
+  const countEl = document.getElementById('relev-count-label');
+  if (countEl) countEl.textContent = `${filtered.length} de ${relevWorkingCopy.length}`;
+
+  rowsEl.innerHTML = filtered.length ? filtered.map(item => {
+    const prev = item.lastQty !== null ? item.lastQty : item.qty;
+    const pct = item.lastQty !== null && item.lastQty !== 0
+      ? Math.round(((item.qty - item.lastQty) / item.lastQty) * 100) : null;
+    const deltaHtml = pct === null ? '<span class="stock-delta eq">—</span>'
+      : pct > 0 ? `<span class="stock-delta up">▲${pct}%</span>`
+      : pct < 0 ? `<span class="stock-delta down">▼${Math.abs(pct)}%</span>`
+      : '<span class="stock-delta eq">0%</span>';
+    return `<div class="relev-row">
+      <div>
+        <div style="font-size:12px;font-weight:600">${item.name}</div>
+        <div style="font-size:10px;color:var(--muted)">${item.cat}</div>
+      </div>
+      <input class="relev-qty-input" type="number" min="0" value="${item.qty}"
+        onchange="relevUpdateQty(${JSON.stringify(item.id)}, this.value)"
+        oninput="relevUpdateQty(${JSON.stringify(item.id)}, this.value)">
+      <div style="text-align:center;font-size:12px;color:var(--muted);font-family:var(--mono)">${item.lastQty!==null?prev:'—'} ${item.unit}</div>
+      <div style="text-align:center">${deltaHtml}</div>
+    </div>`;
+  }).join('') : '<div style="color:var(--muted);font-size:12px;padding:12px 0">Sin resultados.</div>';
+}
+
+function relevUpdateQty(id, val) {
+  const item = relevWorkingCopy.find(i => i.id === id);
+  if (item) { item.qty = Math.max(0, parseFloat(val) || 0); renderRelevRows(); }
+}
+
+function saveRelev() {
+  initStockItems();
+  const now = new Date().toISOString();
+  const snapshot = {};
+  relevWorkingCopy.forEach(rc => {
+    const item = stockItems.find(i => i.id === rc.id);
+    if (item) {
+      item.lastQty = item.qty;
+      item.qty = rc.qty;
+      snapshot[rc.id] = rc.qty;
+    }
+  });
+  stockLastRelev = { date: now, snapshot };
+  saveAll();
+  closeStockRelev();
+  renderStock();
+}
+
+// ─── NUEVO / EDITAR INSUMO ────────────────────────────────────────
+function openStockNew() {
+  document.getElementById('stock-edit-id').value = '';
+  document.getElementById('stock-new-title').textContent = 'Nuevo insumo';
+  ['stock-new-name','stock-new-unit','stock-new-storage','stock-new-uso'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('stock-new-qty').value = '0';
+  document.getElementById('stock-new-min').value = '0';
+  document.getElementById('stock-new-cat').value = 'Solventes';
+  document.getElementById('stock-new-bg').style.display = 'flex';
+}
+function openStockEdit(id) {
+  initStockItems();
+  const item = stockItems.find(i => i.id === id);
+  if (!item) return;
+  document.getElementById('stock-edit-id').value = item.id;
+  document.getElementById('stock-new-title').textContent = 'Editar insumo';
+  document.getElementById('stock-new-name').value = item.name;
+  document.getElementById('stock-new-cat').value = item.cat;
+  document.getElementById('stock-new-unit').value = item.unit;
+  document.getElementById('stock-new-qty').value = item.qty;
+  document.getElementById('stock-new-min').value = item.min;
+  document.getElementById('stock-new-storage').value = item.storage||'';
+  document.getElementById('stock-new-uso').value = item.uso||'';
+  document.getElementById('stock-new-bg').style.display = 'flex';
+}
+function closeStockNew() { document.getElementById('stock-new-bg').style.display = 'none'; }
+
+function saveStockItem() {
+  initStockItems();
+  const name = document.getElementById('stock-new-name').value.trim();
+  if (!name) { alert('El nombre es obligatorio.'); return; }
+  const editId = document.getElementById('stock-edit-id').value;
+  const item = {
+    id: editId || 'si_' + (++stockItemCounter),
+    name,
+    cat:     document.getElementById('stock-new-cat').value,
+    unit:    document.getElementById('stock-new-unit').value.trim() || 'unid',
+    qty:     Math.max(0, parseFloat(document.getElementById('stock-new-qty').value) || 0),
+    min:     Math.max(0, parseFloat(document.getElementById('stock-new-min').value) || 0),
+    storage: document.getElementById('stock-new-storage').value.trim(),
+    uso:     document.getElementById('stock-new-uso').value.trim(),
+    lastQty: null,
+  };
+  if (editId) {
+    const idx = stockItems.findIndex(i => i.id === editId);
+    if (idx >= 0) { item.lastQty = stockItems[idx].lastQty; stockItems[idx] = item; }
+  } else {
+    stockItems.push(item);
+  }
+  saveAll();
+  closeStockNew();
+  renderStock();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const rb = document.getElementById('relev-modal-bg');
+  if (rb) rb.addEventListener('click', e => { if(e.target===rb) closeStockRelev(); });
+  const sb = document.getElementById('stock-new-bg');
+  if (sb) sb.addEventListener('click', e => { if(e.target===sb) closeStockNew(); });
+});
+
+// ════════════════════════════════════
+
+// ═══ DASHBOARD ═══
 // ═══ DASHBOARD ═══
 const dashEqData = [
   { name:'Alineador Máscara', id:'EQP-AMF-004', h:45 },
