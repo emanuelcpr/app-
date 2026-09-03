@@ -1045,8 +1045,8 @@
             <span class="badge red" style="margin-top:6px;display:inline-flex">2.087 / 2.000 h — URGENTE</span>
           </div>
           <div class="alert-actions">
-            <button class="btn btn-primary">Registrar reemplazo</button>
-            <button class="btn">Ver REG-AMF-14</button>
+            <button class="btn btn-primary" onclick="openMaint('EQP-AMF-010','Filtros HEPA Micropleat · Sala Principal','Reemplazo del Filtro')">Registrar reemplazo</button>
+            <button class="btn" onclick="show('mantenimiento')">Ver REG-AMF-14</button>
           </div>
         </div>
       </div>
@@ -1060,8 +1060,8 @@
             <span class="badge amber" style="margin-top:6px;display:inline-flex">892 / 1.000 h — 89%</span>
           </div>
           <div class="alert-actions">
-            <button class="btn btn-primary">Programar revisión</button>
-            <button class="btn">Ver REG-AMF-14</button>
+            <button class="btn btn-primary" onclick="openMaint('EQP-AMF-012','Fuente de Luz UV · OAI','Revisión de lámpara')">Programar revisión</button>
+            <button class="btn" onclick="show('mantenimiento')">Ver REG-AMF-14</button>
           </div>
         </div>
       </div>
@@ -1127,6 +1127,16 @@
                 <td style="font-size:12px">Tomás Tesarik</td>
               </tr>
             </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h3 class="section-title" style="margin-top:24px">Registros de mantenimiento realizados</h3>
+      <div class="card">
+        <div class="card-body" style="padding:0">
+          <table>
+            <thead><tr><th>Fecha</th><th>Equipo</th><th>Tarea</th><th>Responsable</th><th>Próximo</th></tr></thead>
+            <tbody id="maint-tbody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px 0;font-size:13px">Sin registros aún</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -2225,6 +2235,47 @@
               <td style="font-size:12px;color:var(--muted)">Descarte supervisado. pH final: 7.2</td>
             </tr>
           </tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: Registrar mantenimiento -->
+    <div id="maint-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:300;align-items:center;justify-content:center">
+      <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:28px;width:480px;max-width:94vw">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+          <div>
+            <div style="font-size:15px;font-weight:700" id="maint-modal-title">Registrar mantenimiento</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px" id="maint-modal-sub"></div>
+          </div>
+          <button onclick="document.getElementById('maint-modal').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1">×</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:13px">
+          <div>
+            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Tarea realizada</label>
+            <input id="maint-tarea" type="text" placeholder="Ej: Reemplazo filtro HEPA Micropleat" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 11px;border-radius:7px;font-size:13px;font-family:var(--font);box-sizing:border-box">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div>
+              <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Técnico responsable</label>
+              <input id="maint-resp" type="text" placeholder="Nombre" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 11px;border-radius:7px;font-size:13px;font-family:var(--font);box-sizing:border-box">
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Fecha</label>
+              <input id="maint-fecha" type="date" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 11px;border-radius:7px;font-size:13px;font-family:var(--font);box-sizing:border-box">
+            </div>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Próximo mantenimiento estimado</label>
+            <input id="maint-proximo" type="date" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 11px;border-radius:7px;font-size:13px;font-family:var(--font);box-sizing:border-box">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px">Observaciones</label>
+            <textarea id="maint-notas" rows="3" placeholder="Detalle del trabajo realizado, materiales usados, etc." style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:9px 11px;border-radius:7px;font-size:13px;font-family:var(--font);resize:vertical;box-sizing:border-box"></textarea>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end">
+          <button class="btn" onclick="document.getElementById('maint-modal').style.display='none'">Cancelar</button>
+          <button class="btn btn-primary" onclick="saveMaint()">Guardar registro</button>
         </div>
       </div>
     </div>
@@ -3460,7 +3511,8 @@ function saveAll() {
       consumiblesItems: consumiblesItems,
       consumiblesLastRelev: consumiblesLastRelev,
       eqChecks: eqChecks,
-      eqLastCheck: eqLastCheck
+      eqLastCheck: eqLastCheck,
+      maintRecords: maintRecords
     };
     localStorage.setItem(LS_KEY, JSON.stringify(snap));
   } catch(e) { console.warn('localStorage save failed', e); }
@@ -3490,6 +3542,7 @@ function loadAll() {
     if (snap.consumiblesLastRelev) consumiblesLastRelev = snap.consumiblesLastRelev;
     if (snap.eqChecks) eqChecks = snap.eqChecks;
     if (snap.eqLastCheck) eqLastCheck = snap.eqLastCheck;
+    if (snap.maintRecords) maintRecords = snap.maintRecords;
     return true;
   } catch(e) { console.warn('localStorage load failed', e); return false; }
 }
@@ -3516,7 +3569,8 @@ async function exportData() {
       procesos, procesoCounter,
       stockItems, stockLastRelev,
       consumiblesItems, consumiblesLastRelev,
-      eqChecks, eqLastCheck
+      eqChecks, eqLastCheck,
+      maintRecords
     };
     const json = JSON.stringify(snap, null, 2);
     const date = new Date().toISOString().slice(0,10);
@@ -3622,6 +3676,7 @@ function confirmImport() {
     if (snap.consumiblesLastRelev) consumiblesLastRelev = snap.consumiblesLastRelev;
     if (snap.eqChecks) eqChecks = snap.eqChecks;
     if (snap.eqLastCheck) eqLastCheck = snap.eqLastCheck;
+    if (snap.maintRecords) { maintRecords = snap.maintRecords; renderMaintRecords(); }
     saveAll();
     closeImportConfirm();
     // Re-render current section
@@ -5139,6 +5194,63 @@ function addSample() {
   document.getElementById('samp-desc').value = '';
 }
 document.getElementById('new-sample-modal').addEventListener('click', function(e){ if(e.target===this) this.style.display='none'; });
+
+// ═══ MANTENIMIENTO ═══
+let maintRecords = [];
+let _maintEqId = '', _maintEqName = '';
+
+function openMaint(eqId, eqName, tarea) {
+  _maintEqId = eqId || '';
+  _maintEqName = eqName || '';
+  document.getElementById('maint-modal-title').textContent = tarea || 'Registrar mantenimiento';
+  document.getElementById('maint-modal-sub').textContent = eqId ? eqId + ' — ' + eqName : '';
+  document.getElementById('maint-tarea').value = tarea || '';
+  document.getElementById('maint-resp').value = '';
+  document.getElementById('maint-fecha').value = new Date().toISOString().slice(0,10);
+  document.getElementById('maint-proximo').value = '';
+  document.getElementById('maint-notas').value = '';
+  const m = document.getElementById('maint-modal');
+  m.style.display = 'flex';
+}
+
+function saveMaint() {
+  const tarea = document.getElementById('maint-tarea').value.trim();
+  const resp  = document.getElementById('maint-resp').value.trim();
+  const fecha = document.getElementById('maint-fecha').value;
+  const prox  = document.getElementById('maint-proximo').value;
+  const notas = document.getElementById('maint-notas').value.trim();
+  if (!tarea) { alert('Ingresá la tarea realizada.'); return; }
+  if (!fecha) { alert('Ingresá la fecha.'); return; }
+  const rec = {
+    id: 'MNT-' + String(maintRecords.length + 1).padStart(4, '0'),
+    eqId: _maintEqId,
+    eqName: _maintEqName,
+    tarea, resp, fecha, proximo: prox, notas,
+    createdAt: new Date().toISOString()
+  };
+  maintRecords.unshift(rec);
+  renderMaintRecords();
+  saveAll();
+  document.getElementById('maint-modal').style.display = 'none';
+}
+
+function renderMaintRecords() {
+  const tbody = document.getElementById('maint-tbody');
+  if (!tbody) return;
+  if (!maintRecords.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px 0;font-size:13px">Sin registros aún</td></tr>';
+    return;
+  }
+  tbody.innerHTML = maintRecords.map(r => `<tr>
+    <td style="font-family:var(--mono);font-size:12px">${r.fecha}</td>
+    <td style="font-size:12px;color:var(--muted)">${r.eqId || '—'}</td>
+    <td style="font-size:13px;font-weight:500">${r.tarea}</td>
+    <td style="font-size:12px;color:var(--muted)">${r.resp || '—'}</td>
+    <td style="font-size:12px;color:var(--muted)">${r.proximo || '—'}</td>
+  </tr>`).join('');
+}
+
+document.getElementById('maint-modal').addEventListener('click', function(e){ if(e.target===this) this.style.display='none'; });
 
 // ═══ RESIDUOS ═══
 let wasteRecords = [];
@@ -6925,6 +7037,7 @@ function saveNota() {
   if (activeSessions.length) renderActiveSessions();
   renderWaste();
   renderServicios();
+  renderMaintRecords();
 })();
 
 // Init habilitaciones on first load
