@@ -2,6 +2,12 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="theme-color" content="#1d4ed8">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AMF FIUNER">
+<link rel="manifest" href="manifest.json">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AMF FIUNER — Gestión de Laboratorio</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -7188,6 +7194,7 @@ updateClock(); setInterval(updateClock, 1000);
     </div>
     <div style="display:flex;gap:8px;align-items:center">
       <div id="m-sync-dot" style="width:8px;height:8px;border-radius:50%;background:var(--green);opacity:0.8"></div>
+      <button id="m-install-btn" onclick="pwaInstall()" style="display:none;align-items:center;gap:5px;font-size:11px;padding:5px 10px;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:#fff;font-family:var(--font);cursor:pointer;font-weight:600">⬇ Instalar</button>
       <button onclick="mSwitchToDesktop()" style="font-size:11px;padding:5px 10px;border-radius:6px;border:1px solid var(--border2);background:none;color:var(--muted);font-family:var(--font);cursor:pointer">Vista completa</button>
     </div>
   </div>
@@ -7680,6 +7687,36 @@ document.addEventListener('DOMContentLoaded', function() {
   // small delay so all desktop vars are initialized
   setTimeout(mInit, 50);
 });
+</script>
+
+
+<script>
+// ══ PWA: Service Worker ══
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  navigator.serviceWorker.register('./sw.js', {scope: './'})
+    .then(reg => console.log('SW registrado:', reg.scope))
+    .catch(err => console.warn('SW no disponible (normal en local):', err));
+}
+
+// ══ PWA: Install prompt ══
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  // Show install button in mobile topbar
+  const btn = document.getElementById('m-install-btn');
+  if (btn) btn.style.display = 'flex';
+});
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  const btn = document.getElementById('m-install-btn');
+  if (btn) btn.style.display = 'none';
+});
+function pwaInstall() {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.then(() => { deferredInstallPrompt = null; });
+}
 </script>
 
 </body>
